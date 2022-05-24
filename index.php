@@ -19,7 +19,7 @@ require( $g_page_arbo . FOLD_CLASS . 'OListeFunctions.req.php' ) ;
 $LFUNC = new OListeFunctions() ;
 // accumule les ressources acquises au cours des séries d'apprentissages ALPA 
 require( $g_page_arbo . FOLD_CLASS . 'ORessources.req.php' ) ;
-$RESSOURCES = new ORessources() ;
+$RESSOURCES = new ORessources( $BFUNC ) ;
 
 /* ------------------------------------------------------------------------------------------- */
 /* HEADER */
@@ -59,7 +59,7 @@ echo '<br/>';
 echo 'Je vais commencer par l\'addition';
 echo '<br/>';
 echo '+';
-echo '<br/>';
+
 /* Fin Introdution */
 
 /* ------------------------------------------------------------------------------------------- */
@@ -78,9 +78,12 @@ echo '<br/>';
 // 		une valeur déterminant le mode d'utilisation de la fonction
 //			Apprentissage ou Travail
 
-const MODE = "L" ;
 //regroupe l'ensemble des fonctions nécessaires aux fonctionnement du coeur de l'IA : les fonction ALPA
 require( $g_page_arbo . FOLD_CLASS . 'OAlpa.req.php' ) ;
+
+
+/* --------------------------------------  --------------------- -------------------------------------- */
+/* --------------------------------------  --------------------- -------------------------------------- */
 
 
 /* ----------------------------------- CONTEXTUALISATION DU TRAVAIL 1 ------------------------------------ */
@@ -88,82 +91,159 @@ require( $g_page_arbo . FOLD_CLASS . 'OAlpa.req.php' ) ;
 // 0) ---------------- PARAMETRAGE ---------------- 
 // l'outil est tiré de la liste des fonctions à apprendre/travailler
 // le type de matière est fonction/contraint de/à l'outils
-$g_Tressources = array ("matieres"  => 1, "outils" => "addition") ;
-$g_Tobjectifs = array ("objectif"  => 2, "distance" => 0.5, "precision" => 0.9, "delais" => 1) ;
+$g_Tressources = array ( "matieres"  => 1, "outils" => "addition" ) ;
+$g_Tobjectifs = array ( "objectif"  => [2, 6], "distance" => 0.5, "precision" => 0.9, "delais" => 1 ) ;
+// objectif[0] = initial, objectif[1] = final (utilisé pour ALPA en série) ;
 
 // ---------------------------------------------------------------------------------------------- 
 // 1) CREATION DE LA NOUVELLE INSTANCE DE TRAVAIL "ALPA":"A" */
-$ALPA1 = new OAlpa($g_Tobjectifs, $g_Tressources, MODE, $LFUNC, $BFUNC, $RESSOURCES) ;
+$l_ALPA = "ALPA1" ;
+$l_mode = "LEARN" ;
+$$l_ALPA = new OAlpa( $l_ALPA, $g_Tobjectifs, $g_Tressources, $l_mode, $LFUNC, $BFUNC, $RESSOURCES ) ;
+
+// ---------------------------------------------------------------------------------------------- 
+// AFFICHAGE DES ORDRES D'APPRENTISSAGE 
+echo $$l_ALPA->affichage_serie_A_ordres( $g_Tobjectifs["objectif"][1] ) ;
+//ou (si apres la methode serieA) : echo $$l_ALPA->p_Caffichage_serie_A_ordres ;
 
 // ---------------------------------------------------------------------------------------------- 
 // 2) APPEL DE LA FONCTION ELEMENTAIRE EN MODE D'APPRENTISSAGE "ALPA":"A" 
 // $g_Tressources["outils"] se trouve dans $LFUNC
-$g_objectif_max = 5 ;
-$ALPA1->serie_A( $g_objectif_max, $g_Tressources["outils"] ) ;
-
+$$l_ALPA->serie_A( $g_Tobjectifs["objectif"][1], $g_Tressources["outils"] ) ;
 
 // ---------------------------------------------------------------------------------------------- 
 // AFFICHAGE DE LA SEQUENCE D'APPRENTISSAGE 
-//echo $ALPA1->Caffichage_serie_A_ordres ;
-//echo $ALPA1->Caffichage_serie_A ;
+//echo $$l_ALPA->p_Caffichage_serie_A ;
+
 
 // ---------------------------------------------------------------------------------------------- 
-// FORMATAGE DE L'APPRENTISSAGE  
+// 3) FORMATAGE DE L'APPRENTISSAGE  
 // on rend l'enseignement intelligible
-//echo "<br/><br/>" ;
-//print_r( $ALPA1->Tresultats ) ;
+echo "<br/><br/>" ;
+echo "<b><u>Résultat formaté</u> :</b><br/>" ;
+$BFUNC->printr( $$l_ALPA->p_Tresultats, false ) ;
 
+
+/* --------------------------------------  --------------------- -------------------------------------- */
+/* --------------------------------------  --------------------- -------------------------------------- */
 
 /* ------------------------------ CONTEXTUALISATION DU TRAVAIL 2 --------------------------------------- */
 
 // 0) ---------------- PARAMETRAGE ---------------- 
 // l'outil est tiré de la liste des fonctions à apprendre/travailler
 // le type de matière est fonction/contraint de/à l'outils
-$g_Tressources = array ("matieres"  => 5, "outils" => "addition") ;
-$g_Tobjectifs = array ("objectif"  => 10, "distance" => 0.5, "precision" => 0.9, "delais" => 1) ;
-
+$g_Tressources = array ( "matieres"  => 10, "outils" => "addition" ) ;
+$g_Tobjectifs = array ( "objectif"  => [100, 130], "distance" => 0.5, "precision" => 0.9, "delais" => 1 ) ;
+// objectif[0] = initial, objectif[1] = final (utilisé pour ALPA en série) ;
 // ---------------------------------------------------------------------------------------------- 
 // 1) CREATION DE LA NOUVELLE INSTANCE DE TRAVAIL "ALPA":"A" */
-$ALPA2 = new OAlpa($g_Tobjectifs, $g_Tressources, MODE, $LFUNC, $BFUNC, $RESSOURCES) ;
+$l_ALPA = "ALPA2" ;
+$l_mode = "LEARN" ;
+$$l_ALPA = new OAlpa( $l_ALPA, $g_Tobjectifs, $g_Tressources, $l_mode, $LFUNC, $BFUNC, $RESSOURCES ) ;
+
+// ---------------------------------------------------------------------------------------------- 
+// AFFICHAGE DES ORDRES D'APPRENTISSAGE 
+echo $$l_ALPA->affichage_serie_A_ordres( $g_Tobjectifs["objectif"][1] ) ;
+//ou (si apres la methode serieA) : echo $$l_ALPA->p_Caffichage_serie_A_ordres ;
 
 // ---------------------------------------------------------------------------------------------- 
 // 2) APPEL DE LA FONCTION ELEMENTAIRE EN MODE D'APPRENTISSAGE "ALPA":"A" 
 // $g_Tressources["outils"] se trouve dans $LFUNC
-$g_objectif_max = 100 ;
-$ALPA2->serie_A( $g_objectif_max, $g_Tressources["outils"] ) ;
+$$l_ALPA->serie_A( $g_Tobjectifs["objectif"][1], $g_Tressources["outils"] ) ;
 
 // ---------------------------------------------------------------------------------------------- 
 // AFFICHAGE DE LA SEQUENCE D'APPRENTISSAGE 
-//echo $ALPA2->p_Caffichage_serie_A_ordres ;
-//echo $ALPA2->p_Caffichage_serie_A ;
+//echo $$l_ALPA->p_Caffichage_serie_A ;
 
 // ---------------------------------------------------------------------------------------------- 
-// FORMATAGE DE L'APPRENTISSAGE  
-// on rend l'enseignement intelligible
-// echo "<br/><br/>" ;
-//print_r( $ALPA2->Tresultats ) ;
+// 3) FORMATAGE DE L'APPRENTISSAGE  
+//on rend l'enseignement intelligible
+//echo "<br/><br/>" ;
+echo "<b><u>Résultat formaté</u> :</b><br/>" ;
+$BFUNC->printr( $$l_ALPA->p_Tresultats, false ) ;
 
 
-/* -------------------------------------- AFFICHAGE DES NOUVELLES RESSOURCES -------------------------------------- */
-echo "<br/><br/>" ;
-echo "<b><u>Nouvelles ressources</u> :</b><br/>" ;
-print_r( $RESSOURCES->p_Tressources) ;
+/* --------------------------------------  --------------------- -------------------------------------- */
+/* --------------------------------------  --------------------- -------------------------------------- */
 
-
-/* ---------------------------------------------------------------------------------------------- */
-// 4) ENREGISTREMENT DE L'APPRENTISSAGE  
+/* -------------------------------------- ENREGISTREMENT DE L'APPRENTISSAGE ---------------------------------------- */
+// 4) ENREGISTREMENT DES RESULTATS ET DES RESSOURCES DÉCOUVERTES  
 // on rend réutilisable
 echo "<br/><br/>" ;
 echo "<b><u>Mémoire</u> :</b><br/>" ;
-print_r( $RESSOURCES->p_Tarchives ) ;
+$BFUNC->printr( $RESSOURCES->p_Tarchives ) ;
+
+echo "<br/><br/>" ;
+echo "<h2> > 1er RÉSULTAT D'APPRENTISSAGE</h2>" ;
+
+/* -------------------------------------- AFFICHAGE DES NOUVELLES RESSOURCES -------------------------------------- */
+echo "<b><u>Nouvelles ressources</u> :</b><br/>" ;
+$BFUNC->printr( $RESSOURCES->p_Tressources, false)  ;
+
+
+
+/* --------------------------------------  --------------------- -------------------------------------- */
+/* --------------------------------------  --------------------- -------------------------------------- */
+
+/* -------------------------------------- TRAVAIL DE RESTITUTION ---------------------------------------- */
+// on lance un nouvelle apprentissage
+// il doit tenir compte de l'enseignement précédent
+/* ------------------------------ CONTEXTUALISATION DU TRAVAIL 3 --------------------------------------- */
+
+// 0) ---------------- PARAMETRAGE ---------------- 
+// l'outil est tiré de la liste des fonctions à apprendre/travailler
+// le type de matière est fonction/contraint de/à l'outils
+$g_Tressources = array ( "matieres"  => 5, "outils" => "addition" ) ;
+$g_Tobjectifs = array ( "objectif"  => [20, 100], "distance" => 0.5, "precision" => 0.9, "delais" => 1 ) ;
+// objectif[0] = initial, objectif[1] = final (utilisé pour ALPA en série) ;
+
+// ---------------------------------------------------------------------------------------------- 
+// 1) CREATION DE LA NOUVELLE INSTANCE DE TRAVAIL "ALPA":"A" */
+$l_ALPA = "ALPA3" ;
+$l_mode = "WORK" ;
+$$l_ALPA = new OAlpa( $l_ALPA, $g_Tobjectifs, $g_Tressources, $l_mode, $LFUNC, $BFUNC, $RESSOURCES ) ;
+
+// ---------------------------------------------------------------------------------------------- 
+// AFFICHAGE DES ORDRES DE RESTITUTION 
+echo $$l_ALPA->affichage_serie_A_ordres( $g_Tobjectifs["objectif"][1] ) ;
+//ou (si apres la methode serieA) : echo $$l_ALPA->p_Caffichage_serie_A_ordres ;
+
+
+
+// ------------------------------------- RECHERCHE DE POSSIBLES ----------------------------------------- 
+// On verifie si l'objectif n'a pas déjà été atteint
+// En comparant l'objectif demandée aux ressources existantes
+$g_Tpossibles = $RESSOURCES->recherche_des_possibles( $g_Tobjectifs["objectif"][0] ) ;
+$BFUNC->printr( $g_Tpossibles ) ;
+$parcours = "g_Tpossibles['relais'][0]['value']" ;
+echo $$parcours ;
+// -------------------------- CONSTRUCTION ET PARCOURS DE L'ARBRE DES POSSIBLES  ------------------------------------
+// fonction boucle qui s'appelle elle même avec des limite de temps de calcul comme contrainte 
+    // timestamp en millisecondes du début du script
+$l_timestamp_ms_global_debut = microtime( true ) ;
+$l_timestamp_ms_local_debut = microtime( true ) ;
+
+
+//$l_TarbresDesRecherches = boucle( $g_Tpossibles, $l_timestamp_ms_local_debut, $l_timestamp_ms_global_debut, $RESSOURCES ) ;
+
+//$BFUNC->printr( $l_TarbresDesRecherches ) ;
+
+/* --------------------------------------  --------------------- -------------------------------------- */
+/* --------------------------------------  --------------------- -------------------------------------- */
+
+
+echo "<br/><br/>" ;
+echo "<h2> > RÉSULTAT DE RESTITUTION</h2>" ;
+
+/* -------------------------------------- AFFICHAGE DES RESSOURCES APRÈS RESTITUTION -------------------------------------- */
+echo "<b><u>Nouvelles ressources</u> :</b><br/>" ;
+$BFUNC->printr( $RESSOURCES->p_Tressources, false)  ;
 
 
 
 
 
-
-
-
+echo "<br/><br/><b> FIN </b><br/><br/>" ;
 /* ----------------------------------FIN------------------------------------- */
 /* Fin de la page */
 ?>

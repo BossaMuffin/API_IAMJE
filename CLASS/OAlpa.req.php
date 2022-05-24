@@ -8,12 +8,16 @@
 class OAlpa
 {
 
+// Constantes
     const   MODE = "L" ;
+
+// Propriétés
     public $p_Tresultats = array() ;
-    public $p_Caffichage_serie_A_ordres = "" ;
+   // public $p_Caffichage_serie_A_ordres = "" ;
     public $p_Caffichage_serie_A = "" ;
 
-  // var de construction
+// Var de construction
+    private $g_CinstanceName = "nom de l'instance ALPA" ;
     public $g_Tobjectifs ;
     public $g_Tressources ;
     public $g_mode ;
@@ -21,18 +25,37 @@ class OAlpa
     public $g_LFUNC ;
     public $g_RESSOURCES ;
 
-    function __CONSTRUCT( $T_objectifs, $T_ressources, $mode, $LFUNC, $BFUNC, $RESSOURCES )
-    {         
+/* ---------------- CONSTRUCTEUR ----------------------------- 
+* @value : $g_CinstanceName, $T_objectifs, $T_ressources, $mode, $LFUNC, $BFUNC, $RESSOURCES
+* @return : idem
+*/
+    function __construct( $g_CinstanceName, $T_objectifs, $T_ressources, $mode, $LFUNC, $BFUNC, $RESSOURCES )
+    {       
+        $this->g_CinstanceName = $g_CinstanceName ;
         $this->g_Tobjectifs = $T_objectifs ;
         $this->g_Tressources = $T_ressources ;
         $this->g_mode = $mode ;
         $this->g_LFUNC = $LFUNC ;
         $this->g_BFUNC = $BFUNC ;
         $this->g_RESSOURCES = $RESSOURCES ;
-    } // fin construct 
+    // fin construct 
+    } 
+    // ------------------------------------
 
-/* ------------------------------------------------------------------------------------------- */
-/* FONCTION ELEMENTAIRE "ALPA":"A" */
+/* ------------------- CLONE ----------------------- 
+* Empêche le clonage
+* @value : none
+* @return : none
+*/
+    private function  __clone()
+    {
+    // fin clone
+    }
+    // ------------------------------------
+
+
+/* ------------------------------------- EXPLICATIONS ------------------------------------------ 
+* FONCTION ELEMENTAIRE "ALPA":"A" */
 
 // EX : L'ADDITION
 // On commence par donner un résultat simple à décortiquer en addition, ex : 2
@@ -49,9 +72,12 @@ class OAlpa
 
 
 
-/* ---------------------------------------------------------------------------------------------- */
-/* FONCTION ELEMENTAIRE EN MODE D'APPRENTISSAGE "ALPA":"A" */
-// retourne : ...
+/* ------------------------------------ ALPA ----------------------------------------------- 
+* FONCTION ELEMENTAIRE EN MODE D'APPRENTISSAGE "ALPA":"A" 
+* @param :
+* @value : $this->g_RESSOURCES->push_ressource( $l_resultat )
+* @return : table $l_Treponse
+*/
 // reste à intégrer : 1) le mode 2) selection de l'outil 3) l'approche/distance de l'objectif
     function A( $T_objectifs, $Coutils )
     {
@@ -76,10 +102,10 @@ class OAlpa
             // sequence de calculs (chemin utilisé)
         $l_sequence = '[matiere]' . $this->g_Tressources["matieres"] ;
 
-        if ($T_objectifs["objectif"] != $this->g_Tressources["matieres"])
+        if ( $T_objectifs["objectif"] != $this->g_Tressources["matieres"] )
         {
             // Boucle de calcul pour approche/distance de l'obejctif demandé
-        	while( $l_distance  > $T_objectifs["distance"] and $l_timestamp_ms_difference < $T_objectifs["delais"] )
+        	while ( $l_distance  > $T_objectifs["distance"] and $l_timestamp_ms_difference < $T_objectifs["delais"] )
             //while( $l_precision  > $T_objectifs["precision"] and $l_timestamp_ms_difference < $T_objectifs["delais"] )
         	{
 
@@ -95,9 +121,9 @@ class OAlpa
 
                 // Controle de précision de calcul et de respect des contraintes
                     // Estimation de l'approche/distance à l'objectif 
-                $l_distance = $T_objectifs["objectif"] - $l_resultat ;
+                $l_distance = $T_objectifs["objectif"][0] - $l_resultat ;
                     // Estimation de la precision à l'objectif 
-                $l_precision = $l_resultat / $T_objectifs["objectif"] ;
+                $l_precision = $l_resultat / $T_objectifs["objectif"][0] ;
                     // timestamp en millisecondes de la fin du script
                 $l_timestamp_ms_fin = microtime( true ) ; 
                     // différence en millisecondes entre le début et la fin
@@ -143,19 +169,29 @@ class OAlpa
     	return  $l_Treponse;
         	
 
-    // Fin fonctionélémentaire ALPA
+    // Fin fonction élémentaire ALPA
     } 
-// ------------------------------------
+    // ------------------------------------
 
 
 
-/* ---------------------------------------------------------------------------------------------- */
-/* ENREGISTREMENT DE L'APPRENTISSAGE -> MISE EN MEMOIRE DU CALCUL ELEMENTAIRE */
-// ????? BDD ?????
+/* ------------------------------- ENREGISTREMENT RESULAT EN BDD ------------------------------------------------------ 
+* ENREGISTREMENT DE L'APPRENTISSAGE -> MISE EN MEMOIRE DU CALCUL ELEMENTAIRE 
+* @param :
+* @value : 
+* @return : 
+*/
+// ????? BDD ????? -> Oressources
 
-/* -------------------------------------FORMATAGE DE LA SEIRE D'APPRENTISSAGE ----------------------------------------------- */
-// On formate le resultat du calcul ALPA dans un tableau global 
-// hierarchisation de l'information OBJECTIF > MATIERE UTILISEE > OUTILS > DONNEES DE CALCUL
+
+
+/* -------------------------------------FORMATAGE DE LA SEIRE D'APPRENTISSAGE ----------------------------------------------- 
+* On formate le resultat du calcul ALPA dans un tableau global 
+* hierarchisation de l'information OBJECTIF > MATIERE UTILISEE > OUTILS > DONNEES DE CALCUL
+* @param :
+* @value : none
+* @return : table $l_Tmemoire
+*/
     function formate_A( $T_result, $Cid )
     {
         $l_Tmemoire["id"] = $Cid ;
@@ -170,22 +206,28 @@ class OAlpa
         $l_Tmemoire["datas"]["compteur"] = $T_result["compteur"] ;
 
         return $l_Tmemoire ;
+
+    // fin formate_A
     }
-// ------------------------------------
+    // ------------------------------------
 
 
 
-/* --------------------------------SERIE A-------------------------------------------- */
-// Travail en serie de fonctions élémentaire en mode apprentissage "ALPA":"A" */
+/* --------------------------------SERIE A-------------------------------------------- 
+* Travail en serie de fonctions élémentaire en mode apprentissage "ALPA":"A" 
+* @param :
+* @value : $this->g_RESSOURCES->push_archive_A( $l_Treponse[$g_i_id], $g_i_id ) et $this->p_Tresultats
+* @return : none
+*/
     function serie_A( $objectif_max, $Coutils )
     {
         // Afffichage des ordres d'apprentissage 
-        $this->p_Caffichage_serie_A_ordres = $this->affichage_serie_A_ordres( $objectif_max ) ;
+        //$this->p_Caffichage_serie_A_ordres = $this->affichage_serie_A_ordres( $objectif_max ) ;
 
         // On boucle la fonction élémentaire A sur la serie de l'objectif initial à l'objectif max 
         $l_i = 0 ;
         $l_Tobjectifs= $this->g_Tobjectifs ;
-        while( $l_Tobjectifs["objectif"] <= $objectif_max )
+        while ( $l_Tobjectifs["objectif"][0] <= $objectif_max )
         {
 
             $l_i++ ;
@@ -221,7 +263,7 @@ class OAlpa
             $this->p_Caffichage_serie_A .= $this->affichage_A( $l_Tresultats[$l_i] ) ;
 
             // Incrémente l'objectif d'apprentissage
-            $l_Tobjectifs["objectif"] = $l_Tobjectifs["objectif"] + $this->g_Tressources["matieres"];
+            $l_Tobjectifs["objectif"][0] = $l_Tobjectifs["objectif"][0] + $this->g_Tressources["matieres"];
 
             // Fin boucle while pour créer la serie d'apprentissage
         }
@@ -232,26 +274,39 @@ class OAlpa
 
     // Fin de la fonction d'apprentissage en série ALPA
     }
-// ------------------------------------
+    // ------------------------------------
 
 
 
-/* --------------------------------AFFICHAGE POUR CONTROLE D'APPRENTISSAGE ------------------------------------------------- */
-/* AFFICHAGE  D'APPRENTISSAGE "ALPA":"A" */
-// Utilse pour le DEV surtout
+/* --------------------------------AFFICHAGE POUR CONTROLE D'APPRENTISSAGE ------------------------------------------------- 
+* AFFICHAGE  D'APPRENTISSAGE "ALPA":"A" 
+* Utilsée surtout pour le DEV 
+* @param :
+* @value : none
+* @return : html char
+*/
     function affichage_serie_A_ordres( $g_objectif_max )
     {
 
             // ---------------------------------------------------------------------------------------------- 
-            // AFFICHAGE DES ORDRES D'APRENTISSAGE (ENSEIGNEMENT) 
-            $l_part[1] = " <br/>
-            ORDRES D'ENSEIGNEMENT<br/>
-            <br/>
+            // AFFICHAGE DES ORDRES 
+            if ( $this->g_mode == "WORK" )
+            {
+                $l_mode = "RESTITUTION" ;
+            }
+            else if ( $this->g_mode == "LEARN" )
+            {
+                $l_mode = "ENSEIGNEMENT" ;
+            }
+            $l_part[1] = " <br/><br/>
+
+            <h2>" . $l_mode . " " . $this->g_CinstanceName . "</h2>
+            <h3>ORDRES</h3>
 
             <dd>
 
                 <u>Objectif initial</u> (objectif) :<br/>
-                <b>" . $this->g_Tobjectifs["objectif"] . "</b><br/>
+                <b>" . $this->g_Tobjectifs["objectif"][0] . "</b><br/>
 
                 <u>Objectif final</u> (g_objectif_max) :<br/>
                 <b>" . $g_objectif_max . "</b><br/>
@@ -277,13 +332,18 @@ class OAlpa
 
             return $l_part[1] ;
 
+    // fin affichage ordres de serie A
     }
-// ------------------------------------
+    // ------------------------------------
 
 
 /* --------------------------------AFFICHAGE POUR CONTROLE D'APPRENTISSAGE ------------------------------------------------- */
-/* AFFICHAGE  D'APPRENTISSAGE "ALPA":"A" */
-// Utilse pour le DEV surtout
+/* AFFICHAGE  D'APPRENTISSAGE "ALPA":"A" 
+* Utilsée surtout pour le DEV 
+* @param :
+* @value : none
+* @return : html char
+*/
     function affichage_A( $T_result )
     {
 
@@ -296,7 +356,7 @@ class OAlpa
             // ---------------------------------------------------------------------------------------------- 
             // AFFICHAGE DES ORDRES D'APRENTISSAGE (ENSEIGNEMENT) 
             $l_part[2] = " <br/>
-            ORDRES D'ENSEIGNEMENT<br/>
+            <h3>ORDRES D'ENSEIGNEMENT<h3/>
             <br/>
 
             <dd>
@@ -305,7 +365,7 @@ class OAlpa
                 <b>" . $this->g_Tressources["outils"] . "</b><br/>-->
 
                 <u>Objectif demandé</u> (objectif) :<br/>
-                <b>" . $T_result["objectif"] . "</b><br/>
+                <b>" . $T_result["objectif"][0] . "</b><br/>
 
                 <!--<u>Distance à l'objectif minimum demandée</u> (distance) :<br/>
                 <b>" . $this->g_Tobjectifs["distance"] . "</b><br/>
@@ -326,7 +386,7 @@ class OAlpa
             // ---------------------------------------------------------------------------------------------- 
             // AFFICHAGE DU RÉSULTAT */
             $l_part[3] = "<br/>
-            RÉSULTAT D'APPRENTISSAGE<br/>
+            <h3>RÉSULTAT D'APPRENTISSAGE</h3>
             <br/>
 
             <dd>
@@ -353,8 +413,9 @@ class OAlpa
 
             return $l_part[1].$l_part[2] . $l_part[3] ;
 
+    // fin affichage A
     }
-// ------------------------------------
+    // ------------------------------------
 
 
 

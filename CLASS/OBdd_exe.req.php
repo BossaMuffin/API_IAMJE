@@ -22,22 +22,86 @@
         }
     }
 */
+
+
 class OBdd extends OBdd_connexion {
 
-    function __CONSTRUCT(){
+
+/* ---------------- CONSTRUCTEUR ----------------------------- 
+* @value : 
+* @return : PARENT
+*/
+    function __CONSTRUCT()
+    {
         parent::__CONSTRUCT();
-	} // fin construct 
+	} // fin construct
+
+
+/* ------------------- CLONE ----------------------- 
+* Empêche le clonage
+*
+* @value : none
+* @return : none
+*/
+	private function  __clone()
+	{
+	} // fin clone
+
 
 /* REQUETE --------------------------- REQUETE 
  * requete
  @Param: REQ STATEMENT 
  @Return: 
 */
+ /*
+	public function demandeObjet($requete){
+		//$req = $this->getPDO()->query('SELECT * FROM events');
+		$result = $this->getPDO()->query($requete);
+		$datas = $result->fetchAll(PDO::FETCH_OBJ);
+		return $datas ;
+	}
+*/
 	protected function demande($requete){
 		//$req = $this->getPDO()->query('SELECT * FROM events');
 		$result = $this->getPDO()->query($requete);
 		return $result ;
 	}
+
+/*
+	function test($arg) {
+		global $BDD;
+		if($req = $BDD->demande('SELECT id
+						FROM tab 
+						WHERE cpx="'.$arg.'"'))
+		{
+
+			$r = array();
+			$i_doublon = 0 ;
+
+			while ($d = $req->fetch(PDO::FETCH_OBJ)){
+				$i_doublon++;
+				$r[$i_doublon]['id'] = $d->id ;
+
+			}
+
+			if ($i_doublon == 0){
+				//la cle nexiste pas
+				$reponse[0] = true ;
+
+			}
+			else if($i_doublon == 1){$reponse["erreur"] = 4 ;}
+			else if($i_doublon > 1){$reponse["erreur"] = 5 ;}
+
+		}else{$reponse["erreur"] = 3 ;}
+
+			
+	return $reponse;
+	}
+	// ------------------------------------
+
+*/
+
+
 
 /* ----------------------------------FIN------------------------------------- */
 /* Fin Class OBdd_connexion */

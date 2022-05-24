@@ -7,35 +7,105 @@
 class OBaseFunctions 
 {
 
-  const   CHARMAX = 40 ;
+// Constantes
   const   KEYMAX = 6 ; // doit être supérieur ou égal à 6
-  const   MDPMIN = 7 ;
-  const   MDPMAX = 12 ;
-  const   MDPDEFO = "" ;
-  const   AUTHDELAY = 129600 ;
-  const   COOKIEDELAY = 129600 ;
-  const   PASREQUETE = 20 ;
-  const   DEBREQUETE = 0 ;
-  const   EXPMAIL = "";
-  const   EXPNOM = "YOUR NAME";
 
-  function __CONSTRUCT()
-  {         
-  } // fin construct 
 
-//----------------------------------------------------------------------------------------------------------------------------------------------------------------
-// FONCTIONS PHP ---------------------------------- FONCTIONS
-//----------------------------------------------------------------------------------------------------------------------------------------------------------------  
-  
-/* -------------------------------------- recupere lurl appelé sans parametre --------------------------- */
+/* ---------------- CONSTRUCTEUR ----------------------------- 
+* @value : none
+* @return : none
+*/
+  function  __construct()
+  {
+  // fin construct
+  }
+  // ------------------------------------
+
+/* ------------------- CLONE ----------------------- 
+* Empêche le clonage
+* @value : none
+* @return : none
+*/
+  private function  __clone()
+  {
+  // fin clone
+  }
+  // ------------------------------------
+
+
+/* --------- PRINTR -------------------------------------------------------- 
+* Fonction d'affichage préformaté de variable non typée pour nos débuggages
+* @param unknow $var : variable, tableau, objet... à afficher
+* @param string $pIsSQL : True => Mode affichage SQL / String => Couleur du conteneur
+* @param bool $pIsOpen : True => Conteneur déplié par défaut
+* @return Code HTML d'un conteneur dépliable / repliable avec scrollbar auto
+*/
+  function printr( $var, $pIsOpen = true, $pIsSQL = false )
+  {
+      $lColor = ( is_string( $pIsSQL ) ? $pIsSQL : ( $pIsSQL === true ? '#FFF5DD' : '#F2FFEE' ) ) ;
+      $pIsSQL = ( $pIsSQL === true || $lColor == '#FEE' ) ;
+      $var = ( $pIsSQL === true ? wordwrap( $var . ";\n", 100 ) : $var ) ;
+      $lHeight = ( $pIsSQL === true ? '100px' : '200px' ) ;
+      $lUniqId = uniqid( md5( rand() ) ) ;
+
+      echo '<table  cellspacing="0" cellpadding="0" 
+                    style=" width:100%;
+                            border:1px dashed gray;
+                            background-color:' . $lColor . ';">
+        <tr>
+          <td>
+            <a  style=" display:block;
+                        padding:4px;" 
+                title="Cliquer pour ouvrir ou fermer l\'affichage détaillé"
+                href="javascript:void(0);"
+                onClick="var tr = document.getElementById(\'printr_' . $lUniqId . '\');
+                  if (tr.style.display!=\'none\') tr.style.display = \'none\';
+                  else tr.style.display = \'table-row\';"><img
+                src="img/sort-down.png" border="none" height="30px" />
+            </a>
+          </td>
+        </tr>
+        <tr style="display:' . ( $pIsOpen ? 'table-row':'none') .';"
+          id="printr_' . $lUniqId . '"><td><textarea
+          style=" padding:2 5px;
+                  width:100%;
+                  overflow:auto;
+                  height:' . $lHeight . ';
+                  background-color:transparent;
+                  border:none;
+                  border-top:1px dashed gray;
+                  font-size:11px;
+                  font-family:monospace;"
+        title="Affichage avec print_r() pour debug" ' . ($pIsSQL===true ? ' onFocus="select();"' : '' ) . '>' ;
+
+      @print_r( $var ) ;
+
+      echo '</textarea></td></tr></table>' ;
+  }
+  // ------------------------------------
+
+
+
+/* -------------------------------------- recupere lurl appelé sans parametre --------------------------- 
+* @param :
+* @value : none
+* @return : char $l_TurlGet[0]
+*/
   function UrlSansParametres()
   {
     $l_urlCourante = $_SERVER['REQUEST_URI'] ;
     $l_TurlGet = explode( "?", $l_urlCourante ) ;
     return  $l_TurlGet[0] ;
   }
+  // ------------------------------------
 
-/* ---------------------------------- annonce si le parametre est le sous domaine de lurl appelée -------------- */
+
+
+/* ---------------------------------- annonce si le parametre est le sous domaine de lurl appelée -------------- 
+* @param :
+* @value : 
+* @return : booléen
+*/
   function UrlSousDomaine( $sousDomaine )
   {
             
@@ -54,17 +124,18 @@ class OBaseFunctions
 
     return  $l_reponse;
   }
+  // ------------------------------------
 
 
-  /* GENERE IA CHAR KEY -------------------------------------------------------------------- GENERE IA CHAR KEY 
-   * Genere une chaine de caractere lettre minuscule et majuscule et chiffre avec des char spéciaux ( -!$ )
-   @Input :
-   [option] len int : longeur de la clé (supérieur à 4!!!)
-   
-   @Return: une table avec 0: BOOL 0 -> pb , 1-> ok ;
-    [value] : la clé demandée
-   et [erreur] 
-  */
+/* GENERE IA CHAR KEY -------------------------------------------------------------------- GENERE IA CHAR KEY 
+* Genere une chaine de caractere lettre minuscule et majuscule et chiffre avec des char spéciaux ( -!$ )
+@Input :
+[option] len int : longeur de la clé (supérieur à 4!!!)
+
+@Return: une table avec 0: BOOL 0 -> pb , 1-> ok ;
+[value] : la clé demandée
+et [erreur] 
+*/
   function genereCharKey( $len = self::KEYMAX ) 
   {
     $l_Treponse[0] = false ;
@@ -94,12 +165,12 @@ class OBaseFunctions
     $l_car = $l_newcar ;
 
   // les len - 2 autres caracteres sont generés depuis $chaine dans une boucle while
-    while( $l_i_car < $len-4 ) 
+    while ( $l_i_car < $len-4 ) 
     {
       $l_newcar = $l_chaine[rand()%strlen($l_chaine)] ;
-      if( $l_newcar == "-" or $l_newcar == "$" )
+      if ( $l_newcar == "-" or $l_newcar == "$" )
       {
-        if( $l_newcar != $l_car )
+        if ( $l_newcar != $l_car )
         {
           $l_Treponse["value"] .= $l_newcar ;
           $l_i_car++ ;
@@ -114,12 +185,12 @@ class OBaseFunctions
       $l_car = $l_newcar ;
     }
   //lavant dernier separatif
-    while( $l_i_car < $len-3 ) 
+    while ( $l_i_car < $len-3 ) 
     {
       $l_newcar = $l_chainesep[rand()%strlen( $l_chainesep )] ;
-      if( $l_newcar == "-" or $l_newcar == "!" )
+      if ( $l_newcar == "-" or $l_newcar == "!" )
       {
-        if($l_newcar != $l_car)
+        if ( $l_newcar != $l_car )
         {
           $l_Treponse["value"] .= $l_newcar ;
           $l_i_car++ ;
@@ -135,7 +206,7 @@ class OBaseFunctions
     }
 
   //les 3 derniers caracteres
-    while( $l_i_car < $len )
+    while ( $l_i_car < $len )
     {
       $l_newcar = $l_chainecoz[rand()%strlen( $l_chainecoz )] ;
       $l_Treponse["value"] .= $l_newcar ;
@@ -145,7 +216,7 @@ class OBaseFunctions
     $l_Treponse[0] = true ;
     return $l_Treponse;
   }
-// ------------------------------------
+  // ------------------------------------
 
 
 /* ----------------------------------FIN------------------------------------- */

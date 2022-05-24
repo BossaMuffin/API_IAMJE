@@ -7,22 +7,29 @@
 */
 
 class OBdd_connexion{
+
 //instance PDO
 	private $pdo ;
 
-
-/* CONSTRUCTEUR-------------------- CONSTRUCTEUR
- *
- @Param: str, str, str, str / Données de connexion
- @Return: NULL / modifie les constantes de linstance PDO
+/* ---------------- CONSTRUCTEUR ----------------------------- 
+* @value : none
+* @return : none
+ou 
+* Param: str, str, str, str / Données de connexion
+* @Return: NULL / modifie les constantes de linstance PDO
 */
+   function  __construct()
+   {
+   } // fin construct
 
-
- // LOCAL BDD PROD
-	public function __CONSTRUCT(){
-	}
-
-//------------------------------------
+/* ------------------- CLONE ----------------------- 
+* Empêche le clonage
+* @value : none
+* @return : none
+*/
+   private function  __clone()
+   {
+   }
 
 
 /* GENERE PDO---------------------- GENERE PDO
@@ -36,7 +43,7 @@ class OBdd_connexion{
 		// Accesseur BDD 
 		if($this->pdo === null){
 			try{ 
-				$pdo = new PDO('mysql:host=YOURDBHOS;dbname=YOURDBNAME', 'root', 'YOURPASSWORD', array(PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES UTF8'));
+				$pdo = new PDO('mysql:host=YOURHOST;dbname=YOURDBNAME', 'root', 'PASSWORD', array(PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES UTF8'));
 				//die(PDO::ATTR_ERRMODE);
 				//Retour derreur syntaxe
 				$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
