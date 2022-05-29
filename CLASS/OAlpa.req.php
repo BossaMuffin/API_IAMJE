@@ -79,9 +79,10 @@ class OAlpa
 * @return : table $l_Treponse
 */
 // reste à intégrer : 1) le mode 2) selection de l'outil 3) l'approche/distance de l'objectif
-    function A( $T_objectifs, $Coutils )
+    function A( $l_i_objectif )
     {
-        
+        $Coutils = $this->g_Tressources["outils"] ;
+
         // Identification de cette phase d'apprentissage
         //$test = $this->g_BFUNC->genereCharKey();
 
@@ -96,16 +97,16 @@ class OAlpa
             // Initialisation de l'approche au delais
         $l_timestamp_ms_difference = 0 ;
             // Initialisation de l'approche/distance à l'objectif
-        $l_distance = $T_objectifs["objectif"] ;
+        $l_distance = $this->g_Tobjectifs["objectif"][$l_i_objectif] ;
         // Initialisation du taux de precision minimum
         $l_precision = 0 ;
             // sequence de calculs (chemin utilisé)
         $l_sequence = '[matiere]' . $this->g_Tressources["matieres"] ;
 
-        if ( $T_objectifs["objectif"] != $this->g_Tressources["matieres"] )
+        if ( $this->g_Tobjectifs["objectif"][$l_i_objectif] != $this->g_Tressources["matieres"] )
         {
             // Boucle de calcul pour approche/distance de l'obejctif demandé
-        	while ( $l_distance  > $T_objectifs["distance"] and $l_timestamp_ms_difference < $T_objectifs["delais"] )
+        	while ( $l_distance  > $this->g_Tobjectifs["distance"] and $l_timestamp_ms_difference < $this->g_Tobjectifs["delais"] )
             //while( $l_precision  > $T_objectifs["precision"] and $l_timestamp_ms_difference < $T_objectifs["delais"] )
         	{
 
@@ -121,9 +122,9 @@ class OAlpa
 
                 // Controle de précision de calcul et de respect des contraintes
                     // Estimation de l'approche/distance à l'objectif 
-                $l_distance = $T_objectifs["objectif"][0] - $l_resultat ;
+                $l_distance = $this->g_Tobjectifs["objectif"][$l_i_objectif] - $l_resultat ;
                     // Estimation de la precision à l'objectif 
-                $l_precision = $l_resultat / $T_objectifs["objectif"][0] ;
+                $l_precision = $l_resultat / $this->g_Tobjectifs["objectif"][$l_i_objectif] ;
                     // timestamp en millisecondes de la fin du script
                 $l_timestamp_ms_fin = microtime( true ) ; 
                     // différence en millisecondes entre le début et la fin
@@ -151,7 +152,7 @@ class OAlpa
 		
         // chargement des données à retourner
         //$l_Treponse["id"] = $l_id["value"] ;
-        $l_Treponse["objectif"] = $T_objectifs["objectif"] ;
+        $l_Treponse["objectif"] = $this->g_Tobjectifs["objectif"][$l_i_objectif] ;
         $l_Treponse["resultat"] = $l_resultat ;
         $l_Treponse["distance"] = $l_distance ;
         $l_Treponse["precision"] = $l_precision ;
@@ -219,23 +220,25 @@ class OAlpa
 * @value : $this->g_RESSOURCES->push_archive_A( $l_Treponse[$g_i_id], $g_i_id ) et $this->p_Tresultats
 * @return : none
 */
-    function serie_A( $objectif_max, $Coutils )
+    function serie_A( )
     {
         // Afffichage des ordres d'apprentissage 
         //$this->p_Caffichage_serie_A_ordres = $this->affichage_serie_A_ordres( $objectif_max ) ;
 
         // On boucle la fonction élémentaire A sur la serie de l'objectif initial à l'objectif max 
         $l_i = 0 ;
-        $l_Tobjectifs= $this->g_Tobjectifs ;
-        while ( $l_Tobjectifs["objectif"][0] <= $objectif_max )
+        $l_Tobjectifs = $this->g_Tobjectifs ;
+        $l_Tressources = $this->g_Tressources ;
+
+        foreach ( $l_Tobjectifs["objectif"] as $l_i_objectif => $l_objectif )
         {
 
             $l_i++ ;
-            $g_i_id = "v1-" . $this->g_Tressources["outils"] . "-" . $l_i ;
+            $g_i_id = "v1-" . $l_Tressources["outils"] . "-" . $l_i ;
 
             // -------------------- TRAVAIL  
             // TRAVAIL D'APPRENTISAGE ELEMENTAIRE 
-            $l_Tresult = $this->A( $l_Tobjectifs, $Coutils ) ;
+            $l_Tresult = $this->A( $l_i_objectif ) ;
 
             // Pour mémoire
             // $g_Tresultat["resultat"]
@@ -256,16 +259,15 @@ class OAlpa
             // ------------------------------ ARCHIVAGE PHASE A
             // Archivage du resultat de calcul elementaire
             // pour réutilisation future de l'apprentissage
-            $this->g_RESSOURCES->push_archive_A( $l_Treponse[$g_i_id], $g_i_id ) ;
+            $this->g_RESSOURCES->push_archive_A( $l_Treponse[$g_i_id] ) ;
 
             // --------------------------- AFFICHAGE PHASE A 
             // Implémente l'attribut d'affichage de la phase d'apprentissage */
             $this->p_Caffichage_serie_A .= $this->affichage_A( $l_Tresultats[$l_i] ) ;
 
-            // Incrémente l'objectif d'apprentissage
-            $l_Tobjectifs["objectif"][0] = $l_Tobjectifs["objectif"][0] + $this->g_Tressources["matieres"];
 
-            // Fin boucle while pour créer la serie d'apprentissage
+
+            // Fin boucle foreach pour créer la serie d'apprentissage
         }
 
         $this->p_Tresultats = $l_Treponse ;
@@ -285,7 +287,7 @@ class OAlpa
 * @value : none
 * @return : html char
 */
-    function affichage_serie_A_ordres( $g_objectif_max )
+    function affichage_serie_A_ordres( )
     {
 
             // ---------------------------------------------------------------------------------------------- 
@@ -298,6 +300,21 @@ class OAlpa
             {
                 $l_mode = "ENSEIGNEMENT" ;
             }
+            
+            // on recupere la liste des objectifs qu'on formate
+            foreach ( $this->g_Tobjectifs["objectif"] as $l_i_obj => $objectif )
+            {
+                    if ( $l_i_obj == 0 )
+                    {
+                        $l_Cobjectifs = $objectif ;
+                    }
+                    else
+                    {
+                        $l_Cobjectifs .= ", ".$objectif ;
+                    }
+                    
+            } 
+
             $l_part[1] = " <br/><br/>
 
             <h2>" . $l_mode . " " . $this->g_CinstanceName . "</h2>
@@ -305,11 +322,8 @@ class OAlpa
 
             <dd>
 
-                <u>Objectif initial</u> (objectif) :<br/>
-                <b>" . $this->g_Tobjectifs["objectif"][0] . "</b><br/>
-
-                <u>Objectif final</u> (g_objectif_max) :<br/>
-                <b>" . $g_objectif_max . "</b><br/>
+                <u>Serie d'objectifs traités</u> (Tobjectifs) :<br/>
+                <b>" . $l_Cobjectifs . "</b><br/>
 
                 <u>Matière utilisée</u> (matieres) :<br/>
                 <b>" . $this->g_Tressources["matieres"] . "</b><br/>

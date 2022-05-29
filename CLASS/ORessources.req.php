@@ -11,7 +11,6 @@ class ORessources
 // Propriétés
     public $p_Tressources = array();
     public $p_Tarchives = array();
-    public $p_TarbresDesRecherches = array();
 
 // Var de construction
     //public $g_BFUNC ;
@@ -179,13 +178,16 @@ class ORessources
             // on récupère dans les archives toutes les données de calcul ALPA qui ont mené à cet objectif 
             // on les range dans $l_Tpossibles 
             $l_Tpossibles = array() ;
-
+            $l_i = 0 ;
             foreach ( $this->p_Tarchives as $l_key => $l_Tressource ) 
             {
                 // Pour mémoire
-                if ( $l_Tressource["objectif"]["value"][0] == $objectifs ) 
+                if ( $l_Tressource["resultat"]["value"] == $objectifs ) 
                 {
+                    $l_Tmin_diff[$l_i]["value"] = $objectifs ;
+                    $l_Tmin_diff[$l_i]["key"] = $l_key ;
                     array_push($l_Tpossibles, $l_Tressource) ;
+                    $l_i++ ;
                 }
                 // $p_Tarchives[$l_i_id]["matieres"]["value"] = $Tresultats["matieres"]["value"] 
                 // $p_Tarchives[$l_i_id]["outils"]["value"] = $Tresultats["outils"]["value"]
@@ -198,7 +200,7 @@ class ORessources
             }
 
             $l_Treponse["differences"] = array() ;
-            $l_Treponse["relais"] = array() ;
+            $l_Treponse["relais"] = $l_Tmin_diff ;
             $l_Treponse["possibles"] = $l_Tpossibles ;
         }
         else
@@ -212,7 +214,7 @@ class ORessources
             $l_Tdifferences = array() ;
 
             $l_i = 0 ;
-            $l_Tmin_diff[$l_i]["value"] = abs( $this->p_Tarchives[0]["objectif"]["value"][0] - $objectifs ) ;
+            $l_Tmin_diff[$l_i]["value"] = abs( $this->p_Tarchives[0]["objectif"]["value"] - $objectifs ) ;
             $l_Tmin_diff[$l_i]["key"] = 0 ;
             
             // Pour mémoire
@@ -221,9 +223,12 @@ class ORessources
 
             foreach ( $this->p_Tarchives as $l_key => $l_Tressource ) 
             {
-                
-                $l_Tdifferences[$l_key] =  $objectifs - $l_Tressource["objectif"]["value"][0];
-                    
+                // ADAPTER LE TYPE DE COMPARAISON AVEC LE TYPE DE DONNÉES COMPARÉES XXXXXXXXXXX
+                // CHOISIR ENTRE LA COMPARAISON AUX OBJECTIFS DEMANDÉS OU AUX RÉSULTATS ATEINTS
+                //$l_Tdifferences[$l_key] =  $objectifs - $l_Tressource["objectif"]["value"];
+                $l_Tdifferences[$l_key] =  $objectifs - $l_Tressource["resultat"]["value"];
+                // ------------------------------------------------------------------------    
+
                 if ( $l_key == 0 )
                 {
                 // initialisation pour 0 
@@ -280,72 +285,6 @@ class ORessources
     }
     // ------------------------------------
 
-/* ------------------------------------- BOUCLES DES POSSIBLES ----------------------------------------- 
-* Si l'objectif est inconnu, on a trouvé des possibles qui sont les plus proches possibles de ce qu'on cherche globalement
-* la différence entre les possibles et les objectifs est minimale dans notre contexte de connaissance
-* on va recommencer la recherche des possibles sur les différences elles-mêmes 
-* on prend donc les différences minimales trouvées précédemment (les relais) en tant qu'objectif cette fois
-* et on observe les nouveaux possibles trouvés
-* @param :
-* @value : 
-* @return : 
-*/
-
-    function boucle( $T_possibles, $parcours, $timestamp_ms_local_debut, $timestamp_ms_global_debut)
-    {
-
-        foreach ( $T_possibles.$parcours.["relais"] as $l_i => $l_relais ) 
-        {
-            // timestamp en millisecondes de la fin du script
-            $l_timestamp_ms_global_fin = microtime( true ) ; 
-            // différence en millisecondes entre le début et la fin
-            $l_timestamp_ms_global_difference = $l_timestamp_ms_global_fin - $timestamp_ms_global_debut ;
-
-            if ( $l_timestamp_ms_global_difference <= 1000000 )
-            {
-                $T_possibles["relais"][$l_i]["branche"] = $this->recherche_des_possibles( $l_relais["value"] ) ;
-
-                 // timestamp en millisecondes de la fin du script
-                $l_timestamp_ms_local_fin = microtime( true ) ; 
-                // différence en millisecondes entre le début et la fin
-                $l_timestamp_ms_local_difference = $l_timestamp_ms_local_fin - $timestamp_ms_local_debut ;
-
-                /*
-                if ( $g_Tpossibles["acquis"] )
-                {
-                    // la connaissance pour repondre à l'objectif demandé est déjà acquise
-                    echo "<br/><b>J'ai déjà acquis cet objectif et je sais comment le reproduire</b>" ;
-                    echo "<br/><b><u>Tableau des possibles</u> :</b>" ;
-                    $BFUNC->printr( $g_Tpossibles["possibles"], false)  ;
-                }
-                else
-                {
-                    // la connaissance pour repondre à l'objectif demandé n'est pas encore acquise
-                    echo "<br/><b>Je n'ai jamais atteint cet objectif. Je vais devoir trouver un moyen</b>" ;
-                    echo "<br/>" ;
-                    echo "<br/><b><u>Tableau des différences</u> :</b>" ;
-                    $BFUNC->printr( $g_Tpossibles["differences"], false )  ;
-                    echo "<br/><b><u>Tableau des différences minimales</u> :</b>" ;
-                    $BFUNC->printr( $g_Tpossibles["relais"], false )  ;
-                    echo "<br/><b><u>Tableau des possibles</u> :</b>" ;
-                    $BFUNC->printr( $g_Tpossibles["possibles"], false )  ;
-                     
-                }
-                */
-
-                if ( isset($Tpossibles["relais"][$l_i]) and $l_timestamp_ms_local_difference <= 100000 ) 
-                {
-                    $l_timestamp_ms_local_debut = microtime( true ) ;
-
-                    boucle( $T_possibles["relais"][$l_i]["branche"], $timestamp_ms_local_debut, $timestamp_ms_global_debut ) ;
-                }
-            }
-           
-        }
-
-       $this->p_TarbresDesRecherches = $T_possibles ;
-
-    }
 
 /* ----------------------------------FIN------------------------------------- */
 /* Fin Class ORessources */
