@@ -15,6 +15,8 @@ class OTresultat
 // Var de construction
     public $g_BFUNC ;
 
+// XXXXXXX 99999999999 créer une propriété par Valeur importante réutilisée partout ailleurs
+
 
 /* ---------------- CONSTRUCTEUR ----------------------------- 
 * @value : $g_objectif, BFUNC
@@ -29,7 +31,7 @@ class OTresultat
         $this->p_T["outils"]["value"] = array() ;
         $this->p_T["sequence"]["value"] = "" ;
         $this->p_T["resultat"]["value"] = 0 ;
-        $this->p_T["datas"]["distance"] = 0 ;
+        $this->p_T["datas"]["distance"] = $g_objectif ;
         $this->p_T["datas"]["precision"] = 0 ;
         $this->p_T["datas"]["delais"] = 0 ;
         $this->p_T["datas"]["compteur"] = 0 ;
@@ -86,7 +88,7 @@ class OTresultat
     function mat( $Tparam )
     {
         // on verifie que la matiere n'a pas été déjà noté dans la description du calcul
-        $l_Btest = array_search( $Tparam , $this->p_T["matieres"]["value"] ) ;
+        $l_Btest = in_array( $Tparam , $this->p_T["matieres"]["value"] ) ;
 
         if ( ! $l_Btest )
         {
@@ -111,7 +113,7 @@ class OTresultat
     function outs( $Tparam )
     {
         // on verifie que l'outil n'a pas été déjà noté dans la description du calcul
-        $l_Btest = array_search( $Tparam , $this->p_T["outils"]["value"] ) ;
+        $l_Btest = in_array( $Tparam , $this->p_T["outils"]["value"] ) ;
 
         if ( ! $l_Btest )
         {

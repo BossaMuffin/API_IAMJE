@@ -1,0 +1,43 @@
+
+#chessboardsBox {
+	position: relative;
+	margin-left: auto;
+	margin-right: auto;
+	left: 0;
+	top: 0;
+	clear: both;
+	overflow: visible;
+	background-color: #87a1c0;
+	border: 1px #76808C solid;
+	-moz-border-radius: 5px;
+	-webkit-border-radius: 5px;
+	border-radius: 5px;
+	/*
+	-moz-box-shadow:
+		0 0 20px black,
+		20px 15px 30px yellow,
+		-20px 15px 30px lime,
+		-20px -15px 30px blue,
+		20px -15px 30px red;
+	-webkit-box-shadow:
+		0 0 20px black,
+		20px 15px 30px yellow,
+		-20px 15px 30px lime,
+		-20px -15px 30px blue,
+		20px -15px 30px red;
+	box-shadow:
+		0 0 20px black,
+		20px 15px 30px yellow,
+		-20px 15px 30px lime,
+		-20px -15px 30px blue,
+		20px -15px 30px red;
+	*/
+}
+
+#chess2DBox {
+	/**
+	* width: [DYNAMIC VALUE];
+	* height: [DYNAMIC VALUE];
+	*/
+	float: right;
+}

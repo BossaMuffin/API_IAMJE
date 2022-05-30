@@ -79,96 +79,176 @@ class OAlpa
 * @return : table $l_Treponse
 */
 // reste à intégrer : 1) le mode 2) selection de l'outil 3) l'approche/distance de l'objectif
-    function A( $l_i_objectif )
+    function A( $l_i_objectif, $g_i_id = "defo_id" )
     {
-        $Coutils = $this->g_Tressources["outils"] ;
-
-        // Identification de cette phase d'apprentissage
-        //$test = $this->g_BFUNC->genereCharKey();
-
-    	// Initialisation du depart/base de calcul
-    	$l_resultat = $this->g_Tressources["matieres"] ;
 
         // Initialisation des capteurs de performance
             // timestamp en millisecondes du début du script
         $l_timestamp_ms_debut = microtime( true ) ;
-            // compteur de calculs
-        $l_compteur = 0 ;
             // Initialisation de l'approche au delais
         $l_timestamp_ms_difference = 0 ;
-            // Initialisation de l'approche/distance à l'objectif
-        $l_distance = $this->g_Tobjectifs["objectif"][$l_i_objectif] ;
-        // Initialisation du taux de precision minimum
-        $l_precision = 0 ;
-            // sequence de calculs (chemin utilisé)
-        $l_sequence = '[matiere]' . $this->g_Tressources["matieres"] ;
-
-        if ( $this->g_Tobjectifs["objectif"][$l_i_objectif] != $this->g_Tressources["matieres"] )
+ 
+// --------------- ------------------------------------- LEARN : APPRENTISSAGE ALPA ----------------------------------
+        if ( $this->g_mode == "LEARN" )
         {
-            // Boucle de calcul pour approche/distance de l'obejctif demandé
-        	while ( $l_distance  > $this->g_Tobjectifs["distance"] and $l_timestamp_ms_difference < $this->g_Tobjectifs["delais"] )
-            //while( $l_precision  > $T_objectifs["precision"] and $l_timestamp_ms_difference < $T_objectifs["delais"] )
-        	{
+            $Coutils = $this->g_Tressources["outils"] ;
 
-                // incrementation du compteur à chaque passage dans le calcul
-                $l_compteur++ ;
+            // Identification de cette phase d'apprentissage
+            //$test = $this->g_BFUNC->genereCharKey();
+
+            // Initialisation du depart/base de calcul
+            $l_resultat = $this->g_Tressources["matieres"] ;
+
+            // Initialisation des capteurs de performance spécifique à l'apprentissage
+            // compteur de calculs
+            $l_compteur = 0 ;
+            // Initialisation de l'approche/distance à l'objectif
+            $l_distance = $this->g_Tobjectifs["objectif"][$l_i_objectif] ;
+            // Initialisation du taux de precision minimum
+            $l_precision = 0 ;
+                // sequence de calculs (chemin utilisé)
+            $l_sequence = '[matiere]' . $this->g_Tressources["matieres"] ;
+            if ( $this->g_Tobjectifs["objectif"][$l_i_objectif] != $this->g_Tressources["matieres"] )
+            {
+                // Boucle de calcul pour approche/distance de l'obejctif demandé
+                while ( $l_distance  > $this->g_Tobjectifs["distance"] and $l_timestamp_ms_difference < $this->g_Tobjectifs["delais"] )
+                //while( $l_precision  > $T_objectifs["precision"] and $l_timestamp_ms_difference < $T_objectifs["delais"] )
+                {
+
+                    // incrementation du compteur à chaque passage dans le calcul
+                    $l_compteur++ ;
+                    // incrémentation de la sequence
+                    $l_sequence .= '[outil]' . $this->g_Tressources["outils"] . '[matiere]' . $this->g_Tressources["matieres"] ;
+
+                    // lancement du calcul itératif 
+                    $l_resultat = $this->g_LFUNC->$Coutils($l_resultat, $this->g_Tressources["matieres"]) ;
+                    //$l_resultat = $this->g_LFUNC->addition($l_resultat, $this->g_Tressources["matieres"]) ;
+                    //$l_resultat = addition( $l_resultat, $this->g_Tressources["matieres"] ) ;
+
+                    // Controle de précision de calcul et de respect des contraintes
+                        // Estimation de l'approche/distance à l'objectif 
+                    $l_distance = $this->g_Tobjectifs["objectif"][$l_i_objectif] - $l_resultat ;
+                        // Estimation de la precision à l'objectif 
+                    $l_precision = $l_resultat / $this->g_Tobjectifs["objectif"][$l_i_objectif] ;
+                        // timestamp en millisecondes de la fin du script
+                    $l_timestamp_ms_fin = microtime( true ) ; 
+                        // différence en millisecondes entre le début et la fin
+                    $l_timestamp_ms_difference = $l_timestamp_ms_fin - $l_timestamp_ms_debut ;
+
+
+                }
+            }
+            else 
+            {
+
                 // incrémentation de la sequence
                 $l_sequence .= '[outil]' . $this->g_Tressources["outils"] . '[matiere]' . $this->g_Tressources["matieres"] ;
 
-                // lancement du calcul itératif 
-                $l_resultat = $this->g_LFUNC->$Coutils($l_resultat, $this->g_Tressources["matieres"]) ;
-        		//$l_resultat = $this->g_LFUNC->addition($l_resultat, $this->g_Tressources["matieres"]) ;
-                //$l_resultat = addition( $l_resultat, $this->g_Tressources["matieres"] ) ;
-
                 // Controle de précision de calcul et de respect des contraintes
                     // Estimation de l'approche/distance à l'objectif 
-                $l_distance = $this->g_Tobjectifs["objectif"][$l_i_objectif] - $l_resultat ;
+                $l_distance = 0 ;
                     // Estimation de la precision à l'objectif 
-                $l_precision = $l_resultat / $this->g_Tobjectifs["objectif"][$l_i_objectif] ;
+                $l_precision = 1 ;
+                    // timestamp en millisecondes de la fin du script
+                $l_timestamp_ms_fin = microtime( true ) ; 
+                    // différence en millisecondes entre le début et la fin
+                $l_timestamp_ms_difference = $l_timestamp_ms_fin - $l_timestamp_ms_debut ;
+            }
+            
+            // chargement des données à retourner
+            //$l_Treponse["id"] = $l_id["value"] ;
+            $l_Treponse["objectif"]["value"] = $this->g_Tobjectifs["objectif"][$l_i_objectif] ;
+            $l_Treponse["resultat"]["value"] = $l_resultat ;
+            $l_Treponse["sequence"]["value"] = $l_sequence ;
+            $l_Treponse["datas"]["distance"] = $l_distance ;
+            $l_Treponse["datas"]["precision"] = $l_precision ;
+            $l_Treponse["datas"]["delais"] = $l_timestamp_ms_difference ;
+            $l_Treponse["datas"]["compteur"] = $l_compteur ;
+            
+            // la table qui contiendra la chaine de calcul trouvé pour atteindre l'objectif demandé 
+            // on implémente l'objectif au tableau de résultat
+            $l_RESULTAT = new OTresultat( $this->g_Tobjectifs["objectif"][$l_i_objectif], $this->g_BFUNC ) ;
+            // XXXXXXX 99999999999 créer des propriétés Tresultat par Valeur importante réutilisée partout ailleurs
+            $l_Treponse = $this->formate_A( $l_RESULTAT, $l_Treponse, $g_i_id, $this->g_Tressources["matieres"], $this->g_Tressources["outils"] ) ;
+              
+            // PRIMORDIALE : coeur de l'apprentissage
+            // L'IA à atteint un nouveau résultat
+            // Comme elle sait comment l'atteindre, elle le connait
+            // Elle peut le compter parmi ses ressources comme une nouvelle ressource à exploiter
+            $this->g_RESSOURCES->push_ressource( $l_resultat ) ;
+            $this->g_RESSOURCES->push_archive_A( $l_Treponse->p_T ) ;
+            // retour du résultat       
+            return $l_Treponse ;
+           
+        // Fin  LEARN : APPRENTISSAGE ALPA ----------------------------------  
+        }
+// ----------- OU ------------------------------------- WORK : TRAVAIL ALPA ----------------------------------
+        else if ( $this->g_mode == "WORK" )
+        {
+            // ------------------------------------- RECHERCHE DE POSSIBLES ----------------------------------------- 
+            // ------- utilise un  un objet "resultat ALPA" pour formater facilement des tableau de ce type en créant des instances du formatage unique
+            // ----------- fonction bouclée 
+            // ------------- créer des fonctions secondaires communes (de nommage, de calcul de précision, de timming, et compteur, ou de mise à jour du tableau de resultat "solution")
+
+               
+            // la table qui contiendra la chaine de calcul trouvé pour atteindre l'objectif demandé 
+            // on implémente l'objectif au tableau de résultat
+            $l_RESULTAT = new OTresultat( $this->g_Tobjectifs["objectif"][$l_i_objectif], $this->g_BFUNC ) ;
+
+            // jeton de boucle while 
+            $l_while_continue = true ;
+            $l_while_compteur = 0 ;
+
+            while ( $l_while_continue 
+                    and  ( ( abs( 1 - abs( $l_RESULTAT->p_T["datas"]["precision"] ) ) > ( 1 - $this->g_Tobjectifs["precision"] ) ) 
+                        or $l_RESULTAT->p_T["datas"]["distance"] <= $g_Tobjectifs["distance"] )
+                    and $l_timestamp_ms_difference <= $this->g_Tobjectifs["delais"] )
+            {
+                $l_while_compteur++ ; 
+                // On verifie si l'objectif n'a pas déjà été atteint
+                // En comparant l'objectif demandée aux ressources existantes
+                if ( $l_while_compteur == 1 )
+                {
+                    $g_Tpossibles = $this->g_RESSOURCES->recherche_des_possibles( $l_RESULTAT->p_T["objectif"]["value"] ) ;
+                }
+                else
+                {
+                    $g_Tpossibles = $this->g_RESSOURCES->recherche_des_possibles( $g_Tpossibles["relais"][0]["value"] ) ;
+                }
+
+            // -------------------- MEMORISATION DU CHEMIN DEJA PARCOURU DANS OTRESULTAT  XXXXXXXXXXXXXXXXXXXXXXXXXXXXXxxxx
+                //$this->g_Tressources["matieres"] = $g_Tpossibles["possibles"][0]["matieres"]["value"] ;
+
+                $l_Treponse = $this->formate_A( $l_RESULTAT, $g_Tpossibles["possibles"][0], $g_Tpossibles["possibles"][0]["id"], $g_Tpossibles["possibles"][0]["matieres"]["value"], $g_Tpossibles["possibles"][0]["outils"]["value"] ) ;
+              
+
+                if ( $g_Tpossibles["acquis"] )
+                {
+                    $l_while_continue = false ;
+                }
+                else
+                {
+                    $l_while_continue = true ;
+                }
                     // timestamp en millisecondes de la fin du script
                 $l_timestamp_ms_fin = microtime( true ) ; 
                     // différence en millisecondes entre le début et la fin
                 $l_timestamp_ms_difference = $l_timestamp_ms_fin - $l_timestamp_ms_debut ;
 
-
-        	}
+            // Fin de la boucle while
+            }
+            /* -------------------------------------- ENREGISTREMENT DE L'APPRENTISSAGE ISSU DU TRAVAIL EFFECTUÉ --------------------------------- */
+            // ENREGISTREMENT DES RESULTATS ET DES RESSOURCES DÉCOUVERTES  
+            // on rend réutilisable
+            // on enregistre le resultat atteint 
+            $this->g_RESSOURCES->push_ressource( $l_Treponse->p_T["resultat"]["value"] ) ;
+            $this->g_RESSOURCES->push_archive_A( $l_Treponse->p_T ) ;
+            // retour du résultat       
+            return $l_Treponse ;
+        // Fin  WORK : TRAVAIL ALPA ----------------------------------   
         }
-        else 
-        {
-
-            // incrémentation de la sequence
-            $l_sequence .= '[outil]' . $this->g_Tressources["outils"] . '[matiere]' . $this->g_Tressources["matieres"] ;
-
-            // Controle de précision de calcul et de respect des contraintes
-                // Estimation de l'approche/distance à l'objectif 
-            $l_distance = 0 ;
-                // Estimation de la precision à l'objectif 
-            $l_precision = 1 ;
-                // timestamp en millisecondes de la fin du script
-            $l_timestamp_ms_fin = microtime( true ) ; 
-                // différence en millisecondes entre le début et la fin
-            $l_timestamp_ms_difference = $l_timestamp_ms_fin - $l_timestamp_ms_debut ;
-        }
-		
-        // chargement des données à retourner
-        //$l_Treponse["id"] = $l_id["value"] ;
-        $l_Treponse["objectif"] = $this->g_Tobjectifs["objectif"][$l_i_objectif] ;
-        $l_Treponse["resultat"] = $l_resultat ;
-        $l_Treponse["distance"] = $l_distance ;
-        $l_Treponse["precision"] = $l_precision ;
-		$l_Treponse["delais"] = $l_timestamp_ms_difference ;
-        $l_Treponse["compteur"] = $l_compteur ;
-        $l_Treponse["sequence"] = $l_sequence ;
-
-        // PRIMORDIALE : coeur de l'apprentissage
-        // L'IA à atteint un nouveau résultat
-        // Comme elle sait comment l'atteindre, elle le connait
-        // Elle peut le compter parmi ses ressources comme une nouvelle ressource à exploiter
-        $this->g_RESSOURCES->push_ressource( $l_resultat ) ;
-
-        // retour du résultat 
-    	return  $l_Treponse;
-        	
+        
+        
 
     // Fin fonction élémentaire ALPA
     } 
@@ -193,20 +273,30 @@ class OAlpa
 * @value : none
 * @return : table $l_Tmemoire
 */
-    function formate_A( $T_result, $Cid )
+    function formate_A( $l_RESULTAT, $T_result, $Cid, $Nmatieres, $Coutils )
     {
-        $l_Tmemoire["id"] = $Cid ;
-        $l_Tmemoire["objectif"]["value"] = $T_result["objectif"] ;
-        $l_Tmemoire["matieres"]["value"] = $this->g_Tressources["matieres"] ;
-        $l_Tmemoire["outils"]["value"] = $this->g_Tressources["outils"] ;
-        $l_Tmemoire["sequence"]["value"] = $T_result["sequence"] ;
-        $l_Tmemoire["resultat"]["value"] = $T_result["resultat"] ;
-        $l_Tmemoire["datas"]["distance"] = $T_result["distance"] ;
-        $l_Tmemoire["datas"]["precision"] = $T_result["precision"] ;
-        $l_Tmemoire["datas"]["delais"] = $T_result["delais"] ;
-        $l_Tmemoire["datas"]["compteur"] = $T_result["compteur"] ;
-
-        return $l_Tmemoire ;
+        // -------------------- MEMORISATION DU CHEMIN DEJA PARCOURU DANS OTRESULTAT  
+        // on peut ajouter les matières utilisées et les données (contraintes, objectifs, outils etc) du calcul originel
+        // on construit l'id
+        $l_RESULTAT->id( $Cid ) ;
+        // on injecte la matière si elle n'a pas été déjà notée dans la description du calcul
+        $l_RESULTAT->mat( $Nmatieres ) ;
+        // on injecte l'outils s'il n'a pas été déjà noté dans la description du calcul
+        $l_RESULTAT->outs( $Coutils ) ;
+        // on construit la sequence
+        $l_RESULTAT->seq( $T_result["sequence"]["value"] ) ;
+        // on injecte le resultat
+        $l_RESULTAT->res( $T_result["resultat"]["value"] ) ;
+        // on calcul la distance entre l'objectif et le résultat atteint
+        $l_RESULTAT->dist( $T_result["datas"]["distance"] ) ;
+        // on calcul la precision(ratio) entre l'objectif et le ésultat atteint
+        $l_RESULTAT->ratio( $T_result["datas"]["precision"] ) ;
+        // on injecte le délai de calcul
+        $l_RESULTAT->delais( $T_result["datas"]["delais"] ) ;
+        // on injecte le compteur d'opération
+        $l_RESULTAT->compt( $T_result["datas"]["compteur"] ) ;
+   
+        return $l_RESULTAT ;
 
     // fin formate_A
     }
@@ -234,38 +324,18 @@ class OAlpa
         {
 
             $l_i++ ;
+            // 9999999999999 XXXXXXXXXXXXXXXXxx créer un objet de nommage des calculs
             $g_i_id = "v1-" . $l_Tressources["outils"] . "-" . $l_i ;
 
             // -------------------- TRAVAIL  
             // TRAVAIL D'APPRENTISAGE ELEMENTAIRE 
-            $l_Tresult = $this->A( $l_i_objectif ) ;
-
-            // Pour mémoire
-            // $g_Tresultat["resultat"]
-            // $g_Tresultat["distance"]
-            // $g_Tresultat["precision"]
-            // $g_Tresultat["delais"]
-            // $g_Tresultat["compteur"]
-            // $g_Tresultat["sequence"]
-
-            $l_Tresultats[$l_i] = $l_Tresult ;
-            $l_Tresultats[$l_i]["id"] = $g_i_id ;
-
-            // ------------------------------ FORMATAGE PHASE A
-            // Formatage du resultat de calcul elementaire
-            // pour memorisation de l'apprentissage
-            $l_Treponse[$g_i_id] = $this->formate_A( $l_Tresultats[$l_i], $g_i_id ) ;
-
-            // ------------------------------ ARCHIVAGE PHASE A
-            // Archivage du resultat de calcul elementaire
-            // pour réutilisation future de l'apprentissage
-            $this->g_RESSOURCES->push_archive_A( $l_Treponse[$g_i_id] ) ;
+            $l_Tresult = $this->A( $l_i_objectif, $g_i_id ) ;
+            // Résultat formaté, ressourcé et archivé dans Alpa
+            $l_Treponse[$g_i_id] = $l_Tresult->p_T ;
 
             // --------------------------- AFFICHAGE PHASE A 
             // Implémente l'attribut d'affichage de la phase d'apprentissage */
-            $this->p_Caffichage_serie_A .= $this->affichage_A( $l_Tresultats[$l_i] ) ;
-
-
+            $this->p_Caffichage_serie_A .= $this->affichage_A( $l_Tresult->p_T ) ;
 
             // Fin boucle foreach pour créer la serie d'apprentissage
         }
@@ -379,7 +449,7 @@ class OAlpa
                 <b>" . $this->g_Tressources["outils"] . "</b><br/>-->
 
                 <u>Objectif demandé</u> (objectif) :<br/>
-                <b>" . $T_result["objectif"][0] . "</b><br/>
+                <b>" . $T_result["objectif"]["value"][0] . "</b><br/>
 
                 <!--<u>Distance à l'objectif minimum demandée</u> (distance) :<br/>
                 <b>" . $this->g_Tobjectifs["distance"] . "</b><br/>
@@ -406,22 +476,22 @@ class OAlpa
             <dd>
 
                 <u>Résultat atteint</u> (resultat) :<br/>
-                <b>" . $T_result["resultat"] . "</b><br/>
+                <b>" . $T_result["resultat"]["value"] . "</b><br/>
 
                 <u>Distance de l'approche</u> (distance) :<br/>
-                <b>" . $T_result["distance"] . "</b><br/>
+                <b>" . $T_result["datas"]["distance"] . "</b><br/>
 
                 <u>Précision de l'approche</u> (precision) :<br/>
-                <b>" . $T_result["precision"] . "</b><br/>
+                <b>" . $T_result["datas"]["precision"] . "</b><br/>
 
                 <u>Temps de calcul</u> (delais) :<br/>
-                <b>" . $T_result["delais"] . " ms</b><br/>
+                <b>" . $T_result["datas"]["delais"] . " ms</b><br/>
 
                 <u>Nombre de calcul</u> (compteur) :<br/>
-                <b>" . $T_result["compteur"] . "</b><br/>
+                <b>" . $T_result["datas"]["compteur"] . "</b><br/>
 
                 <u>Séquence de calcul</u> (sequence) :<br/>
-                <b>" . $T_result["sequence"] . "</b><br/>
+                <b>" . $T_result["sequence"]["value"] . "</b><br/>
 
             </dd>" ;
 
