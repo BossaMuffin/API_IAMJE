@@ -33,6 +33,7 @@ require_once( $g_page_arbo . FOLD_INC . 'route_serv.req.php' ) ;
 require_once( $g_page_arbo . FOLD_INC . 'route_bdd.req.php' ) ;
 
 /* ------------------------------------------------------------------------------------------- */
+
 /* HEADER */
 echo '
 <!DOCTYPE html>
@@ -83,7 +84,7 @@ echo "<h2> REPRÉSENTATION GRAPHIQUE </h2>" ;
 echo "<br/>" ;
 
 // Construction d'une grille horizontale pour la progression d'un piont graphique de 0 à Objectif 
-// Construction d'une grille horizontale pour la progression d'un piont graphique de 0 à Objectif 
+
 include($g_page_arbo . FOLD_INC . 'body-representation-graphique-1d.inc.php') ;
 
 echo "<br/><br/><b> FIN </b><br/><br/>" ;
