@@ -21,12 +21,60 @@ class OBaseFunctions
 // Constantes
   const   KEYMAX = 6 ; // doit être supérieur ou égal à 6
 
+// Propriété 
+  // initiée dans route_serv.req.php
+  public $g_url ;
+  // les types possibles dépendes d'abord de la fonction php gettype
+  // a chaque type correspond un type SQL (utilisé pour créer les colonnes ou on enregistrera les données)
+  // et une taille maximale par défaut
+  // ATTENTION il ne peut pas y avoir d'espace dans les types car ils sont utilisé pour etre les noms des tables !! XXXXXXXXXXXXXXx
+  // Gérer les types none !!!!!!!!!!!!!!!
+  public $p_Ttypes = [  0 => [  "name"  => "unknown type",
+                                "bdd"   => "none",
+                                "size"  => 0 ],
+
+                        1 => [  "name"  => "NULL",
+                                "bdd"   => "none",
+                                "size"  => 0 ],
+
+                        2 => [  "name"  => "integer", 
+                                "bdd"   => "INT",
+                                "size"  => 255 ],
+
+                        3 => [  "name"  => "double", 
+                                "bdd"   => "FLOAT",
+                                "size"  =>  255 ],
+
+                        4 => [  "name"  => "string", 
+                                "bdd"   => "VARCHAR",
+                                "size"  => 255 ],
+
+                        5 => [  "name"  => "email", 
+                                "bdd"   => "VARCHAR",
+                                "size"  => 255 ],
+
+                        6 => [  "name"  => "web", 
+                                "bdd"   => "VARCHAR",
+                                "size"  => 255 ],
+
+                        7 => [  "name"  => "array", 
+                                "bdd"   => "none",
+                                "size"  => 0 ],
+
+                        8 => [  "name"  => "object", 
+                                "bdd"   => "none",
+                                "size"  => 0 ],
+
+                        9 => [  "name"  => "resource", 
+                                "bdd"   => "none",
+                                "size"  => 0 ],
+                      ] ;
 
 /* ---------------- CONSTRUCTEUR ----------------------------- 
 * @value : none
 * @return : none
 */
-  function  __construct()
+  function  __construct( )
   {
   // fin construct
   }
@@ -44,6 +92,39 @@ class OBaseFunctions
   // ------------------------------------
 
 
+
+/* --------- DEFINE URL -------------------------------------------------------- 
+* Fonction qui enregistre l'url de base de la page dans une propriété 
+* @param url de la page
+* @return charge l'url dans une propriété de la classe
+*/
+  function define_url( $g_url )
+  {
+      $this->g_url = $g_url ;
+  // Fin define url
+  }
+  // ------------------------------------
+
+/* --------- SHOW VAR -------------------------------------------------------- 
+* Permet soit un echo pour une var scalable, soit l'appelle de la méthode printr si c'est une var non scalable 
+* @param url de la page
+* @return charge l'url dans une propriété de la classe
+*/
+  function show( $var, $pIsOpen = true, $pIsSQL = false )
+  {
+      if ( is_scalar( $var ) )
+      {
+        echo $var ;
+      }
+      else
+      {
+        $this->printr( $var, $pIsOpen = true, $pIsSQL = false ) ;
+      }
+  // fin show
+  }
+  // ------------------------------------
+
+
 /* --------- PRINTR -------------------------------------------------------- 
 * Fonction d'affichage préformaté de variable non typée pour nos débuggages
 * @param unknow $var : variable, tableau, objet... à afficher
@@ -51,7 +132,7 @@ class OBaseFunctions
 * @param bool $pIsOpen : True => Conteneur déplié par défaut
 * @return Code HTML d'un conteneur dépliable / repliable avec scrollbar auto
 */
-  function printr( $var, $g_url, $pIsOpen = true, $pIsSQL = false )
+  function printr( $var, $pIsOpen = true, $pIsSQL = false )
   {
       $lColor = ( is_string( $pIsSQL ) ? $pIsSQL : ( $pIsSQL === true ? '#FFF5DD' : '#F2FFEE' ) ) ;
       $pIsSQL = ( $pIsSQL === true || $lColor == '#FEE' ) ;
@@ -72,7 +153,7 @@ class OBaseFunctions
                 onClick="var tr = document.getElementById(\'printr_' . $lUniqId . '\');
                   if (tr.style.display!=\'none\') tr.style.display = \'none\';
                   else tr.style.display = \'table-row\';"><img
-                src="' . $g_url . 'img/sort-down.png" border="none" height="30px" />
+                src="' . $this->g_url . 'img/sort-down.png" border="none" height="30px" />
             </a>
           </td>
         </tr>
@@ -92,8 +173,140 @@ class OBaseFunctions
       @print_r( $var ) ;
 
       echo '</textarea></td></tr></table>' ;
+
+  // fin printr
   }
   // ------------------------------------
+
+/* -------------------------------------- VALIDATE WEB : EMAIL ou URL  --------------------------- 
+* valide une url (par defo) ou un email, en fonction de mode (url ou mail)
+* @param : une chaine de caractere ressemblant à un email ou une url
+* @value : none
+* @return : boolean ++
+*/
+
+  function validate_web( $c_var, $mode = "url" )
+  {
+    $reponse["err"] = 0 ;
+    $reponse["val"] = "" ;
+    $reponse[0] = false ;
+
+    if ( is_string( $c_var ) )
+    {
+
+      $reponse["val"] = $c_var ;
+      // retirer les caractère étrange
+      // $reponse["val"] = trim($c_var, '!"#$%&\'()*+,-./@:;<=>[\\]^_`{|}~') ;
+      // on definit si l'on cherche à valider un email ou une url web
+      if ( $mode == "url" )
+      {
+        // on  definit le regex URL (traite 99% des cas, y compris les email, le ftp, https, les connexions, les sous dossiers, sous domaines, variables get ...)
+        $l_regex = '_^(?:(?:https?|ftp)://)(?:\S+(?::\S*)?@)?(?:(?!10(?:\.\d{1,3}){3})(?!127(?:\.\d{1,3}){3})(?!169\.254(?:\.\d{1,3}){2})(?!192\.168(?:\.\d{1,3}){2})(?!172\.(?:1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2})(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z\x{00a1}-\x{ffff}0-9]+-?)*[a-z\x{00a1}-\x{ffff}0-9]+)(?:\.(?:[a-z\x{00a1}-\x{ffff}0-9]+-?)*[a-z\x{00a1}-\x{ffff}0-9]+)*(?:\.(?:[a-z\x{00a1}-\x{ffff}]{2,})))(?::\d{2,5})?(?:/[^\s]*)?$_iuS' ;
+      } 
+      else 
+      {
+        // on  definit le regex EMAIL
+        $l_regex = '_^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)?$_iuS' ;
+      }
+      
+      if ( $c_var != '' ) 
+      { 
+        $l_string = preg_replace( $l_regex, '', $c_var ) ;
+
+        if ( empty( $l_string ) )
+        {
+          $reponse[0] = true ;
+        }
+        else 
+        {
+          $reponse["err"] = 3 ;
+        }
+
+      } 
+      else 
+      {
+        $reponse["err"] = 2 ;
+      }
+    }
+    else
+    {
+      $reponse["err"] = 1 ;
+    } 
+   
+    return $reponse ;
+
+  // fin validate_web  
+  }
+  // ---------------------------------
+
+
+/* -------------------------------------- GETTYPE  --------------------------- 
+* determine le type du parametre
+* @param : tout type
+* @value : none
+* @return : 
+* Les chaînes de caractères que peut retourner la fonction PHP gettype (injecté dans ["val"]) sont les suivantes :
+* "boolean"
+* "integer"
+* "double"(pour des raisons historiques, "double" est retournée lorsqu'une valeur de type float est fournie, au lieu de la chaîne "float")
+* "string"
+* "array"
+* "object"
+* "resource"
+* "resource (closed)" à partir de PHP 7.2.0
+* "NULL"
+* "unknown type"
+*/
+  function get_type( $var )
+  {
+
+    $reponse["err"] = 0 ;
+    $reponse["val"] = "" ;
+    $reponse["subval"] = "" ;
+    $reponse[0] = false ;
+
+    $l_type = gettype( $var ) ;
+
+    
+    if ( $l_type == "string" )
+    {
+      if ( ! is_numeric($var) )
+      {
+        
+        if ( $this->validate_web( $var, "mail" ) )
+        {
+          $reponse["subval"] = $this->p_Ttypes[6]["name"] ;
+          // c'est un email calssique type nom@domaine.ext
+        }
+        else if ( $this->validate_web( $var ) )
+        {
+          $reponse["subval"] = $this->p_Ttypes[6]["name"] ;
+          // c'est une adresse web qui peut être très complexe
+        }
+
+      }
+      else
+      {//9999999999999999999  XXXXXXXXXXXXXXXXXXXXx
+        // ATTENTION : en fait il n'est pas toujours DOUBLE OU FLOTTANT, 
+        // cela permet juste d'identifier une donnée du type "78" au lieu de 78
+        // il faudrait faire en sorte qu'elle distingue les entiers flottant double ... 
+        // même sous forme de chaine de caractère (entre guillement) car récupérer d'un "explode" depuis les GET 
+        //999999999999999999999999999
+        $l_type = "double" ;
+      }
+      
+    }   
+   
+
+    $reponse["val"] = $l_type ;
+    $reponse["subval"] = $l_type ;
+
+    return  $reponse ;
+
+  // fin get type
+  }
+  // ------------------------------------
+
 
 
 
@@ -107,6 +320,8 @@ class OBaseFunctions
     $l_urlCourante = $_SERVER['REQUEST_URI'] ;
     $l_TurlGet = explode( "?", $l_urlCourante ) ;
     return  $l_TurlGet[0] ;
+
+  // fin Url sans parametre
   }
   // ------------------------------------
 
@@ -134,6 +349,8 @@ class OBaseFunctions
     }
 
     return  $l_reponse;
+
+  // fin url sans parametre
   }
   // ------------------------------------
 
@@ -226,6 +443,8 @@ et [erreur]
     }
     $l_Treponse[0] = true ;
     return $l_Treponse;
+
+  // fin genere char key
   }
   // ------------------------------------
 

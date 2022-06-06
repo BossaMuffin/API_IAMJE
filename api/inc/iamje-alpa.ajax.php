@@ -36,6 +36,7 @@ require( FOLD_INC . "filtre_params_alpa.req.php" ) ;
 
 $g_Tressources = array ( "matieres"  => $_GET["mat"], "outils" => $_GET["outs"] ) ;
 $g_TobjectifsListe = explode( ",", $_GET["obj"] ) ;
+$test = $BFUNC->get_type($_GET["obj"]) ;
 
 $g_Tobjectifs = array ( "objectif"  => $g_TobjectifsListe, "distance" => $_GET["dist"], "precision" => $_GET["ratio"], "delais" => $_GET["delais"] ) ;
 
@@ -43,7 +44,7 @@ $g_Tobjectifs = array ( "objectif"  => $g_TobjectifsListe, "distance" => $_GET["
 // ---------------------------------------------------------------------------------------------- 
 // 1) CREATION DE LA NOUVELLE INSTANCE DE TRAVAIL "ALPA":"A" 
 $l_ALPA = "ALPA1" ;
-$$l_ALPA = new OAlpa( $l_ALPA, $g_Tobjectifs, $g_Tressources, $_GET["mode"], $LFUNC, $BFUNC, $RESSOURCES ) ;
+$$l_ALPA = new OAlpa( $l_ALPA, $g_Tobjectifs, $g_Tressources, $_GET["mode"] ) ;
 
 // ---------------------------------------------------------------------------------------------- 
 // 2) APPEL DE LA FONCTION ELEMENTAIRE EN MODE D'APPRENTISSAGE "ALPA":"A" 
@@ -56,18 +57,83 @@ $$l_ALPA->serie_A( ) ;
 /* --------------------------------------  --------------------- -------------------------------------- */
 
 // AFFICHAGE DES ORDRES DE RESTITUTION 
-echo $$l_ALPA->affichage_serie_A_ordres( ) ;
+$BFUNC->show( $$l_ALPA->affichage_serie_A_ordres( ) ) ;
 //ou (si apres la methode serieA) : echo $$l_ALPA->p_Caffichage_serie_A ;
 
 
 // Resultats
-$BFUNC->printr( $$l_ALPA->p_Tresultats, $g_url ) ;
+$BFUNC->show( $$l_ALPA->p_Tresultats ) ;
 
 // Archives
-$BFUNC->printr( $RESSOURCES->p_Tarchives, $g_url ) ;
+$BFUNC->show( $RESSOURCES->p_Tarchives ) ;
 
 // Ressources
-$BFUNC->printr( $RESSOURCES->p_Tressources, $g_url ) ;
+$BFUNC->show( $RESSOURCES->p_Tressources ) ;
 
 
+
+/* TEST BDD -> NEW TABLE, DROP TABLE, NEW COLUMN*/ 
+/*
+$Ctab_nom = "bite" ;
+
+$newT = $BDD->tab_create( $Ctab_nom ) ;
+if ( $newT[0] ){ echo "TABLE CREE" ; }else{ echo "OUPS" ; } ;
+
+$newT = $BDD->tab_drop( "hello" ) ;
+if ( $newT[0] ){ echo "TABLE SUPPRIMEE" ; }else{ echo "OUPS" ; } ;
+
+$newT = $BDD->tab_show( ) ;
+if ( $newT[0] ){ $BFUNC->show( $newT ) ; }else{ echo "OUPS" ; } ;
+
+
+$newT = $BDD->col_show( $Ctab_nom ) ;
+if ( $newT[0] ){ $BFUNC->show( $newT ) ; }else{ echo "OUPS" ; } ;
+
+
+
+
+
+$newT = $BDD->col_show( $Ctab_nom ) ;
+if ( $newT[0] ){ $BFUNC->show( $newT ) ; }else{ echo "OUPS" ; } ;
+
+$l_var = "ee\"e" ;
+$l_type = $BFUNC->get_type( $l_var ) ;
+$BFUNC->show( $l_type["val"] ) ;
+echo "<br/>"; 
+
+$l_web = $BFUNC->validate_web("https://hello@)comozone.com") ;
+echo $l_web[0] ;
+echo "</br>" ;
+echo $l_web["val"] ;
+
+
+$newT = $BDD->col_show( "string" ) ;
+if ( $newT[0] ){ $BFUNC->show( $newT ) ; }else{ echo "OUPS" ; } ;
+
+$l_newRessource = $BDD->check_ressource(2.3) ;
+$BFUNC->show( $l_newRessource[0] ) ;
+
+$newT = $BDD->col_show( "string" ) ;
+if ( $newT[0] ){ $BFUNC->show( $newT ) ; }else{ echo "OUPS" ; } ;
+
+
+
+$newT = $BDD->check_ressource("string") ;
+echo $newT["err"] ;
+
+$CtabName  = "test2" ;
+$Ccol = "valeur" ;
+$CcolId = "Cid" ;
+$CcolObj = "objectif" ;
+$CcolMat = "matieres" ;
+$CcolOuts = "outils" ;
+$CcolSeq = "sequence" ;
+$CcolResult = "resultat" ;
+$CcolDist = "distance" ;
+$CcolRatio = "precision" ;
+$CcolDelais = "delais" ;
+$CcolCompt = "compteur" ;
+$l_newArchiveT = $BDD->tab_archive_A_create( $CtabName, $CcolId, $CcolObj, $CcolMat, $CcolOuts, $CcolSeq, $CcolResult, $CcolDist, $CcolRatio, $CcolDelais, $CcolCompt ) ;
+echo $l_newArchiveT["err"] ;
+*/
 // ---------------------------------------------------------------------------------------------- 

@@ -30,7 +30,7 @@ echo '
 <html lang="fr">
     <head>
         <title>IAM-JE-API</title>
-        <base href="' . $g_url . '">
+        <base href="' . $BFUNC->g_url . '">
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta http-equiv="content-type" content="text/html; charset=utf-8" />
@@ -44,7 +44,7 @@ echo '
         <!-- Humans -->
         <link rel="author" href="https://www.comozone.com/page-ourteam.txt"/>
         <!-- Page Canonique -->
-        <link rel="canonical" href="' . $g_url . $g_page . '" />
+        <link rel="canonical" href="' . $BFUNC->g_url . $g_page . '" />
         <!-- CSS FILES  --> 
         <link type="text/css" rel="stylesheet" href="' . $g_page_arbo . FOLD_CSS . 'chess.css" />
         <link type="text/css" rel="stylesheet" href="' . $g_page_arbo . FOLD_CSS . FOLD_SKINS . 'gnome-chess.css" /> 

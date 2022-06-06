@@ -23,7 +23,7 @@ $tErrMess["api"] = '<br>
 					<br/>
 					<br/>---
 					<br/><br/>
-					<br/><a href="' . $g_url . '" title="Retour au bercail"> Retour </a>
+					<br/><a href="' . $BFUNC->g_url . '" title="Retour au bercail"> Retour </a>
 					</p>';
 $tErrMess["form"] = '<br>
 					<br>---
@@ -33,7 +33,7 @@ $tErrMess["form"] = '<br>
 					<br/>
 					<br/>---
 					<br/><br/>
-					<br/><a href="' . $g_url . '" title="Retour au bercail"> Retour </a>
+					<br/><a href="' . $BFUNC->g_url . '" title="Retour au bercail"> Retour </a>
 					</p>';
 
 

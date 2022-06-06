@@ -95,14 +95,18 @@ class ORessources
 * @value : $this->p_Tarchives
 * @return : none
 */
-    function push_archive_A( $Tresultat )
+    function push_archive_A( $Tresultat  )
     {
-        $l_archive_exist = $this->check_archive_A($Tresultat) ;
+        global $BDD ;
+        
+        $l_archive_exist = $this->check_archive_A( $Tresultat ) ;
+        $l_archive_exist_BDD = $BDD->check_archive_A( $Tresultat ) ;
 
         // controle de l'existence similaire, sinon on enregistre
-        if ( !$l_archive_exist )
+        if ( ! $l_archive_exist and ! $l_archive_exist_BDD[0] )
         {
             array_push( $this->p_Tarchives, $Tresultat );
+            $BDD->push_archive_A($Tresultat, $l_archive_exist_BDD["val"]["tab"], $l_archive_exist_BDD["val"]["col"] ) ;
         }
 
     // fin push archive
@@ -148,13 +152,17 @@ class ORessources
 */
     function push_ressource( $resultat )
     {
+        global $BDD ;
 
-        $l_ressource_exist = $this->check_ressource($resultat) ;
+// on ne pourrait que checker dans la BDD !! XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+        $l_ressource_exist = $this->check_ressource( $resultat ) ;
+        $l_ressource_exist_BDD = $BDD->check_ressource( $resultat ) ;
 
         // controle de l'existence similaire, sinon on enregistre
-        if ( !$l_ressource_exist )
+        if ( ! $l_ressource_exist and  ! $l_ressource_exist_BDD[0]  )
         {
-            array_push( $this->p_Tressources, $resultat );
+            array_push( $this->p_Tressources, $resultat ) ;
+            $BDD->push_ressource( $resultat, $l_ressource_exist_BDD["val"]["tab"], $l_ressource_exist_BDD["val"]["col"] ) ;
         }
 
     // fin push ressources
@@ -172,17 +180,45 @@ class ORessources
 */
     function recherche_des_possibles( $objectifs )
     {
-        // nous allonsretourner un tableau contenant :
+        global $BDD ;
+        
+        //ce jeton permet de savoir si l'objectif est déjà connu en tant que ressource
+        $l_jeton = false ;
+
+        // nous allons retourner un tableau contenant :
         // 1) le resultat de l'aiguillage (boolleen)
         // Si vrai 
         // 2) le Tableau des possibles $l_Tpossibles 
         // Si faux on rajoute 
         // 3) le Tableau des différences $l_Tdifferences
         // 4) le Tableau des différences minimales $l_Tmin_diff
-     
-       $l_Treponse = array() ;
+        $l_Treponse = array() ;
 
-        if ( $this->check_ressource( $objectifs ) )
+        
+// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXxx
+// 999999999999999999999 a verifier pour mode WORK (check ressource in BDD) 
+// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXxx
+       // on check d'abord le calcul courant, si pas la ressource, on solicite les archives BDD
+        if ( ! $this->check_ressource( $objectifs ) )
+        {
+            // On sollicite la BDD
+            $l_TcheckBdd = $BDD->check_ressource( $objectifs ) ;
+            if ( $l_TcheckBdd[0] )
+            {
+                // On a trouvé la ressource
+                $l_jeton = true ;
+            }
+
+        }
+        else 
+        { 
+            // sinon, la ressource est dans le calcul courant
+             $l_jeton = true ;
+        }
+       
+
+
+        if ( $l_jeton == true  )
         {
             // la connaissance pour repondre à l'objectif demandé est déjà acquise
             $l_Treponse["acquis"] = true ;

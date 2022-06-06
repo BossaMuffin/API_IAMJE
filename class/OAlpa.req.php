@@ -33,23 +33,19 @@ class OAlpa
     public $g_Tobjectifs ;
     public $g_Tressources ;
     public $g_mode ;
-    public $g_BFUNC ;
-    public $g_LFUNC ;
-    public $g_RESSOURCES ;
 
 /* ---------------- CONSTRUCTEUR ----------------------------- 
-* @value : $g_CinstanceName, $T_objectifs, $T_ressources, $mode, $LFUNC, $BFUNC, $RESSOURCES
+* @value : $g_CinstanceName, $T_objectifs, $T_ressources, $mode
+* @Instance utilisée : $LFUNC, $BFUNC, $RESSOURCES
+* @Class utilisée : new OTresultat
 * @return : idem
 */
-    function __construct( $g_CinstanceName, $T_objectifs, $T_ressources, $mode, $LFUNC, $BFUNC, $RESSOURCES )
+    function __construct( $g_CinstanceName, $T_objectifs, $T_ressources, $mode )
     {       
         $this->g_CinstanceName = $g_CinstanceName ;
         $this->g_Tobjectifs = $T_objectifs ;
         $this->g_Tressources = $T_ressources ;
         $this->g_mode = $mode ;
-        $this->g_LFUNC = $LFUNC ;
-        $this->g_BFUNC = $BFUNC ;
-        $this->g_RESSOURCES = $RESSOURCES ;
     // fin construct 
     } 
     // ------------------------------------
@@ -87,12 +83,18 @@ class OAlpa
 /* ------------------------------------ ALPA ----------------------------------------------- 
 * FONCTION ELEMENTAIRE EN MODE D'APPRENTISSAGE "ALPA":"A" 
 * @param :
-* @value : $this->g_RESSOURCES->push_ressource( $l_resultat )
+* @value : $RESSOURCES->push_ressource( $l_resultat )
 * @return : table $l_Treponse
 */
 // reste à intégrer : 1) le mode 2) selection de l'outil 3) l'approche/distance de l'objectif
+// 999999999 XXXXXXXXx la sequence d'opération ecrite [matiere]a[outil]b[matiere] ... puis [m]a[o]b[m]... 
+// peux pôrter à confusion avec des "a" matiere ou "b" outil complexe pouvant présenter la suite de caracteres [m] et [o] XXXXXXXXXXXXXx  999999999999
     function A( $l_i_objectif, $g_i_id = "defo_id" )
     {
+        global $BDD ;
+        global $LFUNC ;
+        global $BFUNC ;
+        global $RESSOURCES ;
 
         // Initialisation des capteurs de performance
             // timestamp en millisecondes du début du script
@@ -106,7 +108,7 @@ class OAlpa
             $Coutils = $this->g_Tressources["outils"] ;
 
             // Identification de cette phase d'apprentissage
-            //$test = $this->g_BFUNC->genereCharKey();
+            //$test = $BFUNC->genereCharKey();
 
             // Initialisation du depart/base de calcul
             $l_resultat = $this->g_Tressources["matieres"] ;
@@ -119,7 +121,7 @@ class OAlpa
             // Initialisation du taux de precision minimum
             $l_precision = 0 ;
                 // sequence de calculs (chemin utilisé)
-            $l_sequence = '[matiere]' . $this->g_Tressources["matieres"] ;
+            $l_sequence = '[m]' . $this->g_Tressources["matieres"] ;
             if ( $this->g_Tobjectifs["objectif"][$l_i_objectif] != $this->g_Tressources["matieres"] )
             {
                 // Boucle de calcul pour approche/distance de l'obejctif demandé
@@ -130,11 +132,11 @@ class OAlpa
                     // incrementation du compteur à chaque passage dans le calcul
                     $l_compteur++ ;
                     // incrémentation de la sequence
-                    $l_sequence .= '[outil]' . $this->g_Tressources["outils"] . '[matiere]' . $this->g_Tressources["matieres"] ;
+                    $l_sequence .= '[o]' . $this->g_Tressources["outils"] . '[m]' . $this->g_Tressources["matieres"] ;
 
                     // lancement du calcul itératif 
-                    $l_resultat = $this->g_LFUNC->$Coutils($l_resultat, $this->g_Tressources["matieres"]) ;
-                    //$l_resultat = $this->g_LFUNC->addition($l_resultat, $this->g_Tressources["matieres"]) ;
+                    $l_resultat = $LFUNC->$Coutils($l_resultat, $this->g_Tressources["matieres"]) ;
+                    //$l_resultat = $LFUNC->addition($l_resultat, $this->g_Tressources["matieres"]) ;
                     //$l_resultat = addition( $l_resultat, $this->g_Tressources["matieres"] ) ;
 
                     // Controle de précision de calcul et de respect des contraintes
@@ -154,7 +156,7 @@ class OAlpa
             {
 
                 // incrémentation de la sequence
-                $l_sequence .= '[outil]' . $this->g_Tressources["outils"] . '[matiere]' . $this->g_Tressources["matieres"] ;
+                $l_sequence .= '[o]' . $this->g_Tressources["outils"] . '[m]' . $this->g_Tressources["matieres"] ;
 
                 // Controle de précision de calcul et de respect des contraintes
                     // Estimation de l'approche/distance à l'objectif 
@@ -179,7 +181,7 @@ class OAlpa
             
             // la table qui contiendra la chaine de calcul trouvé pour atteindre l'objectif demandé 
             // on implémente l'objectif au tableau de résultat
-            $l_RESULTAT = new OTresultat( $this->g_Tobjectifs["objectif"][$l_i_objectif], $this->g_BFUNC ) ;
+            $l_RESULTAT = new OTresultat( $this->g_Tobjectifs["objectif"][$l_i_objectif] ) ;
             // XXXXXXX 99999999999 créer des propriétés Tresultat par Valeur importante réutilisée partout ailleurs
             $l_Treponse = $this->formate_A( $l_RESULTAT, $l_Treponse, $g_i_id, $this->g_Tressources["matieres"], $this->g_Tressources["outils"] ) ;
               
@@ -187,8 +189,28 @@ class OAlpa
             // L'IA à atteint un nouveau résultat
             // Comme elle sait comment l'atteindre, elle le connait
             // Elle peut le compter parmi ses ressources comme une nouvelle ressource à exploiter
-            $this->g_RESSOURCES->push_ressource( $l_resultat ) ;
-            $this->g_RESSOURCES->push_archive_A( $l_Treponse->p_T ) ;
+            $RESSOURCES->push_ressource( $l_resultat ) ;
+            $RESSOURCES->push_archive_A( $l_Treponse->p_T ) ;
+
+// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXxx
+// 999999999999999999999 a verifier pour mode WORK (check ressource in BDD) 
+// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXxx
+
+            // enregistrement dans la base de donnée
+            $l_ressource_exist_BDD = $BDD->check_ressource( $l_resultat ) ;
+            // controle de l'existence similaire, sinon on enregistre
+            if ( ! $l_ressource_exist_BDD[0]  )
+            {
+                $BDD->push_ressource( $l_resultat, $l_ressource_exist_BDD["val"]["tab"], $l_ressource_exist_BDD["val"]["col"] ) ;
+            }
+
+            $l_archive_exist_BDD = $BDD->check_archive_A( $l_Treponse->p_T ) ;
+            // controle de l'existence similaire, sinon on enregistre
+            if ( ! $l_archive_exist_BDD[0] )
+            {
+                $BDD->push_archive_A($l_Treponse->p_T, $l_archive_exist_BDD["val"]["tab"], $l_archive_exist_BDD["val"]["col"] ) ;
+            }
+
             // retour du résultat       
             return $l_Treponse ;
            
@@ -205,7 +227,7 @@ class OAlpa
                
             // la table qui contiendra la chaine de calcul trouvé pour atteindre l'objectif demandé 
             // on implémente l'objectif au tableau de résultat
-            $l_RESULTAT = new OTresultat( $this->g_Tobjectifs["objectif"][$l_i_objectif], $this->g_BFUNC ) ;
+            $l_RESULTAT = new OTresultat( $this->g_Tobjectifs["objectif"][$l_i_objectif] ) ;
 
             // jeton de boucle while 
             $l_while_continue = true ;
@@ -221,11 +243,11 @@ class OAlpa
                 // En comparant l'objectif demandée aux ressources existantes
                 if ( $l_while_compteur == 1 )
                 {
-                    $g_Tpossibles = $this->g_RESSOURCES->recherche_des_possibles( $l_RESULTAT->p_T["objectif"]["value"] ) ;
+                    $g_Tpossibles = $RESSOURCES->recherche_des_possibles( $l_RESULTAT->p_T["objectif"]["value"] ) ;
                 }
                 else
                 {
-                    $g_Tpossibles = $this->g_RESSOURCES->recherche_des_possibles( $g_Tpossibles["relais"][0]["value"] ) ;
+                    $g_Tpossibles = $RESSOURCES->recherche_des_possibles( $g_Tpossibles["relais"][0]["value"] ) ;
                 }
 
             // -------------------- MEMORISATION DU CHEMIN DEJA PARCOURU DANS OTRESULTAT  XXXXXXXXXXXXXXXXXXXXXXXXXXXXXxxxx
@@ -253,8 +275,29 @@ class OAlpa
             // ENREGISTREMENT DES RESULTATS ET DES RESSOURCES DÉCOUVERTES  
             // on rend réutilisable
             // on enregistre le resultat atteint 
-            $this->g_RESSOURCES->push_ressource( $l_Treponse->p_T["resultat"]["value"] ) ;
-            $this->g_RESSOURCES->push_archive_A( $l_Treponse->p_T ) ;
+            $RESSOURCES->push_ressource( $l_Treponse->p_T["resultat"]["value"] ) ;
+            $RESSOURCES->push_archive_A( $l_Treponse->p_T ) ;
+
+// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXxx
+// 999999999999999999999 a verifier pour mode WORK (check ressource in BDD) 
+// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXxx
+
+            // enregistrement dans la base de donnée
+            $l_ressource_exist_BDD = $BDD->check_ressource( $l_resultat ) ;
+            // controle de l'existence similaire, sinon on enregistre
+            if ( ! $l_ressource_exist_BDD[0]  )
+            {
+                $BDD->push_ressource( $l_resultat, $l_ressource_exist_BDD["val"]["tab"], $l_ressource_exist_BDD["val"]["col"] ) ;
+            }
+
+            $l_archive_exist_BDD = $BDD->check_archive_A( $l_Treponse->p_T ) ;
+            // controle de l'existence similaire, sinon on enregistre
+            if ( ! $l_archive_exist_BDD[0] )
+            {
+                $BDD->push_archive_A($l_Treponse->p_T, $l_archive_exist_BDD["val"]["tab"], $l_archive_exist_BDD["val"]["col"] ) ;
+            }
+
+
             // retour du résultat       
             return $l_Treponse ;
         // Fin  WORK : TRAVAIL ALPA ----------------------------------   
@@ -319,7 +362,7 @@ class OAlpa
 /* --------------------------------SERIE A-------------------------------------------- 
 * Travail en serie de fonctions élémentaire en mode apprentissage "ALPA":"A" 
 * @param :
-* @value : $this->g_RESSOURCES->push_archive_A( $l_Treponse[$g_i_id], $g_i_id ) et $this->p_Tresultats
+* @value : $RESSOURCES->push_archive_A( $l_Treponse[$g_i_id], $g_i_id ) et $this->p_Tresultats
 * @return : none
 */
     function serie_A( )

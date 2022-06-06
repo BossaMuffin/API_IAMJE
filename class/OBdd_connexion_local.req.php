@@ -52,7 +52,7 @@ ou
 		// Accesseur BDD 
 		if($this->pdo === null){
 			try{ 
-				$pdo = new PDO('mysql:YOURHOST=localhost;dbname=YOURDB', 'root', 'PASSWORD', array(PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES UTF8'));
+				$pdo = new PDO('mysql:YOURHOST=localhost;dbname=YOURDB', 'root', 'PASSWORD' array(PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES UTF8'));
 				//die(PDO::ATTR_ERRMODE);
 				//Retour derreur syntaxe
 				$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);

@@ -23,18 +23,14 @@ class OTresultat
 // Propriétés
     // Tableau préformaté pour les résultat de calcul Alpa
     public $p_T = array() ;
-  
-// Var de construction
-    public $g_BFUNC ;
-
 
 
 
 /* ---------------- CONSTRUCTEUR ----------------------------- 
 * @value : $g_objectif, BFUNC
-* @return : $g_BFUNC, $p_T
+* @return : $p_T
 */
-    function __construct( $g_objectif, $BFUNC )
+    function __construct( $g_objectif)
     {       
         
         $this->p_T["id"] = "" ;
@@ -47,9 +43,6 @@ class OTresultat
         $this->p_T["datas"]["precision"] = 0 ;
         $this->p_T["datas"]["delais"] = 0 ;
         $this->p_T["datas"]["compteur"] = 0 ;
-        
-        // pour utiliser la classe de fonctions basiques
-        $this->g_BFUNC = $BFUNC ;
 
     // fin construct 
     } 

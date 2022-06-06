@@ -27,8 +27,11 @@ if ( ! isset( $OBfuncIncludeJeton )  )
 // permet d'aiguiller l'IA entre les différents serveurs
 if ( ! isset( $servIncludeJeton ) )
 {
+    // on initie la propriété g_url de BFUNC
     require_once( $g_page_arbo . FOLD_INC . 'route_serv.req.php' ) ;
 }
+
+
 
 // permet de charger les messages d'erreurs
 if ( ! isset( $messagesIncludeJeton ) )

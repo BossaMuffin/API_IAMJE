@@ -29,18 +29,18 @@ require_once( $g_page_arbo . FOLD_CLASS . 'OBaseFunctions.req.php' ) ;
 $BFUNC = new OBaseFunctions() ;
 //permet d'aiguiller l'IA entre les différents serveurs
 require_once( $g_page_arbo . FOLD_INC . 'route_serv.req.php' ) ;
+
 // permet d'aiguiller l'IA sur les différentes BDD
 require_once( $g_page_arbo . FOLD_INC . 'route_bdd.req.php' ) ;
 
 /* ------------------------------------------------------------------------------------------- */
-
 /* HEADER */
 echo '
 <!DOCTYPE html>
 <html lang="fr">
     <head>
         <title>IAM-JE</title>
-        <base href="' . $g_url . '">
+        <base href="' . $BFUNC->g_url . '">
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta http-equiv="content-type" content="text/html; charset=utf-8" />
@@ -54,7 +54,7 @@ echo '
         <!-- Humans -->
         <link rel="author" href="https://www.comozone.com/page-ourteam.txt"/>
         <!-- Page Canonique -->
-        <link rel="canonical" href="' . $g_url . $g_page . '" />
+        <link rel="canonical" href="' . $BFUNC->g_url . $g_page . '" />
         <!-- CSS FILES  --> 
         <link type="text/css" rel="stylesheet" href="' . $g_page_arbo . FOLD_CSS . 'chess.css" />
         <link type="text/css" rel="stylesheet" href="' . $g_page_arbo . FOLD_CSS . FOLD_SKINS . 'gnome-chess.css" /> 
@@ -84,7 +84,7 @@ echo "<h2> REPRÉSENTATION GRAPHIQUE </h2>" ;
 echo "<br/>" ;
 
 // Construction d'une grille horizontale pour la progression d'un piont graphique de 0 à Objectif 
-
+// Construction d'une grille horizontale pour la progression d'un piont graphique de 0 à Objectif 
 include($g_page_arbo . FOLD_INC . 'body-representation-graphique-1d.inc.php') ;
 
 echo "<br/><br/><b> FIN </b><br/><br/>" ;
