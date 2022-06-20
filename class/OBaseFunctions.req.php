@@ -187,16 +187,16 @@ class OBaseFunctions
 
   function validate_web( $c_var, $mode = "url" )
   {
-    $reponse["err"] = 0 ;
-    $reponse["val"] = "" ;
-    $reponse[0] = false ;
+    $l_Treponse["err"] = 0 ;
+    $l_Treponse["val"] = "" ;
+    $l_Treponse[0] = false ;
 
     if ( is_string( $c_var ) )
     {
 
-      $reponse["val"] = $c_var ;
+      $l_Treponse["val"] = $c_var ;
       // retirer les caractère étrange
-      // $reponse["val"] = trim($c_var, '!"#$%&\'()*+,-./@:;<=>[\\]^_`{|}~') ;
+      // $l_Treponse["val"] = trim($c_var, '!"#$%&\'()*+,-./@:;<=>[\\]^_`{|}~') ;
       // on definit si l'on cherche à valider un email ou une url web
       if ( $mode == "url" )
       {
@@ -215,25 +215,25 @@ class OBaseFunctions
 
         if ( empty( $l_string ) )
         {
-          $reponse[0] = true ;
+          $l_Treponse[0] = true ;
         }
         else 
         {
-          $reponse["err"] = 3 ;
+          $l_Treponse["err"] = 3 ;
         }
 
       } 
       else 
       {
-        $reponse["err"] = 2 ;
+        $l_Treponse["err"] = 2 ;
       }
     }
     else
     {
-      $reponse["err"] = 1 ;
+      $l_Treponse["err"] = 1 ;
     } 
    
-    return $reponse ;
+    return $l_Treponse ;
 
   // fin validate_web  
   }
@@ -260,14 +260,16 @@ class OBaseFunctions
   function get_type( $var )
   {
 
-    $reponse["err"] = 0 ;
-    $reponse["val"] = "" ;
-    $reponse["subval"] = "" ;
-    $reponse[0] = false ;
+    $l_Treponse["err"] = 0 ;
+    $l_Treponse["val"] = "" ;
+    $l_Treponse["subval"] = "" ;
+    $l_Treponse[0] = false ;
 
     $l_type = gettype( $var ) ;
+   
+    $l_Treponse["val"] = $l_type ;
+    $l_Treponse["subval"] = $l_type ;
 
-    
     if ( $l_type == "string" )
     {
       if ( ! is_numeric($var) )
@@ -275,33 +277,41 @@ class OBaseFunctions
         
         if ( $this->validate_web( $var, "mail" ) )
         {
-          $reponse["subval"] = $this->p_Ttypes[6]["name"] ;
+          $l_Treponse["subval"] = $this->p_Ttypes[6]["name"] ;
           // c'est un email calssique type nom@domaine.ext
         }
         else if ( $this->validate_web( $var ) )
         {
-          $reponse["subval"] = $this->p_Ttypes[6]["name"] ;
+          $l_Treponse["subval"] = $this->p_Ttypes[6]["name"] ;
           // c'est une adresse web qui peut être très complexe
         }
 
       }
       else
-      {//9999999999999999999  XXXXXXXXXXXXXXXXXXXXx
+      {
         // ATTENTION : en fait il n'est pas toujours DOUBLE OU FLOTTANT, 
         // cela permet juste d'identifier une donnée du type "78" au lieu de 78
-        // il faudrait faire en sorte qu'elle distingue les entiers flottant double ... 
+        // il faut faire en sorte qu'elle distingue les entiers ou flottant ou double ... 
         // même sous forme de chaine de caractère (entre guillement) car récupérer d'un "explode" depuis les GET 
-        //999999999999999999999999999
-        $l_type = "double" ;
+        
+        $l_type_expl = explode( ".", $var ) ;
+
+        if ( isset( $l_type_expl[1] ) )
+        {
+          $l_type = "double" ;
+        }
+        else
+        {
+          $l_type = "integer" ;
+        }
+
+        $l_Treponse["subval"] = $l_type ;
+
       }
       
     }   
-   
 
-    $reponse["val"] = $l_type ;
-    $reponse["subval"] = $l_type ;
-
-    return  $reponse ;
+    return  $l_Treponse ;
 
   // fin get type
   }

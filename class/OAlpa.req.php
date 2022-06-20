@@ -283,11 +283,11 @@ class OAlpa
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXxx
 
             // enregistrement dans la base de donnée
-            $l_ressource_exist_BDD = $BDD->check_ressource( $l_resultat ) ;
+            $l_ressource_exist_BDD = $BDD->check_ressource( $l_Treponse->p_T["resultat"]["value"] ) ;
             // controle de l'existence similaire, sinon on enregistre
             if ( ! $l_ressource_exist_BDD[0]  )
             {
-                $BDD->push_ressource( $l_resultat, $l_ressource_exist_BDD["val"]["tab"], $l_ressource_exist_BDD["val"]["col"] ) ;
+                $BDD->push_ressource( $l_Treponse->p_T["resultat"]["value"], $l_ressource_exist_BDD["val"]["tab"], $l_ressource_exist_BDD["val"]["col"] ) ;
             }
 
             $l_archive_exist_BDD = $BDD->check_archive_A( $l_Treponse->p_T ) ;
