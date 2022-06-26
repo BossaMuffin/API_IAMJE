@@ -21,9 +21,10 @@ class ORessources
 {
 
 // Propriétés
-    public $p_Tressources = array();
-    public $p_Tarchives = array();
-
+    public $p_Tressources = array() ;
+    public $p_Tarchives = array() ;
+    public $p_Tpossibles = array() ; // XXXX
+    public $p_Tarchives_BDD = array() ; // XXX
 // Var de construction
     //public $g_BFUNC ;
 /* ---------------- CONSTRUCTEUR ----------------------------- 
@@ -106,7 +107,7 @@ class ORessources
         if ( ! $l_archive_exist and ! $l_archive_exist_BDD[0] )
         {
             array_push( $this->p_Tarchives, $Tresultat );
-            $BDD->push_archive_A($Tresultat, $l_archive_exist_BDD["val"]["tab"], $l_archive_exist_BDD["val"]["col"] ) ;
+            $BDD->push_archive_A($Tresultat, $l_archive_exist_BDD["val"]["tab"] ) ;
         }
 
     // fin push archive
@@ -162,7 +163,7 @@ class ORessources
         if ( ! $l_ressource_exist and  ! $l_ressource_exist_BDD[0]  )
         {
             array_push( $this->p_Tressources, $resultat ) ;
-            $BDD->push_ressource( $resultat, $l_ressource_exist_BDD["val"]["tab"], $l_ressource_exist_BDD["val"]["col"] ) ;
+            $BDD->push_ressource( $resultat, $l_ressource_exist_BDD["val"]["tab"] ) ;
         }
 
     // fin push ressources
@@ -240,27 +241,28 @@ class ORessources
     // l'archive est en BDD-----------------------------------------
                 // on recupere toutes les archives qui ont l'objectif pour resultat
                 $l_Tarchives_BDD = $BDD->get_archives_A_good( $objectifs ) ;
-                $l_Tressource = array() ;
+
+                $l_Tarchives = array() ;
 
                 foreach ( $l_Tarchives_BDD["val"] as $l_key => $l_Tarchive_BDD ) 
                 {
 // TROUVER UN MOYEN DE MODELISER/GENERALISER LA CONVERSION
                     $l_Tarchive_BDD = (array)$l_Tarchive_BDD;
-                    $l_Tressource["id"]                   = $l_Tarchive_BDD[$BDD->p_Tprefixes["cpx"] . "id"] ; 
-                    $l_Tressource["objectif"]["value"]    = $l_Tarchive_BDD[$BDD->p_Tprefixes["cpx"] . "objectif"] ; 
-                    $l_Tressource["matieres"]["value"]    = $l_Tarchive_BDD[$BDD->p_Tprefixes["cpx"] . "matieres"] ; 
-                    $l_Tressource["outils"]["value"]      = $l_Tarchive_BDD[$BDD->p_Tprefixes["cpx"] . "outils"] ;
-                    $l_Tressource["sequence"]["value"]    = $l_Tarchive_BDD[$BDD->p_Tprefixes["cpx"] . "sequence"] ;
-                    $l_Tressource["resultat"]["value"]    = $l_Tarchive_BDD[$BDD->p_Tprefixes["cpx"] . "resultat"] ;
-                    $l_Tressource["datas"]["distance"]    = $l_Tarchive_BDD[$BDD->p_Tprefixes["cpx"] . "distance"] ;
-                    $l_Tressource["datas"]["precision"]   = $l_Tarchive_BDD[$BDD->p_Tprefixes["cpx"] . "precision"] ;
-                    $l_Tressource["datas"]["delais"]      = $l_Tarchive_BDD[$BDD->p_Tprefixes["cpx"] . "delais"] ;
-                    $l_Tressource["datas"]["compteur"]    = $l_Tarchive_BDD[$BDD->p_Tprefixes["cpx"] . "compteur"] ;
+                    $l_Tarchives[$l_key]["id"]                   = $l_Tarchive_BDD[$BDD->p_Tcol["arch"]["id"]] ; 
+                    $l_Tarchives[$l_key]["objectif"]["value"]    = $l_Tarchive_BDD[$BDD->p_Tcol["arch"]["obj"]] ; 
+                    $l_Tarchives[$l_key]["matieres"]["value"]    = $l_Tarchive_BDD[$BDD->p_Tcol["arch"]["mat"]] ; 
+                    $l_Tarchives[$l_key]["outils"]["value"]      = $l_Tarchive_BDD[$BDD->p_Tcol["arch"]["outs"]] ;
+                    $l_Tarchives[$l_key]["sequence"]["value"]    = $l_Tarchive_BDD[$BDD->p_Tcol["arch"]["seq"]] ;
+                    $l_Tarchives[$l_key]["resultat"]["value"]    = $l_Tarchive_BDD[$BDD->p_Tcol["arch"]["result"]] ;
+                    $l_Tarchives[$l_key]["datas"]["distance"]    = $l_Tarchive_BDD[$BDD->p_Tcol["arch"]["dist"]] ;
+                    $l_Tarchives[$l_key]["datas"]["precision"]   = $l_Tarchive_BDD[$BDD->p_Tcol["arch"]["ratio"]] ;
+                    $l_Tarchives[$l_key]["datas"]["delais"]      = $l_Tarchive_BDD[$BDD->p_Tcol["arch"]["delais"]] ;
+                    $l_Tarchives[$l_key]["datas"]["compteur"]    = $l_Tarchive_BDD[$BDD->p_Tcol["arch"]["compt"]] ;
 
                     $l_Tmin_diff[$l_i]["value"] = $objectifs ;
                     $l_Tmin_diff[$l_i]["key"] = $l_key ;
 
-                    array_push($l_Tpossibles, $l_Tressource) ;
+                    array_push($l_Tpossibles, $l_Tarchives[$l_key]) ;
                     $l_i++ ;
                     
                 }
@@ -270,14 +272,14 @@ class ORessources
             {
     // l'archive est en live -----------------------------------------------
 
-                foreach ( $this->p_Tarchives as $l_key => $l_Tressource ) 
+                foreach ( $this->p_Tarchives as $l_key => $l_Tarchive ) 
                 {
                     // Pour mémoire
-                    if ( $l_Tressource["resultat"]["value"] == $objectifs ) 
+                    if ( $l_Tarchive["resultat"]["value"] == $objectifs ) 
                     {
                         $l_Tmin_diff[$l_i]["value"] = $objectifs ;
                         $l_Tmin_diff[$l_i]["key"] = $l_key ;
-                        array_push($l_Tpossibles, $l_Tressource) ;
+                        array_push($l_Tpossibles, $l_Tarchive) ;
                         $l_i++ ;
                     }
                     // $p_Tarchives[$l_i_id]["matieres"]["value"] = $Tresultats["matieres"]["value"] 
@@ -291,7 +293,7 @@ class ORessources
                 }
 
             }
-            
+
             $l_Treponse["differences"] = array() ;
             $l_Treponse["relais"] = $l_Tmin_diff ;
             $l_Treponse["possibles"] = $l_Tpossibles ;
@@ -306,55 +308,46 @@ class ORessources
             $l_Tpossibles = array() ;
             $l_Tdifferences = array() ;
 
-            $l_i = 0 ;
-
  // l'archive est en BDD-----------------------------------------
             // on recupere toutes les archives qui ont l'objectif pour resultat
             $l_Tarchives_BDD = $BDD->get_archives_A_all( $objectifs ) ;
             $l_Tressource = array() ;
 
+
+            $l_i = 0 ;
+            $jeton_init = false ;
+            
             foreach ( $l_Tarchives_BDD["val"] as $l_key => $l_Tarchive_BDD ) 
             {
 // TROUVER UN MOYEN DE MODELISER/GENERALISER LA CONVERSION
                 $l_Tarchive_BDD = (array)$l_Tarchive_BDD;
-                $l_Tarchives[$l_i]["id"]                   = $l_Tarchive_BDD[$BDD->p_Tprefixes["cpx"] . "id"] ; 
-                $l_Tarchives[$l_i]["objectif"]["value"]    = $l_Tarchive_BDD[$BDD->p_Tprefixes["cpx"] . "objectif"] ; 
-                $l_Tarchives[$l_i]["matieres"]["value"]    = $l_Tarchive_BDD[$BDD->p_Tprefixes["cpx"] . "matieres"] ; 
-                $l_Tarchives[$l_i]["outils"]["value"]      = $l_Tarchive_BDD[$BDD->p_Tprefixes["cpx"] . "outils"] ;
-                $l_Tarchives[$l_i]["sequence"]["value"]    = $l_Tarchive_BDD[$BDD->p_Tprefixes["cpx"] . "sequence"] ;
-                $l_Tarchives[$l_i]["resultat"]["value"]    = $l_Tarchive_BDD[$BDD->p_Tprefixes["cpx"] . "resultat"] ;
-                $l_Tarchives[$l_i]["datas"]["distance"]    = $l_Tarchive_BDD[$BDD->p_Tprefixes["cpx"] . "distance"] ;
-                $l_Tarchives[$l_i]["datas"]["precision"]   = $l_Tarchive_BDD[$BDD->p_Tprefixes["cpx"] . "precision"] ;
-                $l_Tarchives[$l_i]["datas"]["delais"]      = $l_Tarchive_BDD[$BDD->p_Tprefixes["cpx"] . "delais"] ;
-                $l_Tarchives[$l_i]["datas"]["compteur"]    = $l_Tarchive_BDD[$BDD->p_Tprefixes["cpx"] . "compteur"] ;
-
-                $l_i++ ;
+                $l_Tarchives[$l_key]["id"]                   = $l_Tarchive_BDD[$BDD->p_Tcol["arch"]["id"]] ; 
+                $l_Tarchives[$l_key]["objectif"]["value"]    = $l_Tarchive_BDD[$BDD->p_Tcol["arch"]["obj"]] ; 
+                $l_Tarchives[$l_key]["matieres"]["value"]    = $l_Tarchive_BDD[$BDD->p_Tcol["arch"]["mat"]] ; 
+                $l_Tarchives[$l_key]["outils"]["value"]      = $l_Tarchive_BDD[$BDD->p_Tcol["arch"]["outs"]] ;
+                $l_Tarchives[$l_key]["sequence"]["value"]    = $l_Tarchive_BDD[$BDD->p_Tcol["arch"]["seq"]] ;
+                $l_Tarchives[$l_key]["resultat"]["value"]    = $l_Tarchive_BDD[$BDD->p_Tcol["arch"]["result"]] ;
+                $l_Tarchives[$l_key]["datas"]["distance"]    = $l_Tarchive_BDD[$BDD->p_Tcol["arch"]["dist"]] ;
+                $l_Tarchives[$l_key]["datas"]["precision"]   = $l_Tarchive_BDD[$BDD->p_Tcol["arch"]["ratio"]] ;
+                $l_Tarchives[$l_key]["datas"]["delais"]      = $l_Tarchive_BDD[$BDD->p_Tcol["arch"]["delais"]] ;
+                $l_Tarchives[$l_key]["datas"]["compteur"]    = $l_Tarchive_BDD[$BDD->p_Tcol["arch"]["compt"]] ;
                 
-            }
-            
-
-            $l_Tmin_diff[$l_i]["value"] = abs( $l_Tarchives[0]["objectif"]["value"] - $objectifs ) ;
-            $l_Tmin_diff[$l_i]["key"] = 0 ;
-            
-            // Pour mémoire
-                // on compare tous les objectifs déjà atteints avec l'objectif demandé et on prend le plus proche
-                // à adapter a chaque forme de ressource ...
-
-            foreach ( $l_Tarchives as $l_key => $l_Tressource ) 
-            {
+    // Pour mémoire
+        // on compare tous les objectifs déjà atteints avec l'objectif demandé et on prend le plus proche
+        // à adapter a chaque forme de ressource ...
                 // ADAPTER LE TYPE DE COMPARAISON AVEC LE TYPE DE DONNÉES COMPARÉES XXXXXXXXXXX
                 // CHOISIR ENTRE LA COMPARAISON AUX OBJECTIFS DEMANDÉS OU AUX RÉSULTATS ATEINTS
-                //$l_Tdifferences[$l_key] =  $objectifs - $l_Tressource["objectif"]["value"];
-                $l_Tdifferences[$l_key] =  $objectifs - $l_Tressource["resultat"]["value"];
+                //$l_Tdifferences[$l_key] =  $objectifs - $l_Trarchive["objectif"]["value"];
+                $l_Tdifferences[$l_key] =  $objectifs - $l_Tarchives[$l_key]["resultat"]["value"] ;
                 // ------------------------------------------------------------------------    
-
-                if ( $l_key == 0 )
+                if ( ! $jeton_init )
                 {
                 // initialisation pour 0 
                     $l_Tmin_diff[$l_i]["value"] = $l_Tdifferences[$l_key] ;
                     $l_Tmin_diff[$l_i]["key"] = $l_key ;
+                    $jeton_init = true ;
                 }
-                else if ( $l_key > 0 )
+                else 
                 {
                 // on range les différences les plus petites avec la clé de ressource dans un tableau
                     // Si la valeur suivante est plus petite que la valeur la plus petite enregistré (par defaut, key=0)
@@ -382,6 +375,11 @@ class ORessources
 
 
             }
+            // xxxxx
+            //    $l_Tmin_diff[$l_i]["value"] = abs( $l_Tarchives[0]["objectif"]["value"] - $objectifs ) ;
+            //   $l_Tmin_diff[$l_i]["key"] = 0 ;    
+            
+
             // Ensuite on récupère dans les archives toutes les données de calcul ALPA correspondant aux plus petites différences
             // on les range dans $l_Tpossibles 
             foreach ( $l_Tmin_diff as $l_i => $l_min_diff ) 

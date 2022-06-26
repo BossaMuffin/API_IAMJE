@@ -45,7 +45,10 @@ class OBdd extends OBdd_connexion
     						"mat" 	=> "R_",
     						"arch" 	=> "A_",
     						"outs" 	=> "O_"	] ;
+    public $p_Tcol = array() ;						
 // constantes
+
+	private $CLIENT_KEY_ID = "coz-IAMJE-001" ;
 
 
 /* ---------------- CONSTRUCTEUR ----------------------------- 
@@ -55,6 +58,23 @@ class OBdd extends OBdd_connexion
     function __CONSTRUCT( )
     {
         parent::__CONSTRUCT( ) ;
+
+        $this->p_Tcol["all"]["client_key"] = $this->p_Tprefixes["cpx"] . "client_key" ;
+
+        $this->p_Tcol["arch"]["id"] 		= $this->p_Tprefixes["cpx"] . "id" ;
+		$this->p_Tcol["arch"]["obj"] 		= $this->p_Tprefixes["cpx"] . "objectif" ;
+		$this->p_Tcol["arch"]["mat"] 		= $this->p_Tprefixes["cpx"] . "matieres" ;
+		$this->p_Tcol["arch"]["outs"] 		= $this->p_Tprefixes["cpx"] . "outils" ;
+		$this->p_Tcol["arch"]["seq"] 		= $this->p_Tprefixes["cpx"] . "sequence" ;
+		$this->p_Tcol["arch"]["result"] 	= $this->p_Tprefixes["cpx"] . "resultat" ;
+		$this->p_Tcol["arch"]["dist"] 		= $this->p_Tprefixes["cpx"] . "distance" ;
+		$this->p_Tcol["arch"]["ratio"] 		= $this->p_Tprefixes["cpx"] . "precision" ;
+		$this->p_Tcol["arch"]["delais"] 	= $this->p_Tprefixes["cpx"] . "delais" ;
+		$this->p_Tcol["arch"]["compt"] 		= $this->p_Tprefixes["cpx"] . "compteur" ;
+		
+
+		$this->p_Tcol["ress"]["valeur"] 	= $this->p_Tprefixes["cpx"] . "valeur" ;
+
 	} // fin construct
 
 
@@ -97,13 +117,12 @@ class OBdd extends OBdd_connexion
 */
 	function tab_show() 
 	{
-		global $BDD;
 
 		$l_Treponse["err"] = 0 ;
 		$l_Treponse["val"] = array() ;
 		$l_Treponse[0] = false ;
 
-		if ( $req = $BDD->demande( 'SHOW TABLES' ) )
+		if ( $req = $this->demande( 'SHOW TABLES' ) )
 		{
 			$l_Treponse[0] = true ;
 			$l_Treponse["val"] = $req->fetchAll(PDO::FETCH_COLUMN) ;
@@ -126,13 +145,12 @@ class OBdd extends OBdd_connexion
 */
 	function col_show( $Ctab_nom ) 
 	{
-		global $BDD;
 
 		$l_Treponse["err"] = 0 ;
 		$l_Treponse["val"] = array() ;
 		$l_Treponse[0] = false ;
 
-		if ( $req = $BDD->demande( 'SHOW COLUMNS FROM ' . $Ctab_nom ) )
+		if ( $req = $this->demande( 'SHOW COLUMNS FROM ' . $Ctab_nom ) )
 		{
 			$l_Treponse[0] = true ;
 			$l_Treponse["val"] = $req->fetchAll(PDO::FETCH_COLUMN) ;
@@ -156,7 +174,6 @@ class OBdd extends OBdd_connexion
 */
 	function tab_create( $Ctab_nom ) 
 	{
-		global $BDD ;
 
 		$l_Treponse["err"] = 0 ;
 		$l_Treponse["val"] = "void" ;
@@ -167,7 +184,7 @@ class OBdd extends OBdd_connexion
 		if ( ! in_array( $Ctab_nom, $Tnoms["val"] ) )
 		{
 			// on ne crée la table que si le nom est disponnible
-			if ( $req = $BDD->demande( 'CREATE TABLE ' . $Ctab_nom . ' ( id INT NOT NULL AUTO_INCREMENT PRIMARY KEY )' ) )
+			if ( $req = $this->demande( 'CREATE TABLE ' . $Ctab_nom . ' ( id INT NOT NULL AUTO_INCREMENT PRIMARY KEY )' ) )
 			{
 				$l_Treponse[0] = true ;
 			}
@@ -196,7 +213,6 @@ class OBdd extends OBdd_connexion
 */
 	function tab_drop( $Ctab_nom ) 
 	{
-		global $BDD ;
 
 		$l_Treponse["err"] = 0 ;
 		$l_Treponse["val"] = "void" ;
@@ -207,7 +223,7 @@ class OBdd extends OBdd_connexion
 		if ( in_array( $Ctab_nom, $Tnoms["val"] ) )
 		{
 			// on ne detruit la table que si le nom existe
-			if ( $req = $BDD->demande( 'DROP TABLE ' . $Ctab_nom ) )
+			if ( $req = $this->demande( 'DROP TABLE ' . $Ctab_nom ) )
 			{
 				$l_Treponse[0] = true ;
 			}
@@ -281,7 +297,6 @@ class OBdd extends OBdd_connexion
 */
 	function tab_add_col( $Ctab_nom, $Ccol_nom, $Ccol_type, $Ntype_size ) 
 	{
-		global $BDD ;
 
 		$l_Treponse["err"] = 0 ;
 		$l_Treponse["val"] = "void" ;
@@ -301,7 +316,7 @@ class OBdd extends OBdd_connexion
 				if ( $l_Ccoltype[0] )
 				{
 					// on ne cree la colonne que si le nom est disponnible
-					if ( $req = $BDD->demande( 'ALTER TABLE ' . $Ctab_nom . ' ADD ' . $Ccol_nom . ' ' . $l_Ccoltype["val"] ) )
+					if ( $req = $this->demande( 'ALTER TABLE ' . $Ctab_nom . ' ADD ' . $Ccol_nom . ' ' . $l_Ccoltype["val"] ) )
 					{
 						$l_Treponse[0] = true ;
 					}
@@ -334,6 +349,67 @@ class OBdd extends OBdd_connexion
 	}
 	// ------------------------------------
 
+/* ADD CLIENT KEY COLONNE --------------------------- ADD CLIENT KEY COLONNE
+ * requete
+ @Param: le nom de la table à modifier, la colonne client_key à ajouter, le type de colone, la taille du champs
+ @Return: $l_Treponse[0] = temoin ; $l_Treponse["val"] = ""
+*/
+	function tab_add_col_client_key( $Ctab_nom ) 
+	{
+		global $BFUNC ;
+
+		$l_Treponse["err"] = 0 ;
+		$l_Treponse["val"] = "void" ;
+		$l_Treponse[0] = false ;
+
+		// on check si une table existe avec ce nom
+		$Tnoms = $this->tab_show( ) ;
+		if ( in_array( $Ctab_nom, $Tnoms["val"] ) )
+		{
+
+			// on check si une colonne existe avec ce nom
+			$Tnoms = $this->col_show( $Ctab_nom ) ;
+			if ( ! in_array( $this->p_Tcol["all"]["client_key"], $Tnoms["val"] ) )
+			{
+				// on construit le type du champs pour la nouvelle colonne (check si le type existe)
+				$l_Ccoltype = $this->build_type( $BFUNC->p_Ttypes[4]["bdd"], $BFUNC->p_Ttypes[4]["size"] ) ;
+				if ( $l_Ccoltype[0] )
+				{
+					// on ne cree la colonne que si le nom est disponnible
+					if ( $req = $this->demande( 'ALTER TABLE ' . $Ctab_nom . ' ADD ' . $this->p_Tcol["all"]["client_key"] . ' ' . $l_Ccoltype["val"] ) )
+					{
+						$l_Treponse[0] = true ;
+					}
+					else
+					{
+						$l_Treponse["err"] = 4 ;
+					}
+
+				}
+				else
+				{
+					$l_Treponse["err"] = 3 ;
+				}
+
+			}
+			else
+			{
+				$l_Treponse["err"] = 2 ;
+			}
+
+		}
+		else
+		{
+			$l_Treponse["err"] = 1 ;
+		}
+
+		return $l_Treponse ;
+
+	// Fin ADD COL TABLE
+	}
+	// ------------------------------------
+
+
 // ------------------------------------------------------------------------------------------
 // -------------------------------------- RESSOURCES -----------------------------------------
 // ------------------------------------------------------------------------------------------
@@ -347,20 +423,19 @@ class OBdd extends OBdd_connexion
  * la colonne et la table
  @Return: $l_Treponse[0] = temoin ; $l_Treponse["val"] = "void"
 */
-	function tab_ressource_create( $CtabName, $Ccol )
+	function tab_ressource_create( $CtabName )
 	{
-		global $BDD ;
 		global $BFUNC ;
 
-		$BDD->tab_create( $CtabName ) ;
+		$this->tab_create( $CtabName ) ;
 
 		$l_Treponse["err"] = 0 ;
 		$l_Treponse["val"] = "void" ;
 		$l_Treponse[0] = false ;
 		// on check si une colonne existe avec ce nom
-		$Tcols = $BDD->col_show( $CtabName ) ;
+		$Tcols = $this->col_show( $CtabName ) ;
 
-		if ( ! in_array( $Ccol, $Tcols["val"] ) )
+		if ( ! in_array( $this->p_Tcol["ress"]["valeur"], $Tcols["val"] ) )
 		{
 			// on recupere le type SQL equivalent au type de la ressource
 			foreach ($BFUNC->p_Ttypes as $key => $Ttype) 
@@ -373,10 +448,12 @@ class OBdd extends OBdd_connexion
 			}
 			// $Ctab_nom, $Ccol_nom, $Ccol_type, $Ntype_size 
 			// on crée un champ "ressource" si besoin pour enregistrer la ressource 
-			$l_TnewCol = $BDD->tab_add_col( $CtabName, $Ccol, $l_Ccol_type, $l_Ntype_size ) ;
-			
-			if ( ! $l_TnewCol[0]  )
+			$l_TnewCol = $this->tab_add_col( $CtabName, $this->p_Tcol["ress"]["valeur"], $l_Ccol_type, $l_Ntype_size ) ;
+			$l_TnewCol_key = $this->tab_add_col_client_key( $CtabName ) ;
+
+			if ( ! $l_TnewCol[0] and ! $l_TnewCol_key[0]  )
 			{
+
 				$l_Treponse[0] = true ;
 				// propriété $BDD qui garde en memoire le check + create table colonne
 				array_push( $this->p_TnewTressources, $CtabName ) ;
@@ -403,10 +480,7 @@ class OBdd extends OBdd_connexion
 
 	function check_ressource( $ressource ) 
 	{
-		global $BDD ;
 		global $BFUNC ;
-
-		$l_Ccol = $this->p_Tprefixes["cpx"] . "valeur" ;
 
 		$l_Treponse["err"] = 0 ;
 		$l_Treponse["val"]["tab"] = "" ;
@@ -416,34 +490,36 @@ class OBdd extends OBdd_connexion
 		// on  recupere le type de la ressource à enregistrer
 		// ATTENTION AU TYPE EXOTIQUE (NON SCALABLE -> une type SQL "none" !!!!!!!!!! )   XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXxxxx
 		$l_Ttype = $BFUNC->get_type( $ressource ) ; 
-		
+		 
 		// on cree une table spécifique à ce type de ressource s'il elle n'existe pas déjà
 		$l_CtabName = $this->p_Tprefixes["mat"] . $l_Ttype["subval"] ;
 		
 		$l_Treponse["val"]["tab"] = $l_CtabName ;
-		$l_Treponse["val"]["col"] = $l_Ccol ;
+
+// echo $ressource . " type : " . $l_Ttype["val"] . "-> " . $l_Ttype["subval"] . " err : " . $l_Ttype["err"] . " tabName :" . $l_CtabName ;
 
 		// propriété $BDD qui garde en memoire le check + create table colonne
 		if ( ! in_array( $l_CtabName, $this->p_TnewTressources ) )
 		{
 			// le type de $ressource est analysé, une table et les colonne sont crées si besoin
-			$BDD->tab_ressource_create( $l_CtabName, $l_Ccol ) ;	
+			$this->tab_ressource_create( $l_CtabName ) ;	
 		}
 		
 
 		// VERIF dans la base 
-		if( $l_Oreq = $BDD->demande( 'SELECT id
+		if ( $l_Oreq = $this->demande( 'SELECT id
 						FROM ' . $l_CtabName . ' 
-						WHERE ' . $l_Ccol .' ="' . $ressource . '"' )  )
+						WHERE ' . $this->p_Tcol["ress"]["valeur"] . 	' ="' . $ressource . '"
+						AND ' . $this->p_Tcol["all"]["client_key"] . 	' ="' . $this->CLIENT_KEY_ID . '"' )  )
 		{
 
-			$l_Tr = array();
+			//$l_Tr = array();
 			$l_i_doublon = 0 ;
 
-			while ($l_Od = $l_Oreq->fetch(PDO::FETCH_OBJ)){
+			while ( $l_Od = $l_Oreq->fetch(PDO::FETCH_OBJ ) ) 
+			{
 				$l_i_doublon++;
-				$l_Tr[$l_i_doublon]['id'] = $l_Od->id ;
-
+				//$l_Tr[$l_i_doublon]['id'] = $l_Od->id ;
 			}
 
 			if ( $l_i_doublon == 1 or $l_i_doublon > 1 )
@@ -480,16 +556,17 @@ class OBdd extends OBdd_connexion
  @Return: $l_Treponse[0] = temoin ; $l_Treponse["val"] = "void"
 */
 
-	function push_ressource( $ressource, $tab, $col ) 
+	function push_ressource( $ressource, $tab ) 
 	{
-		global $BDD ;
 		global $BFUNC ;
 
 		$l_Treponse["err"] = 0 ;
 		$l_Treponse["val"] = "void" ;
 		$l_Treponse[0] = false ;
 
-		if ( $BDD->demande( 'INSERT INTO ' . $tab . ' (' . $col . ') VALUES (' . $ressource . ')' ) )
+		if ( $this->demande( 'INSERT INTO ' . $tab . ' 
+										(' . $this->p_Tcol["ress"]["valeur"] . ', ' . $this->p_Tcol["all"]["client_key"] . ') 
+										VALUES ("' . $ressource . '", "' . $this->CLIENT_KEY_ID . '")' ) )
 		{
 			$l_Treponse[0] = true ;
 		}
@@ -520,9 +597,8 @@ class OBdd extends OBdd_connexion
 */
 
  // XXXX 9999999999999999999 FAIRE EN SORTE QUE LE TYPE SOIT DETERMINÉ EN FONCTION DE LA DONN2E A ENREGISTREE -> TEST A FAIRE SUR L'ARCHIVE EN AMONT !!!!!
- function tab_archive_A_create( $CtabName, $Tcol )
+ function tab_archive_A_create( $CtabName )
 	{
-		global $BDD ;
 		global $BFUNC ;
 
 		$l_jeton = true ;
@@ -531,35 +607,35 @@ class OBdd extends OBdd_connexion
 		$l_Treponse["val"] = "void" ;
 		$l_Treponse[0] = false ;
 
-		$l_TnewTab = $BDD->tab_create( $CtabName ) ;
+		$l_TnewTab = $this->tab_create( $CtabName ) ;
 		if ( ! $l_TnewTab[0] )
 		{
 			$l_jeton = false ;
 			$l_Treponse["err"] = 1 ;
 		}
 		
-		$l_TnewCol = $BDD->tab_add_col( $CtabName, $Tcol["id"], "VARCHAR", 255 ) ;
+		$l_TnewCol = $this->tab_add_col( $CtabName, $this->p_Tcol["arch"]["id"], $BFUNC->p_Ttypes[4]["bdd"], $BFUNC->p_Ttypes[4]["size"] ) ;
 		if ( ! $l_TnewCol[0] )
 		{
 			$l_jeton = false ;
 			$l_Treponse["err"] = 2 ;
 		}
 
-		$l_TnewCol = $BDD->tab_add_col( $CtabName, $Tcol["obj"], "FLOAT", 0 ) ;
+		$l_TnewCol = $this->tab_add_col( $CtabName, $this->p_Tcol["arch"]["obj"], $BFUNC->p_Ttypes[3]["bdd"], 0 ) ;
 		if ( ! $l_TnewCol[0] )
 		{
 			$l_jeton = false ;
 			$l_Treponse["err"] = 3 ;
 		}
 
-		$l_TnewCol = $BDD->tab_add_col( $CtabName, $Tcol["mat"], "FLOAT", 0 ) ;
+		$l_TnewCol = $this->tab_add_col( $CtabName, $this->p_Tcol["arch"]["mat"], $BFUNC->p_Ttypes[3]["bdd"], 0 ) ;
 		if ( ! $l_TnewCol[0] )
 		{
 			$l_jeton = false ;
 			$l_Treponse["err"] = 4 ;
 		}
 
-		$l_TnewCol = $BDD->tab_add_col( $CtabName, $Tcol["outs"], "VARCHAR", 40 ) ;
+		$l_TnewCol = $this->tab_add_col( $CtabName, $this->p_Tcol["arch"]["outs"], $BFUNC->p_Ttypes[4]["bdd"], 40 ) ;
 		if ( ! $l_TnewCol[0] )
 		{
 			$l_jeton = false ;
@@ -567,47 +643,55 @@ class OBdd extends OBdd_connexion
 		}
 // 999999999999999999999  ATTENTION : la taille de la donnée grandit vite, mieux vaux un texte ou tinytext 
 		// ... mais "text" n'est pas compris par la méthode build type  ------------  99999999999 XXXXXXXXXx
-		$l_TnewCol = $BDD->tab_add_col( $CtabName, $Tcol["seq"], "VARCHAR", 255 ) ;
+		$l_TnewCol = $this->tab_add_col( $CtabName, $this->p_Tcol["arch"]["seq"], $BFUNC->p_Ttypes[4]["bdd"], $BFUNC->p_Ttypes[4]["size"] ) ;
 		if ( ! $l_TnewCol[0] )
 		{
 			$l_jeton = false ;
 			$l_Treponse["err"] = 6 ;
 		}
 
-		$l_TnewCol = $BDD->tab_add_col( $CtabName, $Tcol["result"], "FLOAT", 0 ) ;
+		$l_TnewCol = $this->tab_add_col( $CtabName, $this->p_Tcol["arch"]["result"], $BFUNC->p_Ttypes[3]["bdd"], 0 ) ;
 		if ( ! $l_TnewCol[0] )
 		{
 			$l_jeton = false ;
 			$l_Treponse["err"] = 7 ;
 		}
 
-		$l_TnewCol = $BDD->tab_add_col( $CtabName, $Tcol["dist"], "FLOAT", 0 ) ;
+		$l_TnewCol = $this->tab_add_col( $CtabName, $this->p_Tcol["arch"]["dist"], $BFUNC->p_Ttypes[3]["bdd"], 0 ) ;
 		if ( ! $l_TnewCol[0] )
 		{
 			$l_jeton = false ;
 			$l_Treponse["err"] = 8 ;
 		}
 
-		$l_TnewCol = $BDD->tab_add_col( $CtabName, $Tcol["ratio"], "FLOAT", 0 ) ;
+		$l_TnewCol = $this->tab_add_col( $CtabName, $this->p_Tcol["arch"]["ratio"], $BFUNC->p_Ttypes[3]["bdd"], 0 ) ;
 		if ( ! $l_TnewCol[0] )
 		{
 			$l_jeton = false ;
 			$l_Treponse["err"] = 9 ;
 		}
 
-		$l_TnewCol = $BDD->tab_add_col( $CtabName, $Tcol["delais"], "FLOAT", 0 ) ;
+		$l_TnewCol = $this->tab_add_col( $CtabName, $this->p_Tcol["arch"]["delais"], $BFUNC->p_Ttypes[3]["bdd"], 0 ) ;
 		if ( ! $l_TnewCol[0] )
 		{
 			$l_jeton = false ;
 			$l_Treponse["err"] = 10 ;
 		}
 
-		$l_TnewCol = $BDD->tab_add_col( $CtabName, $Tcol["compt"], "INT", 0 ) ;
+		$l_TnewCol = $this->tab_add_col( $CtabName, $this->p_Tcol["arch"]["compt"], $BFUNC->p_Ttypes[2]["bdd"], 0 ) ;
 		if ( ! $l_TnewCol[0] )
 		{
 			$l_jeton = false ;
 			$l_Treponse["err"] = 11 ;
 		}
+
+		$l_TnewCol = $this->tab_add_col_client_key( $CtabName ) ;
+		if ( ! $l_TnewCol[0] )
+		{
+			$l_jeton = false ;
+			$l_Treponse["err"] = 12 ;
+		}
+
 
 		if ( $l_jeton  )
 		{
@@ -615,6 +699,9 @@ class OBdd extends OBdd_connexion
 			// propriété $BDD qui garde en memoire le check + create table colonne
 			array_push( $this->p_TnewTarchives, $CtabName ) ;
 		}
+
+
+
 
 		return $l_Treponse ;
 
@@ -631,23 +718,11 @@ class OBdd extends OBdd_connexion
 
 	function check_archive_A( $Tarchive ) 
 	{
-		global $BDD ;
 		global $BFUNC ;
-
-		$l_Tcol["id"] = $this->p_Tprefixes["cpx"] . "id" ;
-		$l_Tcol["obj"] = $this->p_Tprefixes["cpx"] . "objectif" ;
-		$l_Tcol["mat"] = $this->p_Tprefixes["cpx"] . "matieres" ;
-		$l_Tcol["outs"] = $this->p_Tprefixes["cpx"] . "outils" ;
-		$l_Tcol["seq"] = $this->p_Tprefixes["cpx"] . "sequence" ;
-		$l_Tcol["result"] = $this->p_Tprefixes["cpx"] . "resultat" ;
-		$l_Tcol["dist"] = $this->p_Tprefixes["cpx"] . "distance" ;
-		$l_Tcol["ratio"] = $this->p_Tprefixes["cpx"] . "precision" ;
-		$l_Tcol["delais"] = $this->p_Tprefixes["cpx"] . "delais" ;
-		$l_Tcol["compt"] = $this->p_Tprefixes["cpx"] . "compteur" ;
 
 		$l_Treponse["err"] = 0 ;
 		$l_Treponse["val"]["tab"] = "" ;
-		$l_Treponse["val"]["col"] = "" ;		
+		
 		$l_Treponse[0] = false ;
 
 		// on  recupere le type de la ressource à enregistrer
@@ -658,33 +733,33 @@ class OBdd extends OBdd_connexion
 		$l_CtabName = $this->p_Tprefixes["arch"] . $l_Ttype["subval"] ;
 		
 		$l_Treponse["val"]["tab"] = $l_CtabName ;
-		$l_Treponse["val"]["col"] = $l_Tcol ;
 
 		// propriété $BDD qui garde en memoire le check + create table colonne
 		if ( ! in_array( $l_CtabName, $this->p_TnewTarchives ) )
 		{
 			// le type de $Tarchive["objectif"]["value"] est analysé, une table et les colonnes sont crées si besoin
-			$new = $BDD->tab_archive_A_create( $l_CtabName, $l_Tcol  ) ;	
+			$new = $this->tab_archive_A_create( $l_CtabName ) ;	
 		}
 
 		// VERIF dans la base 
-		if( $l_Oreq = $BDD->demande( 'SELECT id
+		if ( $l_Oreq = $this->demande( 'SELECT id
 						FROM ' . $l_CtabName . ' 
-						WHERE ' . $l_Tcol["obj"]  .	  ' ="' . $Tarchive["objectif"]["value"] . '" 
-						AND ' 	. $l_Tcol["mat"] .	  ' ="' . $Tarchive["matieres"]["value"][0] . '"
-						AND '	. $l_Tcol["outs"] .	  ' ="' . $Tarchive["outils"]["value"][0] . '"
-						AND '	. $l_Tcol["seq"] .	  ' ="' . $Tarchive["sequence"]["value"] . '"
-						AND '	. $l_Tcol["result"] . ' ="' . $Tarchive["resultat"]["value"] . '"'
+						WHERE ' . $this->p_Tcol["arch"]["obj"]  .		' ="' . $Tarchive["objectif"]["value"] . '" 
+						AND ' 	. $this->p_Tcol["arch"]["mat"] .		' ="' . $Tarchive["matieres"]["value"][0] . '"
+						AND '	. $this->p_Tcol["arch"]["outs"] .		' ="' . $Tarchive["outils"]["value"][0] . '"
+						AND '	. $this->p_Tcol["arch"]["seq"] .	 	' ="' . $Tarchive["sequence"]["value"] . '"
+						AND '	. $this->p_Tcol["arch"]["result"] . 	' ="' . $Tarchive["resultat"]["value"] . '"
+						AND '	. $this->p_Tcol["all"]["client_key"] . ' ="' . $this->CLIENT_KEY_ID . '"'
 						)  )
 		{
-
-			$l_Tr = array();
+				
+			//$l_Tr = array();
 			$l_i_doublon = 0 ;
 
-			while ($l_Od = $l_Oreq->fetch(PDO::FETCH_OBJ)){
+			while ( $l_Od = $l_Oreq->fetch(PDO::FETCH_OBJ ) )
+			{
 				$l_i_doublon++;
-				$l_Tr[$l_i_doublon]['id'] = $l_Od->id ;
-
+				//$l_Tr[$l_i_doublon]['id'] = $l_Od->id ;
 			}
 
 			if ( $l_i_doublon == 1 or $l_i_doublon > 1 )
@@ -694,15 +769,17 @@ class OBdd extends OBdd_connexion
 				// on pourra enregistrer la ressource
 				if ( $l_i_doublon == 1 )
 				{
-					$l_Treponse["err"] = 3 ;
+					$l_Treponse["err"] = 4 ;
 				}
 				else if ( $l_i_doublon > 1 )
 				{
-					$l_Treponse["err"] = 2 ;
+					$l_Treponse["err"] = 3 ;
 				}
 			}
-			
-
+			else
+			{
+				$l_Treponse["err"] = 2 ;
+			}
 		}
 		else
 		{
@@ -723,17 +800,16 @@ class OBdd extends OBdd_connexion
  @Return: $l_Treponse[0] = temoin ; $l_Treponse["val"] = "void"
 */
 
-	function push_archive_A( $Tarchive, $tab, $Tcol ) 
+	function push_archive_A( $Tarchive, $tab ) 
 	{
-		global $BDD ;
 		global $BFUNC ;
 
 		$l_Treponse["err"] = 0 ;
 		$l_Treponse["val"] = "void" ;
 		$l_Treponse[0] = false ;
 // ATTENTION LORSQUE LES DONNEES A ENREGISTRER SONT EN VARCHAR OU EN INT IL FAUT METTRE OU ENLEVER LES GUILLEMET, LE MIEUX SERAIT D4ENREGITRER TOUT EN VARCHAR ET D'ASSOCIER LE TYPE AVEC LA DONNEE !!!  999999999999999999
-		if ( $BDD->demande( 'INSERT INTO ' . $tab . ' (' . $Tcol["id"] . ', '. $Tcol["obj"] . ', ' . $Tcol["mat"] . ', ' . $Tcol["outs"] . ', ' . $Tcol["seq"] . ', ' . $Tcol["result"] . ', ' . $Tcol["dist"] . ', ' . $Tcol["ratio"] . ', ' . $Tcol["delais"] . ', ' . $Tcol["compt"] . ') 
-							VALUES ("' . $Tarchive["id"] . '", ' . $Tarchive["objectif"]["value"] . ', ' . $Tarchive["matieres"]["value"][0] . ', "' . $Tarchive["outils"]["value"][0] . '", "' . $Tarchive["sequence"]["value"] . '", ' . $Tarchive["resultat"]["value"] . ', ' . $Tarchive["datas"]["distance"] . ', ' . $Tarchive["datas"]["precision"] . ', ' . $Tarchive["datas"]["delais"] . ', ' . $Tarchive["datas"]["compteur"] . ')' ) )
+		if ( $this->demande( 'INSERT INTO ' . $tab . ' (' . $this->p_Tcol["arch"]["id"] . ', '. $this->p_Tcol["arch"]["obj"] . ', ' . $this->p_Tcol["arch"]["mat"] . ', ' . $this->p_Tcol["arch"]["outs"] . ', ' . $this->p_Tcol["arch"]["seq"] . ', ' . $this->p_Tcol["arch"]["result"] . ', ' . $this->p_Tcol["arch"]["dist"] . ', ' . $this->p_Tcol["arch"]["ratio"] . ', ' . $this->p_Tcol["arch"]["delais"] . ', ' . $this->p_Tcol["arch"]["compt"] . ', ' . $this->p_Tcol["all"]["client_key"] . ') 
+							VALUES ("' . $Tarchive["id"] . '", "' . $Tarchive["objectif"]["value"] . '", "' . $Tarchive["matieres"]["value"][0] . '", "' . $Tarchive["outils"]["value"][0] . '", "' . $Tarchive["sequence"]["value"] . '", "' . $Tarchive["resultat"]["value"] . '", ' . $Tarchive["datas"]["distance"] . ', ' . $Tarchive["datas"]["precision"] . ', ' . $Tarchive["datas"]["delais"] . ', ' . $Tarchive["datas"]["compteur"] . ', "' . $this->CLIENT_KEY_ID . '")' ) )
 		{
 			$l_Treponse[0] = true ;
 		}
@@ -773,8 +849,9 @@ class OBdd extends OBdd_connexion
         // VERIF dans la base 
         if ( $req = $this->demande( 'SELECT *
                         FROM ' . $l_CtabName . ' 
-                        WHERE ' . $this->p_Tprefixes["cpx"] . 'resultat="' . $objectif . '" 
-                        ORDER BY ' . $this->p_Tprefixes["cpx"] . 'delais' ) )
+                        WHERE ' . $this->p_Tcol["arch"]["result"] .		' ="' . $objectif . '" 
+                        AND '	. $this->p_Tcol["all"]["client_key"] .	' ="' . $this->CLIENT_KEY_ID . '"
+                        ORDER BY ' . $this->p_Tcol["arch"]["delais"] ) )
         {
         	$l_Treponse[0] = true ;
         	$l_i = 0 ;
@@ -828,7 +905,8 @@ class OBdd extends OBdd_connexion
         // VERIF dans la base 
         if ( $req = $this->demande( 'SELECT *
                         FROM ' . $l_CtabName . ' 
-                        ORDER BY ' . $this->p_Tprefixes["cpx"] . 'delais' ) )
+                        WHERE '	. $this->p_Tcol["all"]["client_key"] . ' ="' . $this->CLIENT_KEY_ID . '"
+                        ORDER BY ' . $this->p_Tcol["arch"]["delais"] ) )
         {
         	$l_Treponse[0] = true ;
         	$l_i = 0 ;

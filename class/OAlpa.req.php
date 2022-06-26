@@ -189,27 +189,11 @@ class OAlpa
             // L'IA à atteint un nouveau résultat
             // Comme elle sait comment l'atteindre, elle le connait
             // Elle peut le compter parmi ses ressources comme une nouvelle ressource à exploiter
+
+            // enregistrement dans la base de donnée et en live
+            // controle de l'existence similaire, sinon on enregistre
             $RESSOURCES->push_ressource( $l_resultat ) ;
             $RESSOURCES->push_archive_A( $l_Treponse->p_T ) ;
-
-// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXxx
-// 999999999999999999999 a verifier pour mode WORK (check ressource in BDD) 
-// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXxx
-
-            // enregistrement dans la base de donnée
-            $l_ressource_exist_BDD = $BDD->check_ressource( $l_resultat ) ;
-            // controle de l'existence similaire, sinon on enregistre
-            if ( ! $l_ressource_exist_BDD[0]  )
-            {
-                $BDD->push_ressource( $l_resultat, $l_ressource_exist_BDD["val"]["tab"], $l_ressource_exist_BDD["val"]["col"] ) ;
-            }
-
-            $l_archive_exist_BDD = $BDD->check_archive_A( $l_Treponse->p_T ) ;
-            // controle de l'existence similaire, sinon on enregistre
-            if ( ! $l_archive_exist_BDD[0] )
-            {
-                $BDD->push_archive_A($l_Treponse->p_T, $l_archive_exist_BDD["val"]["tab"], $l_archive_exist_BDD["val"]["col"] ) ;
-            }
 
             // retour du résultat       
             return $l_Treponse ;
@@ -232,7 +216,7 @@ class OAlpa
             // jeton de boucle while 
             $l_while_continue = true ;
             $l_while_compteur = 0 ;
-
+// XXXXXXXXXXXXXXXXXXXXXXXXX 9999999999999999 ATTENTION A LA DIVERGENCE !!!!!!!!!!!!!!!!!!!!!!!!
             while ( $l_while_continue 
                     and  ( ( abs( 1 - abs( $l_RESULTAT->p_T["datas"]["precision"] ) ) > ( 1 - $this->g_Tobjectifs["precision"] ) ) 
                         or $l_RESULTAT->p_T["datas"]["distance"] <= $g_Tobjectifs["distance"] )
@@ -255,7 +239,6 @@ class OAlpa
 
                 $l_Treponse = $this->formate_A( $l_RESULTAT, $g_Tpossibles["possibles"][0], $g_Tpossibles["possibles"][0]["id"], $g_Tpossibles["possibles"][0]["matieres"]["value"], $g_Tpossibles["possibles"][0]["outils"]["value"] ) ;
               
-
                 if ( $g_Tpossibles["acquis"] )
                 {
                     $l_while_continue = false ;
@@ -275,27 +258,11 @@ class OAlpa
             // ENREGISTREMENT DES RESULTATS ET DES RESSOURCES DÉCOUVERTES  
             // on rend réutilisable
             // on enregistre le resultat atteint 
+
+            // enregistrement dans la base de donnée et en live
+            // controle de l'existence similaire, sinon on enregistre
             $RESSOURCES->push_ressource( $l_Treponse->p_T["resultat"]["value"] ) ;
             $RESSOURCES->push_archive_A( $l_Treponse->p_T ) ;
-
-// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXxx
-// 999999999999999999999 a verifier pour mode WORK (check ressource in BDD) 
-// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXxx
-
-            // enregistrement dans la base de donnée
-            $l_ressource_exist_BDD = $BDD->check_ressource( $l_Treponse->p_T["resultat"]["value"] ) ;
-            // controle de l'existence similaire, sinon on enregistre
-            if ( ! $l_ressource_exist_BDD[0]  )
-            {
-                $BDD->push_ressource( $l_Treponse->p_T["resultat"]["value"], $l_ressource_exist_BDD["val"]["tab"], $l_ressource_exist_BDD["val"]["col"] ) ;
-            }
-
-            $l_archive_exist_BDD = $BDD->check_archive_A( $l_Treponse->p_T ) ;
-            // controle de l'existence similaire, sinon on enregistre
-            if ( ! $l_archive_exist_BDD[0] )
-            {
-                $BDD->push_archive_A($l_Treponse->p_T, $l_archive_exist_BDD["val"]["tab"], $l_archive_exist_BDD["val"]["col"] ) ;
-            }
 
 
             // retour du résultat       
