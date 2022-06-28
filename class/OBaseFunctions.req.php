@@ -68,14 +68,35 @@ class OBaseFunctions
                         9 => [  "name"  => "resource", 
                                 "bdd"   => "none",
                                 "size"  => 0 ],
+                        10 => [ "name"  => "timestamp", 
+                                "bdd"   => "TIMESTAMP",
+                                "size"  => 0 ],
+                        11 => [ "name"  => "boolean", 
+                                "bdd"   => "BOOL",
+                                "size"  => 1 ],
+                        12 => [ "name"  => "text", 
+                                "bdd"   => "TEXT",
+                                "size"  => 0 ]
                       ] ;
+
+  // tableau qui contiendra la trace des erreurs de chaque fonction appelée
+  public $p_Terreurs = array() ;
+  // variable qui indique si on doit enregistrer la trâce des erreurs des fonctions appelées (par défaut, on garde la trâce)
+  public $p_BdevModeRun = true ;
+  // affiche le mode développement
+  public $p_BdevModeShow ;
+
 
 /* ---------------- CONSTRUCTEUR ----------------------------- 
 * @value : none
 * @return : none
 */
-  function  __construct( )
+  function  __construct( $B_DEVMODESHOW, $B_DEVMODERUN = true )
   {
+
+    $this->p_BdevModeRun = $B_DEVMODERUN ;
+    $this->p_BdevModeShow = $B_DEVMODESHOW ;
+
   // fin construct
   }
   // ------------------------------------
@@ -104,6 +125,43 @@ class OBaseFunctions
   // Fin define url
   }
   // ------------------------------------
+
+
+/* --------- DEV MODE -------------------------------------------------------- 
+* Permet d'ajouter à la propriété  p_Terreurs le retour d'erreur d'un fonction appelée
+* @param 
+*       $err = l_Treponses["err"] ; 
+*       $Cmethode = __METHOD__ ; 
+*       $Ntabulation = le nombre de tabulation pour faciliter la lecture du tableau p_Terreurs ;
+* @return charge le retour d'erreur dans le tableau p_Terreurs propriété de BFUNC
+*/
+  function dev_mode( $Cmethod, $err )
+  {
+      // cette chaine contiendra le nombre de tabulation php "&#9" suffisantes par ligne 
+      // (en fonction de la longueur du nom de la methode) pour faciliter la lecture du tableau
+          $Ctabulation = "" ;
+
+      if ( $this->p_BdevModeRun )
+      {
+        if ( is_string( $Cmethod ) and isset( $err["id"] ) and isset( $err["com"] ) )
+        {
+          // on charge les erreurs dans la propriété qui permettra de les restituer en mode DEV
+          $l_T["method"] = $Cmethod ;
+          $l_T["id"] = $err["id"] ;
+          $l_T["com"] = $err["com"] ;
+
+          array_push( $this->p_Terreurs, $l_T ) ;
+
+        }
+
+      }
+
+  // fin dev_mode
+  }
+  // ------------------------------------
+
+
+
 
 /* --------- SHOW VAR -------------------------------------------------------- 
 * Permet soit un echo pour une var scalable, soit l'appelle de la méthode printr si c'est une var non scalable 
@@ -178,61 +236,126 @@ class OBaseFunctions
   }
   // ------------------------------------
 
+
 /* -------------------------------------- VALIDATE WEB : EMAIL ou URL  --------------------------- 
 * valide une url (par defo) ou un email, en fonction de mode (url ou mail)
 * @param : une chaine de caractere ressemblant à un email ou une url
 * @value : none
-* @return : boolean ++
+* @return : bool de resussite (mail ou url) + val (le type mail ou url) + subval (true si le domaine est valide) 
 */
-
-  function validate_web( $c_var, $mode = "url" )
+  function validate_web( $c_var, $option = false )
   {
-    $l_Treponse["err"] = 0 ;
-    $l_Treponse["val"] = "" ;
+    $l_Treponse["err"] = array( "id" => "0", "com" => "" ) ;
+    $l_Treponse["val"] = "" ; 
+    $l_Treponse["subval"] = false ; // le domaine de l'url n'est pas validé
     $l_Treponse[0] = false ;
 
-    if ( is_string( $c_var ) )
+    if ( ! empty( $c_var ) )
     {
-
-      $l_Treponse["val"] = $c_var ;
-      // retirer les caractère étrange
-      // $l_Treponse["val"] = trim($c_var, '!"#$%&\'()*+,-./@:;<=>[\\]^_`{|}~') ;
-      // on definit si l'on cherche à valider un email ou une url web
-      if ( $mode == "url" )
+      if ( is_string( $c_var ) )
       {
-        // on  definit le regex URL (traite 99% des cas, y compris les email, le ftp, https, les connexions, les sous dossiers, sous domaines, variables get ...)
-        $l_regex = '_^(?:(?:https?|ftp)://)(?:\S+(?::\S*)?@)?(?:(?!10(?:\.\d{1,3}){3})(?!127(?:\.\d{1,3}){3})(?!169\.254(?:\.\d{1,3}){2})(?!192\.168(?:\.\d{1,3}){2})(?!172\.(?:1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2})(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z\x{00a1}-\x{ffff}0-9]+-?)*[a-z\x{00a1}-\x{ffff}0-9]+)(?:\.(?:[a-z\x{00a1}-\x{ffff}0-9]+-?)*[a-z\x{00a1}-\x{ffff}0-9]+)*(?:\.(?:[a-z\x{00a1}-\x{ffff}]{2,})))(?::\d{2,5})?(?:/[^\s]*)?$_iuS' ;
-      } 
-      else 
-      {
-        // on  definit le regex EMAIL
-        $l_regex = '_^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)?$_iuS' ;
-      }
-      
-      if ( $c_var != '' ) 
-      { 
-        $l_string = preg_replace( $l_regex, '', $c_var ) ;
-
-        if ( empty( $l_string ) )
+        $l_Cfiltre = array(); 
+        // on filtre sur les url
+        $l_Cfiltre["url"] = filter_var( $c_var, FILTER_VALIDATE_URL ) ;
+        // on filtre sur les email
+        $l_Cfiltre["mail"] = filter_var( $c_var, FILTER_VALIDATE_EMAIL ) ;
+        
+        if ( $l_Cfiltre["mail"] != false )
         {
+          // le filtre mail est ok
+          $l_Treponse["val"] = $this->p_Ttypes[5]["name"] ;
           $l_Treponse[0] = true ;
         }
         else 
         {
-          $l_Treponse["err"] = 3 ;
-        }
+          if ( $l_Cfiltre["url"] != false )
+          {
+            // le filtre url est ok
+            $l_Treponse["val"] = $this->p_Ttypes[6]["name"] ;
+            $l_Treponse[0] = true ;
+          }
+          else 
+          {
+            // auncun des filtres 'url ou mail n'a fonctionné
+            $l_Treponse["err"]["id"] = "3" ;
+          }
+        } // fin des filtres email et url 
 
-      } 
-      else 
-      {
-        $l_Treponse["err"] = 2 ;
+        if ( $l_Treponse[0] )
+        {
+          
+          if ( phpversion() >= 7 )
+          {
+            // les filtres ont fonctionné, on va tester le domaine
+            
+            // si l'option est activée, on filtre les domaines selon les règles HOSTNAME :
+            // commence par un caractère alphanumberic et contenir uniquement des caractères alphanumériques ou des traits d'union
+            if ( $option )
+            {
+              $l_Cfiltre["domain"] = filter_var( $c_var, FILTER_VALIDATE_DOMAIN ) ;
+            }
+            else
+            {
+              $l_Cfiltre["domain"] = filter_var( $c_var, FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOSTNAME ) ;
+            }
+      
+            // on filtre le domaine
+            if ( $l_Cfiltre["domain"] != false )
+            {
+              // le domaine est ok selon le filtre ( norme RFC 1034, RFC 1035, RFC 952, RFC 1123, RFC 2732, RFC 2181 et RFC 1123)
+              $l_Treponse["subval"] = true ;        
+            } 
+          }
+          else
+          {
+            // si c'est un mail
+            if ( $l_Treponse["val"] == $this->p_Ttypes[5]["name"] )
+            {
+              // Regex de nom de domaine
+              // $l_regex = '^([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,6}$' ;
+              // $l_string = preg_replace( $l_regex, '', $c_var ) ;
+              //if(empty($l_string)){$l_Treponse[0]=true;}
+              $l_TurlGet = explode( "@", $c_var ) ;
+
+              if ( isset( $l_TurlGet[1] ) )
+              {
+                // on a recupereé la partie domain.com du mail
+                $l_Treponse["subval"] = checkdnsrr( $l_TurlGet[1] , "A") ;
+              }
+              else 
+              {
+                $l_Treponse["err"]["id"] = "3" ;
+              }
+
+            }
+            else
+            {
+              // c'est une url 
+              $l_Chostname = parse_url( $c_var, PHP_URL_HOST ) ;
+              // on a recupereé la partie domain.com du mail
+              $l_Treponse["subval"] = checkdnsrr( $l_Chostname , "A") ;
+            }
+            
+          }
+
+
+        } // du filtre domaine
+        
       }
+      else
+      {
+        $l_Treponse["err"]["id"] = "2" ;
+      } 
     }
     else
     {
-      $l_Treponse["err"] = 1 ;
+      $l_Treponse["err"]["id"] = "1" ;
     } 
-   
+
+   // on charge les erreurs dans la propriété qui permettra de les restituer en mode DEV
+    $this->dev_mode( __METHOD__, $l_Treponse["err"] ) ;
+
+    // on charge la reponse à retourner
     return $l_Treponse ;
 
   // fin validate_web  
@@ -257,10 +380,10 @@ class OBaseFunctions
 * "NULL"
 * "unknown type"
 */
-  function get_type( $var )
+  function get_type( $var, $option = false )
   {
 
-    $l_Treponse["err"] = 0 ;
+    $l_Treponse["err"] = array( "id" => "0", "com" => "" ) ;
     $l_Treponse["val"] = "" ;
     $l_Treponse["subval"] = "" ;
     $l_Treponse[0] = false ;
@@ -274,24 +397,20 @@ class OBaseFunctions
     {
       if ( ! is_numeric($var) )
       {
+        $l_TfiltreWeb = $this->validate_web( $var, $option ) ;
         
-        if ( $this->validate_web( $var, "mail" ) )
+        if ( $l_TfiltreWeb[0] )
         {
-          $l_Treponse["subval"] = $this->p_Ttypes[6]["name"] ;
-          // c'est un email calssique type nom@domaine.ext
+          $l_Treponse["subval"] = $l_TfiltreWeb["val"] ;
+          // c'est un email ou une url
         }
-        else if ( $this->validate_web( $var ) )
-        {
-          $l_Treponse["subval"] = $this->p_Ttypes[6]["name"] ;
-          // c'est une adresse web qui peut être très complexe
-        }
-
+        
       }
       else
       {
-        // ATTENTION : en fait il n'est pas toujours DOUBLE OU FLOTTANT, 
-        // cela permet juste d'identifier une donnée du type "78" au lieu de 78
-        // il faut faire en sorte qu'elle distingue les entiers ou flottant ou double ... 
+        // ATTENTION : pas toujours DOUBLE OU FLOTTANT, 
+        // identifie une donnée du type "78" au lieu de 78
+        // distingue les entiers ou flottant ou double ... 
         // même sous forme de chaine de caractère (entre guillement) car récupérer d'un "explode" depuis les GET 
         
         $l_type_expl = explode( ".", $var ) ;
@@ -311,6 +430,10 @@ class OBaseFunctions
       
     }   
 
+   // on charge les erreurs dans la propriété qui permettra de les restituer en mode DEV
+    $this->dev_mode( __METHOD__, $l_Treponse["err"] ) ;
+
+    // on charge la reponse à retourner
     return  $l_Treponse ;
 
   // fin get type
@@ -377,7 +500,7 @@ et [erreur]
   function genereCharKey( $len = self::KEYMAX ) 
   {
     $l_Treponse[0] = false ;
-    $l_Treponse['erreur'] = 0 ;
+    $l_Treponse["err"] = array( "id" => "0", "com" => "" ) ; ;
 
     $l_Treponse["value"] = "" ;
     $l_i_car = 0 ;
@@ -452,6 +575,12 @@ et [erreur]
       $l_car = $l_newcar ;
     }
     $l_Treponse[0] = true ;
+    
+
+    // on charge les erreurs dans la propriété qui permettra de les restituer en mode DEV
+    $this->dev_mode( __METHOD__, $l_Treponse["err"] ) ;
+
+    // on charge la reponse à retourner
     return $l_Treponse;
 
   // fin genere char key

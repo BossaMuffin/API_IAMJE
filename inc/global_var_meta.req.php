@@ -14,6 +14,28 @@ $metaIncludeJeton = true ;
 //  ------------------------------   VARIABLES META GLOBALES -->
 const HTPROT = "http://" ;
 
+// --------------------------------    MODE DEV  ----->
+// les variables de mode développement
+
+// permet d'activer le mode d'enregistrement des erreurs
+	// doit on trâcer les erreurs ? par defaut on garde la trâce
+$B_DEVMODERUN = true ;
+	
+if ( isset( $_GET["err"] ) && ! empty( $_GET["err"] ) && strlen( $_GET["err"] ) <= 5 ) 
+{
+    $B_DEVMODERUN = filter_var( $_GET["err"], FILTER_VALIDATE_BOOLEAN ) ;
+}
+
+
+// permet d'afficher la trace des erreurs des fonctions appelées
+	// doit on afficher la trâce des erreurs ? par defaut on ne l'affiche pas
+$B_DEVMODESHOW = false ;
+	
+if ( isset( $_GET["dev"] ) && ! empty( $_GET["dev"] ) && strlen( $_GET["dev"] ) <= 5 ) 
+{
+    $B_DEVMODESHOW = filter_var( $_GET["dev"], FILTER_VALIDATE_BOOLEAN ) ;
+}
+// --------   Fin MODE DEV  ----->
 
 
 /* MAIN FOLDERS */

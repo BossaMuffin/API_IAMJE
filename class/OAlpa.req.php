@@ -24,8 +24,9 @@ class OAlpa
     // const   MODE = "L" ;
 
 // Propriétés
+    // tableau contenant les resultat
     public $p_Tresultats = array() ;
-   // public $p_Caffichage_serie_A_ordres = "" ;
+    // public $p_Caffichage_serie_A_ordres = "" ;
     public $p_Caffichage_serie_A = "" ;
 
 // Var de construction
@@ -41,11 +42,26 @@ class OAlpa
 * @return : idem
 */
     function __construct( $g_CinstanceName, $T_objectifs, $T_ressources, $mode )
-    {       
+    {    
+        global $BDD ;   
+
         $this->g_CinstanceName = $g_CinstanceName ;
         $this->g_Tobjectifs = $T_objectifs ;
         $this->g_Tressources = $T_ressources ;
         $this->g_mode = $mode ;
+
+        // BDD -> on trace les ordres envoyés et on recupere dans ["val"] l'id de l'insert dans la BDD
+        $l_Ttrace = $this->trace_ordres() ;
+        
+        // ---------------------------------------------------------------------------------------------- 
+        // APPEL DE LA FONCTION ELEMENTAIRE EN MODE D'APPRENTISSAGE "ALPA":"A" 
+        // $g_Tressources["outils"] se trouve dans $LFUNC
+        if ( $l_Ttrace[0] and $this->serie_A() ) 
+        {
+            // on UPDATE la trace si ALPA aboutit
+            $BDD->push_trace_A_running( $l_Ttrace["val"] ) ;
+        }
+
     // fin construct 
     } 
     // ------------------------------------
@@ -60,6 +76,54 @@ class OAlpa
     // fin clone
     }
     // ------------------------------------
+
+/* -------------------------------------- TRACE ORDRES  --------------------------- 
+* memorise les ordres donnés à ALPA
+* @param : 
+* @value : none
+* @return : bool de resussite (mail ou url) + val (l'id de  l'insert)  
+*/
+  function trace_ordres()
+  {
+    global $BDD ;
+    global $BFUNC ;
+
+    $l_jeton = true ;
+
+    $l_Treponse["err"] = array( "id" => "0", "com" => "" ) ;
+    $l_Treponse["val"] = 0 ;
+    $l_Treponse[0] = false ;
+
+    // propriété $BDD qui garde en memoire le check + create table colonne
+    if ( ! $BDD->p_TnewTtraces )
+    {
+        // une table T_ordres et les colonnes de trace sont crées si besoin
+        $BDD->tab_trace_A_create( ) ; 
+    }
+    // on enregistre les ordres issues de GET     
+    $l_TnewTrace = $BDD->push_trace_A() ;
+    
+    if ( $l_TnewTrace[0] )
+    {
+        $l_Treponse[0] = true ;
+        // on recupere l'ID de cette INSERT
+        $l_Treponse["val"] = $BDD->lastInsertID() ;
+    }
+    else
+    {
+        $l_Treponse["err"]["id"] = "1" ;
+    }
+    
+    // on charge les erreurs dans la propriété qui permettra de les restituer en mode DEV
+    $BFUNC->dev_mode( __METHOD__, $l_Treponse["err"] ) ;
+
+    // on charge la reponse à retourner
+    return $l_Treponse ;
+
+  // fin trace ordres
+  }
+  // ------------------------------------
+
 
 
 /* ------------------------------------- EXPLICATIONS ------------------------------------------ 
@@ -324,8 +388,6 @@ class OAlpa
     }
     // ------------------------------------
 
-
-
 /* --------------------------------SERIE A-------------------------------------------- 
 * Travail en serie de fonctions élémentaire en mode apprentissage "ALPA":"A" 
 * @param :
@@ -365,7 +427,7 @@ class OAlpa
 
         $this->p_Tresultats = $l_Treponse ;
         
-        //return $l_Treponse ;
+        return true ;
 
     // Fin de la fonction d'apprentissage en série ALPA
     }

@@ -21,7 +21,7 @@ if ( ! isset( $metaIncludeJeton ) )
 if ( ! isset( $OBfuncIncludeJeton )  )
 {
     require_once( $g_page_arbo . FOLD_CLASS . 'OBaseFunctions.req.php' ) ;
-    $BFUNC = new OBaseFunctions() ;
+    $BFUNC = new OBaseFunctions( $B_DEVMODESHOW, $B_DEVMODERUN ) ;
 }
 
 // permet d'aiguiller l'IA entre les différents serveurs

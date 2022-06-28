@@ -26,7 +26,16 @@ include( $g_page_arbo . "inc/includes_loader.inc.php" ) ;
 /* Filtre tous les paramètres GET nécessairent au bon fonctionnement d'Alpa */
 require( FOLD_INC . "filtre_params_alpa.req.php" ) ;
 
-
+/* les variables attendues sint dans le GET
+*   ?ia=alpa
+*   &mode=learn|work
+*   &mat=1
+*   &outs=addition
+*   &obj=10&dist=0.5
+*   &delais=1000
+*   &ratio=1
+*   &dev=(defo)false
+*   &err=(defo)true
 
 /* ----------------------------------- CONTEXTUALISATION DU TRAVAIL 1 ------------------------------------ */
 
@@ -45,11 +54,12 @@ $g_Tobjectifs = array ( "objectif"  => $g_TobjectifsListe, "distance" => $_GET["
 // 1) CREATION DE LA NOUVELLE INSTANCE DE TRAVAIL "ALPA":"A" 
 $l_ALPA = "ALPA1" ;
 $$l_ALPA = new OAlpa( $l_ALPA, $g_Tobjectifs, $g_Tressources, $_GET["mode"] ) ;
-
 // ---------------------------------------------------------------------------------------------- 
-// 2) APPEL DE LA FONCTION ELEMENTAIRE EN MODE D'APPRENTISSAGE "ALPA":"A" 
+// 2) APPEL DE LA FONCTION ELEMENTAIRE EN MODE D'APPRENTISSAGE "ALPA":"A" dans CONSTRUCT
 // $g_Tressources["outils"] se trouve dans $LFUNC
-$$l_ALPA->serie_A( ) ;
+// Dans CONSTRUCT : $$l_ALPA->serie_A( ) ;
+
+
 
 
 /* --------------------------------------  --------------------- -------------------------------------- */
@@ -70,7 +80,14 @@ $BFUNC->show( $RESSOURCES->p_Tarchives ) ;
 // Ressources
 $BFUNC->show( $RESSOURCES->p_Tressources ) ;
 
+echo "TRACES NOMS:" ;
+(string) $BFUNC->show( $BDD->p_TnewTtraces ) ;
+echo "RESSOURCES NOMS:" ;
+$BFUNC->show( $BDD->p_TnewTressources ) ;
+echo "ARCHIVES NOMS:" ;
+$BFUNC->show( $BDD->p_TnewTarchives ) ;
 
+include( $g_page_arbo . FOLD_INC . "body-dev-erreurs.inc.php" ) ;
 
 /* TEST BDD -> NEW TABLE, DROP TABLE, NEW COLUMN*/ 
 /*

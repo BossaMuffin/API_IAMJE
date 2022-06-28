@@ -38,9 +38,10 @@ class OBdd extends OBdd_connexion
 {
 
 // Propriétés
-    public $p_Ttypes = ["VARCHAR", "INT", "FLOAT"] ;
+    public $p_Ttypes = ["VARCHAR", "INT", "FLOAT", "TIMESTAMP", "BOOL", "TEXT"] ;
     public $p_TnewTressources = array() ;
     public $p_TnewTarchives = array() ;
+    public $p_TnewTtraces = false ;
     public $p_Tprefixes = [	"cpx" 	=> "C_",
     						"mat" 	=> "R_",
     						"arch" 	=> "A_",
@@ -59,8 +60,22 @@ class OBdd extends OBdd_connexion
     {
         parent::__CONSTRUCT( ) ;
 
-        $this->p_Tcol["all"]["client_key"] = $this->p_Tprefixes["cpx"] . "client_key" ;
+		// liste des champs que l'on retrouve dans toutes les tables
+        $this->p_Tcol["all"]["client_key"] 	= $this->p_Tprefixes["cpx"] . "client_key" ;
+        $this->p_Tcol["all"]["date"] 		= $this->p_Tprefixes["cpx"] . "datetime" ;
 
+		// liste des champs que l'on retrouve dans la table de trace des ordres ALPA
+		$this->p_Tcol["trace"]["run"] 		= $this->p_Tprefixes["cpx"] . "run" ;
+		$this->p_Tcol["trace"]["obj"] 		= $this->p_Tprefixes["cpx"] . "objectif" ;
+		$this->p_Tcol["trace"]["mat"] 		= $this->p_Tprefixes["cpx"] . "matieres" ;
+		$this->p_Tcol["trace"]["outs"] 		= $this->p_Tprefixes["cpx"] . "outils" ;
+		$this->p_Tcol["trace"]["dist"] 		= $this->p_Tprefixes["cpx"] . "distance" ;
+		$this->p_Tcol["trace"]["ratio"] 	= $this->p_Tprefixes["cpx"] . "precision" ;
+		$this->p_Tcol["trace"]["delais"] 	= $this->p_Tprefixes["cpx"] . "delais" ;
+		$this->p_Tcol["trace"]["dev"] 		= $this->p_Tprefixes["cpx"] . "dev" ;
+		$this->p_Tcol["trace"]["err"] 		= $this->p_Tprefixes["cpx"] . "err" ;
+
+		// liste des champs que l'on retrouve dans la table des arvhives ALPA
         $this->p_Tcol["arch"]["id"] 		= $this->p_Tprefixes["cpx"] . "id" ;
 		$this->p_Tcol["arch"]["obj"] 		= $this->p_Tprefixes["cpx"] . "objectif" ;
 		$this->p_Tcol["arch"]["mat"] 		= $this->p_Tprefixes["cpx"] . "matieres" ;
@@ -72,7 +87,7 @@ class OBdd extends OBdd_connexion
 		$this->p_Tcol["arch"]["delais"] 	= $this->p_Tprefixes["cpx"] . "delais" ;
 		$this->p_Tcol["arch"]["compt"] 		= $this->p_Tprefixes["cpx"] . "compteur" ;
 		
-
+		// liste des champs que l'on retrouve dans la table des ressources ALPA
 		$this->p_Tcol["ress"]["valeur"] 	= $this->p_Tprefixes["cpx"] . "valeur" ;
 
 	} // fin construct
@@ -102,13 +117,22 @@ class OBdd extends OBdd_connexion
 		return $datas ;
 	}
 */
-	protected function demande( $requete )
+	protected function demande( $requete, $lastID = false )
 	{
 		//$req = $this->getPDO()->query('SELECT * FROM events');
 		$result = $this->getPDO()->query( $requete ) ;
 		return $result ;
 	}
-
+	
+/* lastID --------------------------- lastID
+ * retourne le dernier ID INSERT dans la base
+ @Param: aucun
+ @Return: int(id)
+*/
+	function lastInsertID( )
+	{
+		return $this->getPDO()->lastInsertId() ;
+	}
 
 /* SHOW TABLES --------------------------- SHOW TABLES
  * requete
@@ -118,7 +142,9 @@ class OBdd extends OBdd_connexion
 	function tab_show() 
 	{
 
-		$l_Treponse["err"] = 0 ;
+		global $BFUNC ;
+
+		$l_Treponse["err"] = array( "id" => "0", "com" => "" ) ;
 		$l_Treponse["val"] = array() ;
 		$l_Treponse[0] = false ;
 
@@ -129,9 +155,14 @@ class OBdd extends OBdd_connexion
 		}
 		else
 		{
-			$l_Treponse["err"] = 1 ;
+			$l_Treponse["err"]["id"] = "1" ;
 		}
 			
+
+		// on charge les erreurs dans la propriété qui permettra de les restituer en mode DEV
+    	$BFUNC->dev_mode( __METHOD__, $l_Treponse["err"] ) ;
+
+    	// on charge la reponse à retourner
 		return $l_Treponse ;
 
 	// Fin SHOW TABLES
@@ -145,8 +176,9 @@ class OBdd extends OBdd_connexion
 */
 	function col_show( $Ctab_nom ) 
 	{
+		global $BFUNC ;
 
-		$l_Treponse["err"] = 0 ;
+		$l_Treponse["err"] = array( "id" => "0", "com" => "" ) ;
 		$l_Treponse["val"] = array() ;
 		$l_Treponse[0] = false ;
 
@@ -157,9 +189,13 @@ class OBdd extends OBdd_connexion
 		}
 		else
 		{
-			$l_Treponse["err"] = 1 ;
+			$l_Treponse["err"]["id"] = "1" ;
 		}
-			
+
+		// on charge les erreurs dans la propriété qui permettra de les restituer en mode DEV
+    	$BFUNC->dev_mode( __METHOD__, $l_Treponse["err"] ) ;
+
+    	// on charge la reponse à retourner
 		return $l_Treponse ;
 
 	// Fin SHOW COLUMNS
@@ -174,8 +210,9 @@ class OBdd extends OBdd_connexion
 */
 	function tab_create( $Ctab_nom ) 
 	{
+		global $BFUNC ;
 
-		$l_Treponse["err"] = 0 ;
+		$l_Treponse["err"] = array( "id" => "0", "com" => "" ) ;
 		$l_Treponse["val"] = "void" ;
 		$l_Treponse[0] = false ;
 
@@ -190,15 +227,21 @@ class OBdd extends OBdd_connexion
 			}
 			else
 			{
-				$l_Treponse["err"] = 2 ;
+				$l_Treponse["err"]["id"] = "2" ;
 			}
 
 		}
 		else
 		{
-			$l_Treponse["err"] = 1 ;
+			$l_Treponse["err"]["id"] = "1" ;
+			$l_Treponse["err"]["com"] = "tab not new " ;
 		}
 
+
+		// on charge les erreurs dans la propriété qui permettra de les restituer en mode DEV
+    	$BFUNC->dev_mode( __METHOD__, $l_Treponse["err"] ) ;
+
+    	// on charge la reponse à retourner
 		return $l_Treponse ;
 
 	// Fin CREATE TABLE
@@ -213,8 +256,9 @@ class OBdd extends OBdd_connexion
 */
 	function tab_drop( $Ctab_nom ) 
 	{
+		global $BFUNC ;
 
-		$l_Treponse["err"] = 0 ;
+		$l_Treponse["err"] = array( "id" => "0", "com" => "" ) ;
 		$l_Treponse["val"] = "void" ;
 		$l_Treponse[0] = false ;
 
@@ -229,15 +273,19 @@ class OBdd extends OBdd_connexion
 			}
 			else
 			{
-				$l_Treponse["err"] = 2 ;
+				$l_Treponse["err"]["id"] = "2" ;
 			}
 
 		}
 		else
 		{
-			$l_Treponse["err"] = 1 ;
+			$l_Treponse["err"]["id"] = "1" ;
 		}
 
+		// on charge les erreurs dans la propriété qui permettra de les restituer en mode DEV
+    	$BFUNC->dev_mode( __METHOD__, $l_Treponse["err"] ) ;
+
+    	// on charge la reponse à retourner
 		return $l_Treponse ;
 
 	// Fin DROP TABLE
@@ -251,7 +299,9 @@ class OBdd extends OBdd_connexion
 */
 	function build_type( $Ctype, $Nsize ) 
 	{
-		$l_Treponse["err"] = 0 ;
+		global $BFUNC ;
+		
+		$l_Treponse["err"] = array( "id" => "0", "com" => "" ) ;
 		$l_Treponse["val"] = "" ;
 		$l_Treponse[0] = false ;
 
@@ -274,14 +324,18 @@ class OBdd extends OBdd_connexion
 			}
 			else
 			{
-				$l_Treponse["err"] = 2 ;
+				$l_Treponse["err"]["id"] = "2" ;
 			}
 		}
 		else
 		{
-			$l_Treponse["err"] = 1 ;
+			$l_Treponse["err"]["id"] = "1" ;
 		}
 
+		// on charge les erreurs dans la propriété qui permettra de les restituer en mode DEV
+    	$BFUNC->dev_mode( __METHOD__, $l_Treponse["err"] ) ;
+
+    	// on charge la reponse à retourner
 		return $l_Treponse ;
 
 	// Fin CREATE TYPE
@@ -292,13 +346,16 @@ class OBdd extends OBdd_connexion
 
 /* ADD COLONNE --------------------------- ADD COLONNE
  * requete
- @Param: le nom de la table à modifier, la colonne à ajouter, le type de colone, la taille du champs
+ @Param: le nom de la table à modifier, la colonne à ajouter, le type de colone, la taille du champs 
+ * et l'option qui permet de spécifier les caractéristique du champ/colonne
  @Return: $l_Treponse[0] = temoin ; $l_Treponse["val"] = ""
 */
-	function tab_add_col( $Ctab_nom, $Ccol_nom, $Ccol_type, $Ntype_size ) 
+	function tab_add_col( $Ctab_nom, $Ccol_nom, $Ccol_type, $Ntype_size, $Coption = "" ) 
 	{
+		global $BFUNC ;
 
-		$l_Treponse["err"] = 0 ;
+
+		$l_Treponse["err"] = array( "id" => "0", "com" => "" ) ;
 		$l_Treponse["val"] = "void" ;
 		$l_Treponse[0] = false ;
 
@@ -316,100 +373,243 @@ class OBdd extends OBdd_connexion
 				if ( $l_Ccoltype[0] )
 				{
 					// on ne cree la colonne que si le nom est disponnible
-					if ( $req = $this->demande( 'ALTER TABLE ' . $Ctab_nom . ' ADD ' . $Ccol_nom . ' ' . $l_Ccoltype["val"] ) )
+					if ( $req = $this->demande( 'ALTER TABLE ' . $Ctab_nom . ' ADD ' . $Ccol_nom . ' ' . $l_Ccoltype["val"] . ' ' . $Coption) )
 					{
 						$l_Treponse[0] = true ;
 					}
 					else
 					{
-						$l_Treponse["err"] = 4 ;
+						$l_Treponse["err"]["id"] = "4" ;
 					}
 
 				}
 				else
 				{
-					$l_Treponse["err"] = 3 ;
+					$l_Treponse["err"]["id"] = "3" ;
 				}
 
 			}
 			else
 			{
-				$l_Treponse["err"] = 2 ;
+				$l_Treponse["err"]["id"] = "2" ;
+				$l_Treponse["err"]["com"] = "col not new" ;
 			}
 
 		}
 		else
 		{
-			$l_Treponse["err"] = 1 ;
+			$l_Treponse["err"]["id"] = "1" ;
 		}
 
+		// on charge les erreurs dans la propriété qui permettra de les restituer en mode DEV
+    	$BFUNC->dev_mode( __METHOD__, $l_Treponse["err"] ) ;
+
+    	// on charge la reponse à retourner
 		return $l_Treponse ;
 
 	// Fin ADD COL TABLE
 	}
 	// ------------------------------------
 
-/* ADD CLIENT KEY COLONNE --------------------------- ADD CLIENT KEY COLONNE
- * requete
- @Param: le nom de la table à modifier, la colonne client_key à ajouter, le type de colone, la taille du champs
- @Return: $l_Treponse[0] = temoin ; $l_Treponse["val"] = ""
+// ------------------------------------------------------------------------------------------
+// -------------------------------------- TRACE DES ORDRES ----------------------------------
+// ------------------------------------------------------------------------------------------
+
+
+/* -------------------------------------- CREATE TRACE TAB  --------------------------- 
+* cree la tab de la trace des ordres demandés à ALPA
+* @param : le nom de la table par defaut
+* @value : none
+* @return : bool de reussite + val void 
 */
-	function tab_add_col_client_key( $Ctab_nom ) 
+  function tab_trace_A_create( $CtabName = "T_ordres"  )
+  {
+    global $BFUNC ;
+
+    $l_jeton = true ;
+
+    $l_Treponse["err"] = array( "id" => "0", "com" => "" ) ;
+    $l_Treponse["val"] = "void" ;
+    $l_Treponse[0] = false ;
+
+
+    $l_TnewTab = $this->tab_create( $CtabName ) ;
+    if ( ! $l_TnewTab[0] )
+    {
+        $l_jeton = false ;
+        $l_Treponse["err"]["id"] .= "- 1 " ;
+        $l_Treponse["err"]["com"] = "cols not new" ;
+    }
+
+// Col RUN -> si le calcul issu de la trace à abouti
+    $l_TnewCol = $this->tab_add_col( $CtabName, $this->p_Tcol["trace"]["run"], $BFUNC->p_Ttypes[11]["bdd"], $BFUNC->p_Ttypes[11]["size"], "DEFAULT FALSE NOT NULL" ) ;
+    if ( ! $l_TnewCol[0] )
+    {
+        $l_jeton = false ;
+        $l_Treponse["err"]["id"] .= "- 2 " ;
+        $l_Treponse["err"]["com"] = "cols not new" ;
+    } 
+// Col OBJECTIFS
+    $l_TnewCol = $this->tab_add_col( $CtabName, $this->p_Tcol["trace"]["obj"], $BFUNC->p_Ttypes[4]["bdd"], $BFUNC->p_Ttypes[4]["size"] ) ;
+    if ( ! $l_TnewCol[0] )
+    {
+        $l_jeton = false ;
+        $l_Treponse["err"]["id"] .= "- 3 " ;
+        $l_Treponse["err"]["com"] = "cols not new" ;
+    }
+// Col MATIERES
+    $l_TnewCol = $this->tab_add_col( $CtabName, $this->p_Tcol["trace"]["mat"], $BFUNC->p_Ttypes[4]["bdd"], $BFUNC->p_Ttypes[4]["size"] ) ;
+    if ( ! $l_TnewCol[0] )
+    {
+        $l_jeton = false ;
+        $l_Treponse["err"]["id"] .= "- 4 " ;
+        $l_Treponse["err"]["com"] = "cols not new" ;
+    }
+// Col OUTILS
+    $l_TnewCol = $this->tab_add_col( $CtabName, $this->p_Tcol["trace"]["outs"], $BFUNC->p_Ttypes[4]["bdd"], 40 ) ;
+    if ( ! $l_TnewCol[0] )
+    {
+        $l_jeton = false ;
+        $l_Treponse["err"]["id"] .= "- 5 " ;
+        $l_Treponse["err"]["com"] = "cols not new" ;
+    }
+// Col DISTANCE MIN
+    $l_TnewCol = $this->tab_add_col( $CtabName, $this->p_Tcol["trace"]["dist"], $BFUNC->p_Ttypes[3]["bdd"], 0 ) ;
+    if ( ! $l_TnewCol[0] )
+    {
+        $l_jeton = false ;
+        $l_Treponse["err"]["id"] .= "- 6 " ;
+        $l_Treponse["err"]["com"] = "cols not new" ;
+    }
+// Col RATIO / PRECISION  MIN
+    $l_TnewCol = $this->tab_add_col( $CtabName, $this->p_Tcol["trace"]["ratio"], $BFUNC->p_Ttypes[3]["bdd"], 0 ) ;
+    if ( ! $l_TnewCol[0] )
+    {
+        $l_jeton = false ;
+        $l_Treponse["err"]["id"] .= "- 7 " ;
+        $l_Treponse["err"]["com"] = "cols not new" ;
+    }
+// Col DELAIS DE CALCUL MAX
+    $l_TnewCol = $this->tab_add_col( $CtabName, $this->p_Tcol["trace"]["delais"], $BFUNC->p_Ttypes[3]["bdd"], 0 ) ;
+    if ( ! $l_TnewCol[0] )
+    {
+        $l_jeton = false ;
+        $l_Treponse["err"]["id"] .= "- 8 " ;
+        $l_Treponse["err"]["com"] = "cols not new" ;
+    }
+// Col CLIENT KEY
+    $l_TnewCol = $this->tab_add_col( $CtabName, $this->p_Tcol["all"]["client_key"], $BFUNC->p_Ttypes[4]["bdd"], $BFUNC->p_Ttypes[4]["size"]  ) ;
+    if ( ! $l_TnewCol[0] )
+    {
+        $l_jeton = false ;
+        $l_Treponse["err"]["id"] .= "- 9 " ;
+        $l_Treponse["err"]["com"] = "cols not new" ;
+    }
+// Col DATETIME -> timestamp de création
+	$l_TnewCol = $this->tab_add_col( $CtabName, $this->p_Tcol["all"]["date"], $BFUNC->p_Ttypes[10]["bdd"], $BFUNC->p_Ttypes[10]["size"], 'DEFAULT CURRENT_TIMESTAMP NOT NULL'  ) ;
+	if ( ! $l_TnewCol[0] )
+	{
+		$l_jeton = false ;
+		$l_Treponse["err"]["id"] .= "- 10 " ;
+		$l_Treponse["err"]["com"] = "cols not new" ;
+	}
+
+// Col DEV affichage du mode developpement
+    $l_TnewCol = $this->tab_add_col( $CtabName, $this->p_Tcol["trace"]["dev"], $BFUNC->p_Ttypes[11]["bdd"], $BFUNC->p_Ttypes[11]["size"], "DEFAULT FALSE NOT NULL" ) ;
+    if ( ! $l_TnewCol[0] )
+    {
+        $l_jeton = false ;
+        $l_Treponse["err"]["id"] .= "- 11 " ;
+        $l_Treponse["err"]["com"] = "cols not new" ;
+    }
+// Col ERR - enregistrement des erreurs au sein des fonctions -> visible en mode développement 
+    $l_TnewCol = $this->tab_add_col( $CtabName, $this->p_Tcol["trace"]["err"], $BFUNC->p_Ttypes[12]["bdd"], $BFUNC->p_Ttypes[12]["size"] ) ;
+    if ( ! $l_TnewCol[0] )
+    {
+        $l_jeton = false ;
+        $l_Treponse["err"]["id"] .= "- 12 " ;
+        $l_Treponse["err"]["com"] = "cols not new" ;
+    }
+
+    if ( $l_jeton  )
+    {
+        $l_Treponse[0] = true ;
+    }
+    else
+    {
+        // propriété $BDD qui garde en memoire le check + create table colonne
+        $this->p_TnewTtraces = true ;
+    }
+
+    // on charge les erreurs dans la propriété qui permettra de les restituer en mode DEV
+    $BFUNC->dev_mode( __METHOD__, $l_Treponse["err"] ) ;
+
+    // on charge la reponse à retourner
+    return $l_Treponse ;
+
+  // fin trace ordres
+  }
+  // ------------------------------------
+
+
+/* PUSH TRACE ORDRE --------------------------- PUSH TRACE ORDRE
+ * requete qui permet de d'enregistrer une nouvelle TRACE d'ordres dans la BDD
+ * il faudra compléter les champs RUN et ERR après l'execution d'ALPA 
+ @Param:
+ @Return: $l_Treponse[0] = temoin ; $l_Treponse["val"] = "void"
+*/
+	function push_trace_A( $Ctab = "T_ordres" ) 
 	{
 		global $BFUNC ;
 
-		$l_Treponse["err"] = 0 ;
+		$l_Treponse["err"] = array( "id" => "0", "com" => "" ) ;
 		$l_Treponse["val"] = "void" ;
 		$l_Treponse[0] = false ;
-
-		// on check si une table existe avec ce nom
-		$Tnoms = $this->tab_show( ) ;
-		if ( in_array( $Ctab_nom, $Tnoms["val"] ) )
+// ATTENTION LORSQUE LES DONNEES A ENREGISTRER SONT EN VARCHAR OU EN INT IL FAUT METTRE OU ENLEVER LES GUILLEMET, LE MIEUX SERAIT D4ENREGITRER TOUT EN VARCHAR ET D'ASSOCIER LE TYPE AVEC LA DONNEE !!!  999999999999999999
+		if ( $this->demande( 'INSERT INTO ' . $Ctab . ' (' . $this->p_Tcol["trace"]["obj"] . ', ' . $this->p_Tcol["trace"]["mat"] . ', ' . $this->p_Tcol["trace"]["outs"] . ', ' . $this->p_Tcol["trace"]["dist"] . ', ' . $this->p_Tcol["trace"]["ratio"] . ', ' . $this->p_Tcol["trace"]["delais"] . ', ' . $this->p_Tcol["all"]["client_key"] . ', ' . $this->p_Tcol["trace"]["dev"] . ', ' . $this->p_Tcol["trace"]["err"] . ') 
+							VALUES ("' . $_GET["obj"] . '", "' . $_GET["mat"] . '", "' . $_GET["outs"] . '", ' . $_GET["dist"] . ', ' . $_GET["ratio"] . ', ' . $_GET["delais"] . ', "' . $this->CLIENT_KEY_ID . '", "' . $BFUNC->p_BdevModeShow . '", "' . print_r( $BFUNC->p_Terreurs, true ) . '")' ) )
 		{
-
-			// on check si une colonne existe avec ce nom
-			$Tnoms = $this->col_show( $Ctab_nom ) ;
-			if ( ! in_array( $this->p_Tcol["all"]["client_key"], $Tnoms["val"] ) )
-			{
-				// on construit le type du champs pour la nouvelle colonne (check si le type existe)
-				$l_Ccoltype = $this->build_type( $BFUNC->p_Ttypes[4]["bdd"], $BFUNC->p_Ttypes[4]["size"] ) ;
-				if ( $l_Ccoltype[0] )
-				{
-					// on ne cree la colonne que si le nom est disponnible
-					if ( $req = $this->demande( 'ALTER TABLE ' . $Ctab_nom . ' ADD ' . $this->p_Tcol["all"]["client_key"] . ' ' . $l_Ccoltype["val"] ) )
-					{
-						$l_Treponse[0] = true ;
-					}
-					else
-					{
-						$l_Treponse["err"] = 4 ;
-					}
-
-				}
-				else
-				{
-					$l_Treponse["err"] = 3 ;
-				}
-
-			}
-			else
-			{
-				$l_Treponse["err"] = 2 ;
-			}
-
+			$l_Treponse[0] = true ;
 		}
 		else
 		{
-			$l_Treponse["err"] = 1 ;
+			$l_Treponse["err"]["id"] = "1" ;
 		}
 
-		return $l_Treponse ;
-
-	// Fin ADD COL TABLE
+	// Fin push trace
+		return $l_Treponse;
 	}
 	// ------------------------------------
 
+/* PUSH TRACE ORDRE RUNNING  --------------------------- PUSH TRACE ORDRE RUNNING 
+ * requete qui permet valider une trace après l'execution d'ALPA
+ @Param: lastInsertId
+ @Return: $l_Treponse[0] = temoin ; $l_Treponse["val"] = "void"
+*/
+	function push_trace_A_running( $l_NlastInsertID, $Ctab = "T_ordres" ) 
+	{
+		global $BFUNC ;
 
+		$l_Treponse["err"] = array( "id" => "0", "com" => "" ) ; ;
+		$l_Treponse["val"] = "void" ;
+		$l_Treponse[0] = false ;
+// ATTENTION LORSQUE LES DONNEES A ENREGISTRER SONT EN VARCHAR OU EN INT IL FAUT METTRE OU ENLEVER LES GUILLEMET, LE MIEUX SERAIT D4ENREGITRER TOUT EN VARCHAR ET D'ASSOCIER LE TYPE AVEC LA DONNEE !!!  999999999999999999
+		if ( $this->demande(   	'UPDATE ' . $Ctab . 
+								' SET ' 	. $this->p_Tcol["trace"]["run"] . ' = 1, ' 
+										. $this->p_Tcol["trace"]["err"] . ' = "' . print_r( $BFUNC->p_Terreurs, true ) . '" 
+								WHERE id = ' . $l_NlastInsertID ) )
+		{
+			$l_Treponse[0] = true ;
+		}
+		else
+		{
+			$l_Treponse["err"]["id"] = "1" ;
+		}
+
+	// Fin push trace running
+		return $l_Treponse ;
+	}
+	// ------------------------------------
 // ------------------------------------------------------------------------------------------
 // -------------------------------------- RESSOURCES -----------------------------------------
 // ------------------------------------------------------------------------------------------
@@ -429,44 +629,63 @@ class OBdd extends OBdd_connexion
 
 		$this->tab_create( $CtabName ) ;
 
-		$l_Treponse["err"] = 0 ;
+		$l_Treponse["err"] = array( "id" => "0", "com" => "" ) ;
 		$l_Treponse["val"] = "void" ;
 		$l_Treponse[0] = false ;
-		// on check si une colonne existe avec ce nom
-		$Tcols = $this->col_show( $CtabName ) ;
+		
+		// jeton qui permet de suivre les différentes création de colonne dans la table
+		$l_jeton = true ;
 
-		if ( ! in_array( $this->p_Tcol["ress"]["valeur"], $Tcols["val"] ) )
+		// on recupere le type SQL equivalent au type de la ressource
+		foreach ($BFUNC->p_Ttypes as $key => $Ttype) 
 		{
-			// on recupere le type SQL equivalent au type de la ressource
-			foreach ($BFUNC->p_Ttypes as $key => $Ttype) 
+			if ( $CtabName == $this->p_Tprefixes["mat"] . $Ttype["name"]  )
 			{
-				if ( $CtabName == $this->p_Tprefixes["mat"] . $Ttype["name"]  )
-				{
-					$l_Ccol_type = $Ttype["bdd"] ;
-					$l_Ntype_size = $Ttype["size"] ;
-				}
+				$l_Ccol_type = $Ttype["bdd"] ;
+				$l_Ntype_size = $Ttype["size"] ;
 			}
-			// $Ctab_nom, $Ccol_nom, $Ccol_type, $Ntype_size 
-			// on crée un champ "ressource" si besoin pour enregistrer la ressource 
-			$l_TnewCol = $this->tab_add_col( $CtabName, $this->p_Tcol["ress"]["valeur"], $l_Ccol_type, $l_Ntype_size ) ;
-			$l_TnewCol_key = $this->tab_add_col_client_key( $CtabName ) ;
+		}
+		// $Ctab_nom, $Ccol_nom, $Ccol_type, $Ntype_size 
+		// on crée un champ "ressource" si besoin pour enregistrer la ressource 
+		$l_TnewCol = $this->tab_add_col( $CtabName, $this->p_Tcol["ress"]["valeur"], $l_Ccol_type, $l_Ntype_size ) ;			
+		if ( ! $l_TnewCol[0] )
+		{
+			$l_jeton = false ;
+			$l_Treponse["err"]["id"] .= "- 2 " ;
+			$l_Treponse["err"]["com"] = "cols not new" ;
+		}
 
-			if ( ! $l_TnewCol[0] and ! $l_TnewCol_key[0]  )
-			{
+		// Col CLIENT KEY
+		$l_TnewCol = $this->tab_add_col( $CtabName, $this->p_Tcol["all"]["client_key"], $BFUNC->p_Ttypes[4]["bdd"], $BFUNC->p_Ttypes[4]["size"]  ) ;
+		if ( ! $l_TnewCol[0] )
+		{
+			$l_jeton = false ;
+			$l_Treponse["err"]["id"] .= "- 3 " ;
+			$l_Treponse["err"]["com"] = "cols not new" ;
+		}
 
-				$l_Treponse[0] = true ;
-				// propriété $BDD qui garde en memoire le check + create table colonne
-				array_push( $this->p_TnewTressources, $CtabName ) ;
-			}
-			else
-			{
-				$l_Treponse["err"] = 2 ;
-			}
+		// Col DATETIME -> timestamp de création
+		$l_TnewCol = $this->tab_add_col( $CtabName, $this->p_Tcol["all"]["date"], $BFUNC->p_Ttypes[10]["bdd"], $BFUNC->p_Ttypes[10]["size"], 'DEFAULT CURRENT_TIMESTAMP NOT NULL'  ) ;
+		if ( ! $l_TnewCol[0] )
+		{
+			$l_jeton = false ;
+			$l_Treponse["err"]["id"] .= "- 4 " ;
+			$l_Treponse["err"]["com"] = "cols not new" ;
+		}
+
+		if ( $l_jeton )
+		{
+			$l_Treponse[0] = true ;
 		}
 		else
 		{
-			$l_Treponse["err"] = 1 ;
+			// propriété $BDD qui garde en memoire le check + create table colonne
+			array_push( $this->p_TnewTressources, $CtabName ) ;
 		}
+
+		// on charge les erreurs dans la propriété qui permettra de les restituer en mode DEV
+    	$BFUNC->dev_mode( __METHOD__, $l_Treponse["err"] ) ;
+
 	// Fin tab ressource create
 	}
 	// ------------------------------------
@@ -477,12 +696,11 @@ class OBdd extends OBdd_connexion
  @Param: la ressource à enregistrer ->
  @Return: $l_Treponse[0] = temoin ; $l_Treponse["val"] = "void"
 */
-
 	function check_ressource( $ressource ) 
 	{
 		global $BFUNC ;
 
-		$l_Treponse["err"] = 0 ;
+		$l_Treponse["err"] = array( "id" => "0", "com" => "" ) ;
 		$l_Treponse["val"]["tab"] = "" ;
 		$l_Treponse["val"]["col"] = "" ;		
 		$l_Treponse[0] = false ;
@@ -529,11 +747,13 @@ class OBdd extends OBdd_connexion
 				// on pourra enregistrer la ressource
 				if ( $l_i_doublon == 1 )
 				{
-					$l_Treponse["err"] = 3 ;
+					$l_Treponse["err"]["id"] = "3" ;
+					$l_Treponse["err"]["com"] = "ressource not new" ;
 				}
 				else if ( $l_i_doublon > 1 )
 				{
-					$l_Treponse["err"] = 2 ;
+					$l_Treponse["err"]["id"] = "2" ;
+					$l_Treponse["err"]["com"] = "ressource not new -> multiple" ;
 				}
 			}
 			
@@ -541,12 +761,18 @@ class OBdd extends OBdd_connexion
 		}
 		else
 		{
-			$l_Treponse["err"] = 1 ;
+			$l_Treponse["err"]["id"] = "1" ;
 		}
 
-	// Fin Check Ressource
+		// on charge les erreurs dans la propriété qui permettra de les restituer en mode DEV
+    	$BFUNC->dev_mode( __METHOD__, $l_Treponse["err"] ) ;
+
+    	// on charge la reponse à retourner
 		return $l_Treponse;
+
+	// Fin Check Ressource
 	}
+	// ------------------------------------
 
 /* PUSH RESSOURCE --------------------------- PUSH RESSOURCE
  * requete qui permet de d'enregistrer une nouvelle ressource dans la BDD
@@ -555,12 +781,11 @@ class OBdd extends OBdd_connexion
  @Param: la ressource à enregistrer ->
  @Return: $l_Treponse[0] = temoin ; $l_Treponse["val"] = "void"
 */
-
 	function push_ressource( $ressource, $tab ) 
 	{
 		global $BFUNC ;
 
-		$l_Treponse["err"] = 0 ;
+		$l_Treponse["err"] = array( "id" => "0", "com" => "" ) ;
 		$l_Treponse["val"] = "void" ;
 		$l_Treponse[0] = false ;
 
@@ -572,11 +797,16 @@ class OBdd extends OBdd_connexion
 		}
 		else
 		{
-			$l_Treponse["err"] = 1 ;
+			$l_Treponse["err"]["id"] = "1" ;
 		}
 
-	// Fin push Ressource
+		// on charge les erreurs dans la propriété qui permettra de les restituer en mode DEV
+    	$BFUNC->dev_mode( __METHOD__, $l_Treponse["err"] ) ;
+
+    	// on charge la reponse à retourner
 		return $l_Treponse;
+
+	// Fin push Ressource
 	}
 	// -------------
 
@@ -595,15 +825,14 @@ class OBdd extends OBdd_connexion
  * la colonne et la table
  @Return: $l_Treponse[0] = temoin ; $l_Treponse["val"] = "void"
 */
-
- // XXXX 9999999999999999999 FAIRE EN SORTE QUE LE TYPE SOIT DETERMINÉ EN FONCTION DE LA DONN2E A ENREGISTREE -> TEST A FAIRE SUR L'ARCHIVE EN AMONT !!!!!
+// XXXX 9999999999999999999 FAIRE EN SORTE QUE LE TYPE SOIT DETERMINÉ EN FONCTION DE LA DONN2E A ENREGISTREE -> TEST A FAIRE SUR L'ARCHIVE EN AMONT !!!!!
  function tab_archive_A_create( $CtabName )
 	{
 		global $BFUNC ;
 
 		$l_jeton = true ;
 
-		$l_Treponse["err"] = 0 ;
+		$l_Treponse["err"] = array( "id" => "0", "com" => "" ) ;
 		$l_Treponse["val"] = "void" ;
 		$l_Treponse[0] = false ;
 
@@ -611,98 +840,123 @@ class OBdd extends OBdd_connexion
 		if ( ! $l_TnewTab[0] )
 		{
 			$l_jeton = false ;
-			$l_Treponse["err"] = 1 ;
+			$l_Treponse["err"]["id"] .= "- 1 " ;
+			$l_Treponse["err"]["com"] = "cols not new" ;
 		}
-		
+// Col ID de calcul
 		$l_TnewCol = $this->tab_add_col( $CtabName, $this->p_Tcol["arch"]["id"], $BFUNC->p_Ttypes[4]["bdd"], $BFUNC->p_Ttypes[4]["size"] ) ;
 		if ( ! $l_TnewCol[0] )
 		{
 			$l_jeton = false ;
-			$l_Treponse["err"] = 2 ;
+			$l_Treponse["err"]["id"] .= "- 2 " ;
+			$l_Treponse["err"]["com"] = "cols not new" ;
 		}
-
+// Col OBJECTIFS
 		$l_TnewCol = $this->tab_add_col( $CtabName, $this->p_Tcol["arch"]["obj"], $BFUNC->p_Ttypes[3]["bdd"], 0 ) ;
 		if ( ! $l_TnewCol[0] )
 		{
 			$l_jeton = false ;
-			$l_Treponse["err"] = 3 ;
+			$l_Treponse["err"]["id"] .= "- 3 " ;
+			$l_Treponse["err"]["com"] = "cols not new" ;
 		}
-
+// Col MATIERES
 		$l_TnewCol = $this->tab_add_col( $CtabName, $this->p_Tcol["arch"]["mat"], $BFUNC->p_Ttypes[3]["bdd"], 0 ) ;
 		if ( ! $l_TnewCol[0] )
 		{
 			$l_jeton = false ;
-			$l_Treponse["err"] = 4 ;
+			$l_Treponse["err"]["id"] .= "- 4 " ;
+			$l_Treponse["err"]["com"] = "cols not new" ;
 		}
-
+// Col OUTILS
 		$l_TnewCol = $this->tab_add_col( $CtabName, $this->p_Tcol["arch"]["outs"], $BFUNC->p_Ttypes[4]["bdd"], 40 ) ;
 		if ( ! $l_TnewCol[0] )
 		{
 			$l_jeton = false ;
-			$l_Treponse["err"] = 5 ;
+			$l_Treponse["err"]["id"] .= "- 5 " ;
+			$l_Treponse["err"]["com"] = "cols not new" ;
 		}
+// Col SEQUENCE DE CALCUL
 // 999999999999999999999  ATTENTION : la taille de la donnée grandit vite, mieux vaux un texte ou tinytext 
 		// ... mais "text" n'est pas compris par la méthode build type  ------------  99999999999 XXXXXXXXXx
 		$l_TnewCol = $this->tab_add_col( $CtabName, $this->p_Tcol["arch"]["seq"], $BFUNC->p_Ttypes[4]["bdd"], $BFUNC->p_Ttypes[4]["size"] ) ;
 		if ( ! $l_TnewCol[0] )
 		{
 			$l_jeton = false ;
-			$l_Treponse["err"] = 6 ;
+			$l_Treponse["err"]["id"] .= "- 6 " ;
+			$l_Treponse["err"]["com"] = "cols not new" ;
 		}
-
+// Col RESULTAT
 		$l_TnewCol = $this->tab_add_col( $CtabName, $this->p_Tcol["arch"]["result"], $BFUNC->p_Ttypes[3]["bdd"], 0 ) ;
 		if ( ! $l_TnewCol[0] )
 		{
 			$l_jeton = false ;
-			$l_Treponse["err"] = 7 ;
+			$l_Treponse["err"]["id"] .= "- 7 " ;
+			$l_Treponse["err"]["com"] = "cols not new" ;
 		}
-
+// Col DISTANCE à l'objectif
 		$l_TnewCol = $this->tab_add_col( $CtabName, $this->p_Tcol["arch"]["dist"], $BFUNC->p_Ttypes[3]["bdd"], 0 ) ;
 		if ( ! $l_TnewCol[0] )
 		{
 			$l_jeton = false ;
-			$l_Treponse["err"] = 8 ;
+			$l_Treponse["err"]["id"] .= "- 8 " ;
+			$l_Treponse["err"]["com"] = "cols not new" ;
 		}
-
+// Col RATIO / precision du resultat
 		$l_TnewCol = $this->tab_add_col( $CtabName, $this->p_Tcol["arch"]["ratio"], $BFUNC->p_Ttypes[3]["bdd"], 0 ) ;
 		if ( ! $l_TnewCol[0] )
 		{
 			$l_jeton = false ;
-			$l_Treponse["err"] = 9 ;
+			$l_Treponse["err"]["id"] .= "- 9 " ;
+			$l_Treponse["err"]["com"] = "cols not new" ;
 		}
-
+// Col DELAIS de calcul
 		$l_TnewCol = $this->tab_add_col( $CtabName, $this->p_Tcol["arch"]["delais"], $BFUNC->p_Ttypes[3]["bdd"], 0 ) ;
 		if ( ! $l_TnewCol[0] )
 		{
 			$l_jeton = false ;
-			$l_Treponse["err"] = 10 ;
+			$l_Treponse["err"]["id"] .= "- 10 " ;
+			$l_Treponse["err"]["com"] = "cols not new" ;
 		}
-
+// Col COMPTEUR de nombre de calcul
 		$l_TnewCol = $this->tab_add_col( $CtabName, $this->p_Tcol["arch"]["compt"], $BFUNC->p_Ttypes[2]["bdd"], 0 ) ;
 		if ( ! $l_TnewCol[0] )
 		{
 			$l_jeton = false ;
-			$l_Treponse["err"] = 11 ;
+			$l_Treponse["err"]["id"] .= "- 11 " ;
+			$l_Treponse["err"]["com"] = "cols not new" ;
 		}
-
-		$l_TnewCol = $this->tab_add_col_client_key( $CtabName ) ;
+// Col CLIENT KEY qui identifie l'origine du calcul
+		$l_TnewCol = $this->tab_add_col( $CtabName, $this->p_Tcol["all"]["client_key"], $BFUNC->p_Ttypes[4]["bdd"], $BFUNC->p_Ttypes[4]["size"]  ) ;
 		if ( ! $l_TnewCol[0] )
 		{
 			$l_jeton = false ;
-			$l_Treponse["err"] = 12 ;
+			$l_Treponse["err"]["id"] .= "- 12 " ;
+			$l_Treponse["err"]["com"] = "cols not new" ;
 		}
-
+// Col DATETIME -> timestamp de création
+		$l_TnewCol = $this->tab_add_col( $CtabName, $this->p_Tcol["all"]["date"], $BFUNC->p_Ttypes[10]["bdd"], $BFUNC->p_Ttypes[10]["size"], 'DEFAULT CURRENT_TIMESTAMP NOT NULL'  ) ;
+		if ( ! $l_TnewCol[0] )
+		{
+			$l_jeton = false ;
+			$l_Treponse["err"]["id"] .= "- 13 " ;
+			$l_Treponse["err"]["com"] = "cols not new" ;
+		}
 
 		if ( $l_jeton  )
 		{
 			$l_Treponse[0] = true ;
-			// propriété $BDD qui garde en memoire le check + create table colonne
-			array_push( $this->p_TnewTarchives, $CtabName ) ;
+			
 		}
+		 else
+	    {
+	        // propriété $BDD qui garde en memoire le check + create table colonne
+			array_push( $this->p_TnewTarchives, $CtabName ) ;
+	    }
 
+		// on charge les erreurs dans la propriété qui permettra de les restituer en mode DEV
+    	$BFUNC->dev_mode( __METHOD__, $l_Treponse["err"] ) ;
 
-
-
+    	// on charge la reponse à retourner
 		return $l_Treponse ;
 
 	// Fin tab ressource create
@@ -715,12 +969,11 @@ class OBdd extends OBdd_connexion
  @Param: l'archive à enregistrer ->
  @Return: $l_Treponse[0] = temoin ; $l_Treponse["val"] = "void"
 */
-
 	function check_archive_A( $Tarchive ) 
 	{
 		global $BFUNC ;
 
-		$l_Treponse["err"] = 0 ;
+		$l_Treponse["err"] = array( "id" => "0", "com" => "" ) ;
 		$l_Treponse["val"]["tab"] = "" ;
 		
 		$l_Treponse[0] = false ;
@@ -738,7 +991,7 @@ class OBdd extends OBdd_connexion
 		if ( ! in_array( $l_CtabName, $this->p_TnewTarchives ) )
 		{
 			// le type de $Tarchive["objectif"]["value"] est analysé, une table et les colonnes sont crées si besoin
-			$new = $this->tab_archive_A_create( $l_CtabName ) ;	
+			$this->tab_archive_A_create( $l_CtabName ) ;	
 		}
 
 		// VERIF dans la base 
@@ -769,27 +1022,34 @@ class OBdd extends OBdd_connexion
 				// on pourra enregistrer la ressource
 				if ( $l_i_doublon == 1 )
 				{
-					$l_Treponse["err"] = 4 ;
+					$l_Treponse["err"]["id"] = "4" ;
+					$l_Treponse["err"]["com"] = "archive not new" ;
 				}
 				else if ( $l_i_doublon > 1 )
 				{
-					$l_Treponse["err"] = 3 ;
+					$l_Treponse["err"]["id"] = "3" ;
+					$l_Treponse["err"]["com"] = "archive not new -> multiple" ;
 				}
 			}
 			else
 			{
-				$l_Treponse["err"] = 2 ;
+				$l_Treponse["err"]["id"] = "2" ;
 			}
 		}
 		else
 		{
-			$l_Treponse["err"] = 1 ;
+			$l_Treponse["err"]["id"] = "1" ;
 		}
 
-	// Fin Check archive
-		return $l_Treponse;
-	}
+		// on charge les erreurs dans la propriété qui permettra de les restituer en mode DEV
+    	$BFUNC->dev_mode( __METHOD__, $l_Treponse["err"] ) ;
 
+    	// on charge la reponse à retourner
+		return $l_Treponse ;
+
+	// Fin Check archive
+	}
+	// ------------------------------------
 
 
 /* PUSH ARCHIVE --------------------------- PUSH ARCHIVE
@@ -799,12 +1059,11 @@ class OBdd extends OBdd_connexion
  @Param: l'ARCHIVE à enregistrer ->
  @Return: $l_Treponse[0] = temoin ; $l_Treponse["val"] = "void"
 */
-
 	function push_archive_A( $Tarchive, $tab ) 
 	{
 		global $BFUNC ;
 
-		$l_Treponse["err"] = 0 ;
+		$l_Treponse["err"] = array( "id" => "0", "com" => "" ) ;
 		$l_Treponse["val"] = "void" ;
 		$l_Treponse[0] = false ;
 // ATTENTION LORSQUE LES DONNEES A ENREGISTRER SONT EN VARCHAR OU EN INT IL FAUT METTRE OU ENLEVER LES GUILLEMET, LE MIEUX SERAIT D4ENREGITRER TOUT EN VARCHAR ET D'ASSOCIER LE TYPE AVEC LA DONNEE !!!  999999999999999999
@@ -815,7 +1074,7 @@ class OBdd extends OBdd_connexion
 		}
 		else
 		{
-			$l_Treponse["err"] = 1 ;
+			$l_Treponse["err"]["id"] = "1" ;
 		}
 
 	// Fin push Archive
@@ -830,14 +1089,13 @@ class OBdd extends OBdd_connexion
  @Return: une table avec 0: BOOL ; val -> object STDClass à transformer en array si besoin  ; 
  "err" : letat derreur de la fonction
 */
-
 	function get_archives_A_good( $objectif ){
 
 		global $BFUNC ;
 
 		$l_Treponse[0] = false ;
 		$l_Treponse["val"] = array() ;
-		$l_Treponse["err"] = 0 ;
+		$l_Treponse["err"] = array( "id" => "0", "com" => "" ) ;
 
 		// on  recupere le type de la ressource à enregistrer
         // ATTENTION AU TYPE EXOTIQUE (NON SCALABLE -> une type SQL "none" !!!!!!!!!! )   XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXxxxx
@@ -864,15 +1122,19 @@ class OBdd extends OBdd_connexion
 
         	if ( $l_i == 0 )
         	{
-        		$l_Treponse["err"] = 2 ;
+        		$l_Treponse["err"]["id"] = "2" ;
         	}
             
         }
         else
         {
-        	$l_Treponse["err"] = 1 ;
+        	$l_Treponse["err"]["id"] = "1" ;
         }
 
+		// on charge les erreurs dans la propriété qui permettra de les restituer en mode DEV
+    	$BFUNC->dev_mode( __METHOD__, $l_Treponse["err"] ) ;
+
+    	// on charge la reponse à retourner
 		return $l_Treponse;
 
 	// Fin recup archives
@@ -886,14 +1148,13 @@ class OBdd extends OBdd_connexion
  @Return: une table avec 0: BOOL ; val -> object STDClass à transformer en array si besoin  ; 
  "err" : letat derreur de la fonction
 */
-
-	function get_archives_A_all( $objectif ){
-
+	function get_archives_A_all( $objectif ) 
+	{
 		global $BFUNC ;
 
 		$l_Treponse[0] = false ;
 		$l_Treponse["val"] = array() ;
-		$l_Treponse["err"] = 0 ;
+		$l_Treponse["err"] = array( "id" => "0", "com" => "" ) ;
 
 		// on  recupere le type de la ressource à enregistrer
         // ATTENTION AU TYPE EXOTIQUE (NON SCALABLE -> une type SQL "none" !!!!!!!!!! )   XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXxxxx
@@ -919,54 +1180,25 @@ class OBdd extends OBdd_connexion
 
         	if ( $l_i == 0 )
         	{
-        		$l_Treponse["err"] = 2 ;
+        		$l_Treponse["err"]["id"] = "2" ;
         	}
             
         }
         else
         {
-        	$l_Treponse["err"] = 1 ;
+        	$l_Treponse["err"]["id"] = "1" ;
         }
 
+		// on charge les erreurs dans la propriété qui permettra de les restituer en mode DEV
+    	$BFUNC->dev_mode( __METHOD__, $l_Treponse["err"] ) ;
+
+    	// on charge la reponse à retourner
 		return $l_Treponse;
 
 	// Fin recup archives ALL
 	}
 	// ------------------------------------
 
-/*
-	function test($arg) {
-		global $BDD;
-		if($req = $BDD->demande('SELECT id
-						FROM tab 
-						WHERE cpx="'.$arg.'"'))
-		{
-
-			$r = array();
-			$i_doublon = 0 ;
-
-			while ($d = $req->fetch(PDO::FETCH_OBJ)){
-				$i_doublon++;
-				$r[$i_doublon]['id'] = $d->id ;
-
-			}
-
-			if ($i_doublon == 0){
-				//la cle nexiste pas
-				$l_Treponse[0] = true ;
-
-			}
-			else if($i_doublon == 1){$l_Treponse["err"] = 4 ;}
-			else if($i_doublon > 1){$l_Treponse["err"] = 5 ;}
-
-		}else{$l_Treponse["err"] = 3 ;}
-
-			
-	return $l_Treponse;
-	}
-	// ------------------------------------
-
-*/
 
 
 

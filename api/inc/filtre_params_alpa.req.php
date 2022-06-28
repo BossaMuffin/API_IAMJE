@@ -6,6 +6,7 @@
 $filtresJeton = true ;
 $filtresListe = "" ;
 
+
 if ( ! $tFiltre["mode"] ) 
 {
     $filtresJeton = false ;
