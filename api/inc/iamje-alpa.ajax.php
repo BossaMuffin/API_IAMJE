@@ -72,22 +72,26 @@ $BFUNC->show( $$l_ALPA->affichage_serie_A_ordres( ) ) ;
 
 
 // Resultats
+echo "NEW RESULTATS :" ;
 $BFUNC->show( $$l_ALPA->p_Tresultats ) ;
-
+echo "<br/><br/>" ;
 // Archives
+echo "NEW ARCHIVES :" ;
 $BFUNC->show( $RESSOURCES->p_Tarchives ) ;
-
+echo "<br/><br/>" ;
 // Ressources
+echo "NEW RESSOURCES :" ;
 $BFUNC->show( $RESSOURCES->p_Tressources ) ;
+echo "<br/><br/>" ;
 
-echo "TRACES NOMS:" ;
-(string) $BFUNC->show( $BDD->p_TnewTtraces ) ;
-echo "RESSOURCES NOMS:" ;
-$BFUNC->show( $BDD->p_TnewTressources ) ;
-echo "ARCHIVES NOMS:" ;
-$BFUNC->show( $BDD->p_TnewTarchives ) ;
+
+
+
+
 
 include( $g_page_arbo . FOLD_INC . "body-dev-erreurs.inc.php" ) ;
+
+
 
 /* TEST BDD -> NEW TABLE, DROP TABLE, NEW COLUMN*/ 
 /*
@@ -152,5 +156,18 @@ $CcolDelais = "delais" ;
 $CcolCompt = "compteur" ;
 $l_newArchiveT = $BDD->tab_archive_A_create( $CtabName, $CcolId, $CcolObj, $CcolMat, $CcolOuts, $CcolSeq, $CcolResult, $CcolDist, $CcolRatio, $CcolDelais, $CcolCompt ) ;
 echo $l_newArchiveT["err"] ;
+
+
+
+
+echo "TRACES NOMS:" ;
+(string) $BFUNC->show( $BDD->p_TnewTtraces ) ;
+echo "<br/>" ;
+echo "RESSOURCES NOMS:" ;
+$BFUNC->show( $BDD->p_TnewTressources ) ;
+echo "ARCHIVES NOMS:" ;
+$BFUNC->show( $BDD->p_TnewTarchives ) ;
+
+
 */
 // ---------------------------------------------------------------------------------------------- 

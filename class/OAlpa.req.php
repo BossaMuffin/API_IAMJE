@@ -29,6 +29,7 @@ class OAlpa
     // public $p_Caffichage_serie_A_ordres = "" ;
     public $p_Caffichage_serie_A = "" ;
 
+
 // Var de construction
     private $g_CinstanceName = "nom de l'instance ALPA" ;
     public $g_Tobjectifs ;
@@ -50,16 +51,15 @@ class OAlpa
         $this->g_Tressources = $T_ressources ;
         $this->g_mode = $mode ;
 
-        // BDD -> on trace les ordres envoyés et on recupere dans ["val"] l'id de l'insert dans la BDD
+        // BDD -> on trace les ordres envoyés et on recupere dans $BDD->p_NtraceId l'id de l'insert dans la BDD
         $l_Ttrace = $this->trace_ordres() ;
-        
         // ---------------------------------------------------------------------------------------------- 
         // APPEL DE LA FONCTION ELEMENTAIRE EN MODE D'APPRENTISSAGE "ALPA":"A" 
         // $g_Tressources["outils"] se trouve dans $LFUNC
         if ( $l_Ttrace[0] and $this->serie_A() ) 
         {
-            // on UPDATE la trace si ALPA aboutit
-            $BDD->push_trace_A_running( $l_Ttrace["val"] ) ;
+            // on UPDATE la trace avec kle dernier insert ID $l_Ttrace["val"] si ALPA aboutit 
+            $BDD->push_trace_A_running( $BDD->p_NtraceId ) ;
         }
 
     // fin construct 
@@ -81,7 +81,7 @@ class OAlpa
 * memorise les ordres donnés à ALPA
 * @param : 
 * @value : none
-* @return : bool de resussite (mail ou url) + val (l'id de  l'insert)  
+* @return : bool de resussite (mail ou url)
 */
   function trace_ordres()
   {
@@ -91,7 +91,7 @@ class OAlpa
     $l_jeton = true ;
 
     $l_Treponse["err"] = array( "id" => "0", "com" => "" ) ;
-    $l_Treponse["val"] = 0 ;
+    $l_Treponse["val"] = "void" ;
     $l_Treponse[0] = false ;
 
     // propriété $BDD qui garde en memoire le check + create table colonne
@@ -107,7 +107,8 @@ class OAlpa
     {
         $l_Treponse[0] = true ;
         // on recupere l'ID de cette INSERT
-        $l_Treponse["val"] = $BDD->lastInsertID() ;
+        $BDD->p_NtraceId = $BDD->lastInsertID() ;
+
     }
     else
     {
@@ -316,8 +317,7 @@ class OAlpa
                     // différence en millisecondes entre le début et la fin
                 $l_timestamp_ms_difference = $l_timestamp_ms_fin - $l_timestamp_ms_debut ;
 
-            // Fin de la boucle while
-            }
+            
             /* -------------------------------------- ENREGISTREMENT DE L'APPRENTISSAGE ISSU DU TRAVAIL EFFECTUÉ --------------------------------- */
             // ENREGISTREMENT DES RESULTATS ET DES RESSOURCES DÉCOUVERTES  
             // on rend réutilisable
@@ -325,6 +325,13 @@ class OAlpa
 
             // enregistrement dans la base de donnée et en live
             // controle de l'existence similaire, sinon on enregistre
+            $RESSOURCES->push_ressource( $l_Treponse->p_T["resultat"]["value"] ) ;
+            $RESSOURCES->push_archive_A( $l_Treponse->p_T ) ;           
+
+
+            }
+
+           // Fin de la boucle while
             $RESSOURCES->push_ressource( $l_Treponse->p_T["resultat"]["value"] ) ;
             $RESSOURCES->push_archive_A( $l_Treponse->p_T ) ;
 

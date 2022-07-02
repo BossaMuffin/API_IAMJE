@@ -47,8 +47,10 @@ class OBdd extends OBdd_connexion
     						"arch" 	=> "A_",
     						"outs" 	=> "O_"	] ;
     public $p_Tcol = array() ;						
-// constantes
+    // l'id de l'ordre de calcul (id de ligne entrée dans la BDD table T_ordres par trace_ordres)
+    public $p_NtraceId ;
 
+// constantes
 	private $CLIENT_KEY_ID = "coz-IAMJE-001" ;
 
 
@@ -65,6 +67,7 @@ class OBdd extends OBdd_connexion
         $this->p_Tcol["all"]["date"] 		= $this->p_Tprefixes["cpx"] . "datetime" ;
 
 		// liste des champs que l'on retrouve dans la table de trace des ordres ALPA
+		$this->p_Tcol["trace"]["mode"] 		= $this->p_Tprefixes["cpx"] . "mode" ;
 		$this->p_Tcol["trace"]["run"] 		= $this->p_Tprefixes["cpx"] . "run" ;
 		$this->p_Tcol["trace"]["obj"] 		= $this->p_Tprefixes["cpx"] . "objectif" ;
 		$this->p_Tcol["trace"]["mat"] 		= $this->p_Tprefixes["cpx"] . "matieres" ;
@@ -86,9 +89,12 @@ class OBdd extends OBdd_connexion
 		$this->p_Tcol["arch"]["ratio"] 		= $this->p_Tprefixes["cpx"] . "precision" ;
 		$this->p_Tcol["arch"]["delais"] 	= $this->p_Tprefixes["cpx"] . "delais" ;
 		$this->p_Tcol["arch"]["compt"] 		= $this->p_Tprefixes["cpx"] . "compteur" ;
+		$this->p_Tcol["arch"]["trace"] 		= $this->p_Tprefixes["cpx"] . "trace" ;
 		
 		// liste des champs que l'on retrouve dans la table des ressources ALPA
 		$this->p_Tcol["ress"]["valeur"] 	= $this->p_Tprefixes["cpx"] . "valeur" ;
+		$this->p_Tcol["ress"]["trace"] 		= $this->p_Tprefixes["cpx"] . "trace" ;
+
 
 	} // fin construct
 
@@ -441,12 +447,21 @@ class OBdd extends OBdd_connexion
         $l_Treponse["err"]["com"] = "cols not new" ;
     }
 
+// Col MODE -> si le calcul issu de la trace à abouti
+    $l_TnewCol = $this->tab_add_col( $CtabName, $this->p_Tcol["trace"]["mode"], $BFUNC->p_Ttypes[4]["bdd"], 10 ) ;
+    if ( ! $l_TnewCol[0] )
+    {
+        $l_jeton = false ;
+        $l_Treponse["err"]["id"] .= "- 2 " ;
+        $l_Treponse["err"]["com"] = "cols not new" ;
+    } 
+
 // Col RUN -> si le calcul issu de la trace à abouti
     $l_TnewCol = $this->tab_add_col( $CtabName, $this->p_Tcol["trace"]["run"], $BFUNC->p_Ttypes[11]["bdd"], $BFUNC->p_Ttypes[11]["size"], "DEFAULT FALSE NOT NULL" ) ;
     if ( ! $l_TnewCol[0] )
     {
         $l_jeton = false ;
-        $l_Treponse["err"]["id"] .= "- 2 " ;
+        $l_Treponse["err"]["id"] .= "- 3 " ;
         $l_Treponse["err"]["com"] = "cols not new" ;
     } 
 // Col OBJECTIFS
@@ -454,7 +469,7 @@ class OBdd extends OBdd_connexion
     if ( ! $l_TnewCol[0] )
     {
         $l_jeton = false ;
-        $l_Treponse["err"]["id"] .= "- 3 " ;
+        $l_Treponse["err"]["id"] .= "- 4 " ;
         $l_Treponse["err"]["com"] = "cols not new" ;
     }
 // Col MATIERES
@@ -462,7 +477,7 @@ class OBdd extends OBdd_connexion
     if ( ! $l_TnewCol[0] )
     {
         $l_jeton = false ;
-        $l_Treponse["err"]["id"] .= "- 4 " ;
+        $l_Treponse["err"]["id"] .= "- 5 " ;
         $l_Treponse["err"]["com"] = "cols not new" ;
     }
 // Col OUTILS
@@ -470,7 +485,7 @@ class OBdd extends OBdd_connexion
     if ( ! $l_TnewCol[0] )
     {
         $l_jeton = false ;
-        $l_Treponse["err"]["id"] .= "- 5 " ;
+        $l_Treponse["err"]["id"] .= "- 6 " ;
         $l_Treponse["err"]["com"] = "cols not new" ;
     }
 // Col DISTANCE MIN
@@ -478,7 +493,7 @@ class OBdd extends OBdd_connexion
     if ( ! $l_TnewCol[0] )
     {
         $l_jeton = false ;
-        $l_Treponse["err"]["id"] .= "- 6 " ;
+        $l_Treponse["err"]["id"] .= "- 7 " ;
         $l_Treponse["err"]["com"] = "cols not new" ;
     }
 // Col RATIO / PRECISION  MIN
@@ -486,7 +501,7 @@ class OBdd extends OBdd_connexion
     if ( ! $l_TnewCol[0] )
     {
         $l_jeton = false ;
-        $l_Treponse["err"]["id"] .= "- 7 " ;
+        $l_Treponse["err"]["id"] .= "- 8 " ;
         $l_Treponse["err"]["com"] = "cols not new" ;
     }
 // Col DELAIS DE CALCUL MAX
@@ -494,7 +509,7 @@ class OBdd extends OBdd_connexion
     if ( ! $l_TnewCol[0] )
     {
         $l_jeton = false ;
-        $l_Treponse["err"]["id"] .= "- 8 " ;
+        $l_Treponse["err"]["id"] .= "- 9 " ;
         $l_Treponse["err"]["com"] = "cols not new" ;
     }
 // Col CLIENT KEY
@@ -502,7 +517,7 @@ class OBdd extends OBdd_connexion
     if ( ! $l_TnewCol[0] )
     {
         $l_jeton = false ;
-        $l_Treponse["err"]["id"] .= "- 9 " ;
+        $l_Treponse["err"]["id"] .= "- 10 " ;
         $l_Treponse["err"]["com"] = "cols not new" ;
     }
 // Col DATETIME -> timestamp de création
@@ -510,7 +525,7 @@ class OBdd extends OBdd_connexion
 	if ( ! $l_TnewCol[0] )
 	{
 		$l_jeton = false ;
-		$l_Treponse["err"]["id"] .= "- 10 " ;
+		$l_Treponse["err"]["id"] .= "- 11 " ;
 		$l_Treponse["err"]["com"] = "cols not new" ;
 	}
 
@@ -519,7 +534,7 @@ class OBdd extends OBdd_connexion
     if ( ! $l_TnewCol[0] )
     {
         $l_jeton = false ;
-        $l_Treponse["err"]["id"] .= "- 11 " ;
+        $l_Treponse["err"]["id"] .= "- 12 " ;
         $l_Treponse["err"]["com"] = "cols not new" ;
     }
 // Col ERR - enregistrement des erreurs au sein des fonctions -> visible en mode développement 
@@ -527,7 +542,7 @@ class OBdd extends OBdd_connexion
     if ( ! $l_TnewCol[0] )
     {
         $l_jeton = false ;
-        $l_Treponse["err"]["id"] .= "- 12 " ;
+        $l_Treponse["err"]["id"] .= "- 13 " ;
         $l_Treponse["err"]["com"] = "cols not new" ;
     }
 
@@ -566,8 +581,8 @@ class OBdd extends OBdd_connexion
 		$l_Treponse["val"] = "void" ;
 		$l_Treponse[0] = false ;
 // ATTENTION LORSQUE LES DONNEES A ENREGISTRER SONT EN VARCHAR OU EN INT IL FAUT METTRE OU ENLEVER LES GUILLEMET, LE MIEUX SERAIT D4ENREGITRER TOUT EN VARCHAR ET D'ASSOCIER LE TYPE AVEC LA DONNEE !!!  999999999999999999
-		if ( $this->demande( 'INSERT INTO ' . $Ctab . ' (' . $this->p_Tcol["trace"]["obj"] . ', ' . $this->p_Tcol["trace"]["mat"] . ', ' . $this->p_Tcol["trace"]["outs"] . ', ' . $this->p_Tcol["trace"]["dist"] . ', ' . $this->p_Tcol["trace"]["ratio"] . ', ' . $this->p_Tcol["trace"]["delais"] . ', ' . $this->p_Tcol["all"]["client_key"] . ', ' . $this->p_Tcol["trace"]["dev"] . ', ' . $this->p_Tcol["trace"]["err"] . ') 
-							VALUES ("' . $_GET["obj"] . '", "' . $_GET["mat"] . '", "' . $_GET["outs"] . '", ' . $_GET["dist"] . ', ' . $_GET["ratio"] . ', ' . $_GET["delais"] . ', "' . $this->CLIENT_KEY_ID . '", "' . $BFUNC->p_BdevModeShow . '", "' . print_r( $BFUNC->p_Terreurs, true ) . '")' ) )
+		if ( $this->demande( 'INSERT INTO ' . $Ctab . ' (' . $this->p_Tcol["trace"]["mode"] . ', ' . $this->p_Tcol["trace"]["obj"] . ', ' . $this->p_Tcol["trace"]["mat"] . ', ' . $this->p_Tcol["trace"]["outs"] . ', ' . $this->p_Tcol["trace"]["dist"] . ', ' . $this->p_Tcol["trace"]["ratio"] . ', ' . $this->p_Tcol["trace"]["delais"] . ', ' . $this->p_Tcol["all"]["client_key"] . ', ' . $this->p_Tcol["trace"]["dev"] . ', ' . $this->p_Tcol["trace"]["err"] . ') 
+							VALUES ("' . $_GET["mode"] . '", "' . $_GET["obj"] . '", "' . $_GET["mat"] . '", "' . $_GET["outs"] . '", ' . $_GET["dist"] . ', ' . $_GET["ratio"] . ', ' . $_GET["delais"] . ', "' . $this->CLIENT_KEY_ID . '", "' . $BFUNC->p_BdevModeShow . '", "' . print_r( $BFUNC->p_Terreurs, true ) . '")' ) )
 		{
 			$l_Treponse[0] = true ;
 		}
@@ -597,7 +612,7 @@ class OBdd extends OBdd_connexion
 		if ( $this->demande(   	'UPDATE ' . $Ctab . 
 								' SET ' 	. $this->p_Tcol["trace"]["run"] . ' = 1, ' 
 										. $this->p_Tcol["trace"]["err"] . ' = "' . print_r( $BFUNC->p_Terreurs, true ) . '" 
-								WHERE id = ' . $l_NlastInsertID ) )
+								WHERE id = "' . $l_NlastInsertID . '"' ) )
 		{
 			$l_Treponse[0] = true ;
 		}
@@ -654,13 +669,21 @@ class OBdd extends OBdd_connexion
 			$l_Treponse["err"]["id"] .= "- 2 " ;
 			$l_Treponse["err"]["com"] = "cols not new" ;
 		}
-
-		// Col CLIENT KEY
-		$l_TnewCol = $this->tab_add_col( $CtabName, $this->p_Tcol["all"]["client_key"], $BFUNC->p_Ttypes[4]["bdd"], $BFUNC->p_Ttypes[4]["size"]  ) ;
+		// Col TRACE ID -> clé secondaire de la table T_ordres (permet de relier la ressource avec les ordres lors de sa création)
+		$l_TnewCol = $this->tab_add_col( $CtabName, $this->p_Tcol["ress"]["trace"], $BFUNC->p_Ttypes[2]["bdd"], 0 ) ;
 		if ( ! $l_TnewCol[0] )
 		{
 			$l_jeton = false ;
 			$l_Treponse["err"]["id"] .= "- 3 " ;
+			$l_Treponse["err"]["com"] = "cols not new" ;
+		}
+
+		// Col CLIENT KEY
+		$l_TnewCol = $this->tab_add_col( $CtabName, $this->p_Tcol["all"]["client_key"], $BFUNC->p_Ttypes[4]["bdd"], $BFUNC->p_Ttypes[4]["size"] ) ;
+		if ( ! $l_TnewCol[0] )
+		{
+			$l_jeton = false ;
+			$l_Treponse["err"]["id"] .= "- 4 " ;
 			$l_Treponse["err"]["com"] = "cols not new" ;
 		}
 
@@ -669,7 +692,7 @@ class OBdd extends OBdd_connexion
 		if ( ! $l_TnewCol[0] )
 		{
 			$l_jeton = false ;
-			$l_Treponse["err"]["id"] .= "- 4 " ;
+			$l_Treponse["err"]["id"] .= "- 5 " ;
 			$l_Treponse["err"]["com"] = "cols not new" ;
 		}
 
@@ -790,8 +813,8 @@ class OBdd extends OBdd_connexion
 		$l_Treponse[0] = false ;
 
 		if ( $this->demande( 'INSERT INTO ' . $tab . ' 
-										(' . $this->p_Tcol["ress"]["valeur"] . ', ' . $this->p_Tcol["all"]["client_key"] . ') 
-										VALUES ("' . $ressource . '", "' . $this->CLIENT_KEY_ID . '")' ) )
+										(' . $this->p_Tcol["ress"]["valeur"] . ', ' . $this->p_Tcol["ress"]["trace"] . ', ' . $this->p_Tcol["all"]["client_key"] . ') 
+										VALUES ("' . $ressource . '", "' . $this->p_NtraceId . '", "' . $this->CLIENT_KEY_ID . '")' ) )
 		{
 			$l_Treponse[0] = true ;
 		}
@@ -925,12 +948,20 @@ class OBdd extends OBdd_connexion
 			$l_Treponse["err"]["id"] .= "- 11 " ;
 			$l_Treponse["err"]["com"] = "cols not new" ;
 		}
+// Col TRACE l'id de la trace des ordres données - clé secondaire de la table T_ordres
+		$l_TnewCol = $this->tab_add_col( $CtabName, $this->p_Tcol["arch"]["trace"], $BFUNC->p_Ttypes[2]["bdd"], 0 ) ;
+		if ( ! $l_TnewCol[0] )
+		{
+			$l_jeton = false ;
+			$l_Treponse["err"]["id"] .= "- 12 " ;
+			$l_Treponse["err"]["com"] = "cols not new" ;
+		}
 // Col CLIENT KEY qui identifie l'origine du calcul
 		$l_TnewCol = $this->tab_add_col( $CtabName, $this->p_Tcol["all"]["client_key"], $BFUNC->p_Ttypes[4]["bdd"], $BFUNC->p_Ttypes[4]["size"]  ) ;
 		if ( ! $l_TnewCol[0] )
 		{
 			$l_jeton = false ;
-			$l_Treponse["err"]["id"] .= "- 12 " ;
+			$l_Treponse["err"]["id"] .= "- 13 " ;
 			$l_Treponse["err"]["com"] = "cols not new" ;
 		}
 // Col DATETIME -> timestamp de création
@@ -938,7 +969,7 @@ class OBdd extends OBdd_connexion
 		if ( ! $l_TnewCol[0] )
 		{
 			$l_jeton = false ;
-			$l_Treponse["err"]["id"] .= "- 13 " ;
+			$l_Treponse["err"]["id"] .= "- 14 " ;
 			$l_Treponse["err"]["com"] = "cols not new" ;
 		}
 
@@ -1067,8 +1098,8 @@ class OBdd extends OBdd_connexion
 		$l_Treponse["val"] = "void" ;
 		$l_Treponse[0] = false ;
 // ATTENTION LORSQUE LES DONNEES A ENREGISTRER SONT EN VARCHAR OU EN INT IL FAUT METTRE OU ENLEVER LES GUILLEMET, LE MIEUX SERAIT D4ENREGITRER TOUT EN VARCHAR ET D'ASSOCIER LE TYPE AVEC LA DONNEE !!!  999999999999999999
-		if ( $this->demande( 'INSERT INTO ' . $tab . ' (' . $this->p_Tcol["arch"]["id"] . ', '. $this->p_Tcol["arch"]["obj"] . ', ' . $this->p_Tcol["arch"]["mat"] . ', ' . $this->p_Tcol["arch"]["outs"] . ', ' . $this->p_Tcol["arch"]["seq"] . ', ' . $this->p_Tcol["arch"]["result"] . ', ' . $this->p_Tcol["arch"]["dist"] . ', ' . $this->p_Tcol["arch"]["ratio"] . ', ' . $this->p_Tcol["arch"]["delais"] . ', ' . $this->p_Tcol["arch"]["compt"] . ', ' . $this->p_Tcol["all"]["client_key"] . ') 
-							VALUES ("' . $Tarchive["id"] . '", "' . $Tarchive["objectif"]["value"] . '", "' . $Tarchive["matieres"]["value"][0] . '", "' . $Tarchive["outils"]["value"][0] . '", "' . $Tarchive["sequence"]["value"] . '", "' . $Tarchive["resultat"]["value"] . '", ' . $Tarchive["datas"]["distance"] . ', ' . $Tarchive["datas"]["precision"] . ', ' . $Tarchive["datas"]["delais"] . ', ' . $Tarchive["datas"]["compteur"] . ', "' . $this->CLIENT_KEY_ID . '")' ) )
+		if ( $this->demande( 'INSERT INTO ' . $tab . ' (' . $this->p_Tcol["arch"]["id"] . ', '. $this->p_Tcol["arch"]["obj"] . ', ' . $this->p_Tcol["arch"]["mat"] . ', ' . $this->p_Tcol["arch"]["outs"] . ', ' . $this->p_Tcol["arch"]["seq"] . ', ' . $this->p_Tcol["arch"]["result"] . ', ' . $this->p_Tcol["arch"]["dist"] . ', ' . $this->p_Tcol["arch"]["ratio"] . ', ' . $this->p_Tcol["arch"]["delais"] . ', ' . $this->p_Tcol["arch"]["compt"] . ', ' . $this->p_Tcol["arch"]["trace"] . ', ' . $this->p_Tcol["all"]["client_key"] . ') 
+							VALUES ("' . $Tarchive["id"] . '", "' . $Tarchive["objectif"]["value"] . '", "' . $Tarchive["matieres"]["value"][0] . '", "' . $Tarchive["outils"]["value"][0] . '", "' . $Tarchive["sequence"]["value"] . '", "' . $Tarchive["resultat"]["value"] . '", ' . $Tarchive["datas"]["distance"] . ', ' . $Tarchive["datas"]["precision"] . ', ' . $Tarchive["datas"]["delais"] . ', ' . $Tarchive["datas"]["compteur"] . ', "' . $this->p_NtraceId . '", "' . $this->CLIENT_KEY_ID . '")' ) )
 		{
 			$l_Treponse[0] = true ;
 		}

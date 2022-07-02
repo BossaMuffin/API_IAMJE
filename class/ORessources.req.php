@@ -155,7 +155,7 @@ class ORessources
     {
         global $BDD ;
 
-// on ne pourrait que checker dans la BDD !! XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+        // on ne pourrait que checker dans la BDD !! ??  XXXXXXXXXXXXXXXXXXXXXXXXx
         $l_ressource_exist = $this->check_ressource( $resultat ) ;
         $l_ressource_exist_BDD = $BDD->check_ressource( $resultat ) ;
 
@@ -182,8 +182,6 @@ class ORessources
     function recherche_des_possibles( $objectifs )
     {
         global $BDD ;
-        global $BFUNC ;
-        global $RESULTAT ;
 
         //ce jeton permet de savoir si l'objectif est déjà connu en tant que ressource
         $l_jeton = false ;
@@ -239,7 +237,7 @@ class ORessources
             if ( $l_jeton_BDD )
             {
     // l'archive est en BDD-----------------------------------------
-                // on recupere toutes les archives qui ont l'objectif pour resultat
+                // on recupere toutes les archives (avec le CLIENT ID KEY) qui ont l'objectif pour resultat dans la BDD
                 $l_Tarchives_BDD = $BDD->get_archives_A_good( $objectifs ) ;
 
                 $l_Tarchives = array() ;
@@ -309,7 +307,7 @@ class ORessources
             $l_Tdifferences = array() ;
 
  // l'archive est en BDD-----------------------------------------
-            // on recupere toutes les archives qui ont l'objectif pour resultat
+            // on recupere toutes les archives (avec le CLIENT ID KEY) dans la BDD
             $l_Tarchives_BDD = $BDD->get_archives_A_all( $objectifs ) ;
             $l_Tressource = array() ;
 
@@ -320,6 +318,7 @@ class ORessources
             foreach ( $l_Tarchives_BDD["val"] as $l_key => $l_Tarchive_BDD ) 
             {
 // TROUVER UN MOYEN DE MODELISER/GENERALISER LA CONVERSION
+
                 $l_Tarchive_BDD = (array)$l_Tarchive_BDD;
                 $l_Tarchives[$l_key]["id"]                   = $l_Tarchive_BDD[$BDD->p_Tcol["arch"]["id"]] ; 
                 $l_Tarchives[$l_key]["objectif"]["value"]    = $l_Tarchive_BDD[$BDD->p_Tcol["arch"]["obj"]] ; 
@@ -332,6 +331,12 @@ class ORessources
                 $l_Tarchives[$l_key]["datas"]["delais"]      = $l_Tarchive_BDD[$BDD->p_Tcol["arch"]["delais"]] ;
                 $l_Tarchives[$l_key]["datas"]["compteur"]    = $l_Tarchive_BDD[$BDD->p_Tcol["arch"]["compt"]] ;
                 
+
+                // on enregistre toutes la table des archives de la BDD (avec le CLIENT ID KEY) dans $this->p_Tarchives
+                // evite de faire cette grosse requete à plusieurs reprise dans le même ALPA WORK 
+                // (car testé au début de la fonction recherche des possibles) 
+                array_push( $this->p_Tarchives, $l_Tarchives[$l_key] ) ;
+
     // Pour mémoire
         // on compare tous les objectifs déjà atteints avec l'objectif demandé et on prend le plus proche
         // à adapter a chaque forme de ressource ...
