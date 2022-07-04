@@ -85,8 +85,11 @@ $BFUNC->show( $RESSOURCES->p_Tressources ) ;
 echo "<br/><br/>" ;
 
 
-
-
+$Ctab_nom = "T_ordres" ;
+$Ccol_nom = "id" ;
+echo "<u>MAX</u> :<br/>" ;
+$BFUNC->show( $BDD->tab_max_id( $Ctab_nom, $Ccol_nom )["val"] ) ;
+echo "<br/>" ;
 
 
 include( $g_page_arbo . FOLD_INC . "body-dev-erreurs.inc.php" ) ;

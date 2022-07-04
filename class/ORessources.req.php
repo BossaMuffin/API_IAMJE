@@ -75,10 +75,10 @@ class ORessources
         // $p_Tarchives[$l_i_id]["datas"]["compteur"] = $Tresultats["datas"]["compteur"]
 
             if ( $l_Tarchive["objectif"]["value"] == $Tresultat["objectif"]["value"] 
-                and $l_Tarchive["matieres"]["value"] == $Tresultat["matieres"]["value"]
+                and $l_Tarchive["matieres"] == $Tresultat["matieres"]
                 and $l_Tarchive["outils"]["value"] == $Tresultat["outils"]["value"]
                 and $l_Tarchive["sequence"]["value"] == $Tresultat["sequence"]["value"]
-                and $l_Tarchive["resultat"]["value"] == $Tresultat["resultat"]["value"] ) 
+                and $l_Tarchive["resultat"] == $Tresultat["resultat"] ) 
             {
                 $l_archive_exist = true ;
             }

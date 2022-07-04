@@ -59,7 +59,7 @@ class OAlpa
         if ( $l_Ttrace[0] and $this->serie_A() ) 
         {
             // on UPDATE la trace avec kle dernier insert ID $l_Ttrace["val"] si ALPA aboutit 
-            $BDD->push_trace_A_running( $BDD->p_NtraceId ) ;
+            $BDD->push_trace_A_running( $BDD->p_NtraceId, $BDD->p_CtabTracesName ) ;
         }
 
     // fin construct 
@@ -98,10 +98,10 @@ class OAlpa
     if ( ! $BDD->p_TnewTtraces )
     {
         // une table T_ordres et les colonnes de trace sont crées si besoin
-        $BDD->tab_trace_A_create( ) ; 
+        $BDD->tab_trace_A_create( $BDD->p_CtabTracesName ) ; 
     }
     // on enregistre les ordres issues de GET     
-    $l_TnewTrace = $BDD->push_trace_A() ;
+    $l_TnewTrace = $BDD->push_trace_A( $BDD->p_CtabTracesName ) ;
     
     if ( $l_TnewTrace[0] )
     {
@@ -297,6 +297,7 @@ class OAlpa
                 else
                 {
                     $g_Tpossibles = $RESSOURCES->recherche_des_possibles( $g_Tpossibles["relais"][0]["value"] ) ;
+                    // on incremente le compteur d'utilisation "memo" memoire 
                 }
 
             // -------------------- MEMORISATION DU CHEMIN DEJA PARCOURU DANS OTRESULTAT  XXXXXXXXXXXXXXXXXXXXXXXXXXXXXxxxx
@@ -317,7 +318,9 @@ class OAlpa
                     // différence en millisecondes entre le début et la fin
                 $l_timestamp_ms_difference = $l_timestamp_ms_fin - $l_timestamp_ms_debut ;
 
-            
+
+// ATTENTIOn PROBLEME DE COMPTEUR -> MEMO n'enregistre pas les sequence intermédiaires !!!!!!!!! XXXXXXXXXXXXXXXXXXXXXxxx  999999999999999999999999ç
+                
             /* -------------------------------------- ENREGISTREMENT DE L'APPRENTISSAGE ISSU DU TRAVAIL EFFECTUÉ --------------------------------- */
             // ENREGISTREMENT DES RESULTATS ET DES RESSOURCES DÉCOUVERTES  
             // on rend réutilisable
@@ -403,6 +406,8 @@ class OAlpa
 */
     function serie_A( )
     {
+        global $BFUNC ;
+        global $BDD ;
         // Afffichage des ordres d'apprentissage 
         //$this->p_Caffichage_serie_A_ordres = $this->affichage_serie_A_ordres( $objectif_max ) ;
 
@@ -416,7 +421,10 @@ class OAlpa
 
             $l_i++ ;
             // 9999999999999 XXXXXXXXXXXXXXXXxx créer un objet de nommage des calculs
-            $g_i_id = "v1-" . $l_Tressources["outils"] . "-" . $l_i ;
+            $l_TobjType = $BFUNC->get_type( $l_objectif ) ;
+            $l_CtabName = $BDD->p_Tprefixes["arch"] . $l_TobjType["subval"] ;
+
+            $g_i_id = "v1-o" . $BDD->p_NtraceId . "-" . $l_Tressources["outils"] . "-" . $BDD->tab_max_id( $l_CtabName, "id" )["val"] ;
 
             // -------------------- TRAVAIL  
             // TRAVAIL D'APPRENTISAGE ELEMENTAIRE 

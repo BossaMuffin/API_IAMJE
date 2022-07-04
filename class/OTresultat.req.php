@@ -32,13 +32,16 @@ class OTresultat
 */
     function __construct( $g_objectif)
     {       
-        
+        global $BFUNC ;
+
         $this->p_T["id"] = "" ;
         $this->p_T["objectif"]["value"] = $g_objectif ;
-        $this->p_T["matieres"]["value"] = array() ;
+        $this->p_T["objectif"]["type"] = $BFUNC->get_type( $g_objectif )["subval"] ;
+        $this->p_T["matieres"] = array() ;
         $this->p_T["outils"]["value"] = array() ;
         $this->p_T["sequence"]["value"] = "" ;
         $this->p_T["resultat"]["value"] = 0 ;
+        $this->p_T["resultat"]["type"] = "" ;
         $this->p_T["datas"]["distance"] = $g_objectif ;
         $this->p_T["datas"]["precision"] = 0 ;
         $this->p_T["datas"]["delais"] = 0 ;
@@ -92,12 +95,20 @@ class OTresultat
 */  
     function mat( $Tparam )
     {
-        // on verifie que la matiere n'a pas été déjà noté dans la description du calcul
-        $l_Btest = in_array( $Tparam , $this->p_T["matieres"]["value"] ) ;
+        global $BFUNC ;
+        // on verifie que la matiere et son type n'ont pas été déjà noté dans la description du calcul
+        $l_Btest = in_array( $Tparam , $this->p_T["matieres"] ) ;
+        
 
         if ( ! $l_Btest )
         {
-            array_push( $this->p_T["matieres"]["value"], $Tparam ) ;
+            // on ajoute la ressource comme matiere de travail
+            $this->p_T["matieres"][]["value"] = $Tparam ;
+            // on recupere l'id d'ajout
+            $l_Nmat_id = array_search( $Tparam , $this->p_T["matieres"] ) ;
+            // on ajoute son type dans le tableau avec le meme id
+            $this->p_T["matieres"][$l_Nmat_id]["type"] = $BFUNC->get_type( $Tparam )["subval"] ;
+            
             return true ;
         }
         else
@@ -165,7 +176,11 @@ class OTresultat
 */  
     function res( $Rparam )
     {
+        global $BFUNC ;
+        // on ajoute le resultat au resultat deja enregistré (mode work)
         $this->p_T["resultat"]["value"] += $Rparam ;
+        // on ajoute son type
+        $this->p_T["resultat"]["type"] = $BFUNC->get_type( $Rparam )["subval"] ;
 
         if ( $this->p_T["resultat"]["value"] == 0 )
         {
