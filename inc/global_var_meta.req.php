@@ -39,6 +39,7 @@ if ( isset( $_GET["dev"] ) && ! empty( $_GET["dev"] ) && strlen( $_GET["dev"] ) 
 
 
 /* MAIN FOLDERS */
+const	FOLD_API = "api/" ;
 const	FOLD_CSS = "css/" ;
 const	FOLD_INC = "inc/" ;
 const	FOLD_JS = "js/" ;

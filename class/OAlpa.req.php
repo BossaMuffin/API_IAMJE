@@ -186,7 +186,7 @@ class OAlpa
             // Initialisation du taux de precision minimum
             $l_precision = 0 ;
                 // sequence de calculs (chemin utilisé)
-            $l_sequence = '[m]' . $this->g_Tressources["matieres"] ;
+            $l_sequence = '--m++' . $this->g_Tressources["matieres"] ;
             if ( $this->g_Tobjectifs["objectif"][$l_i_objectif] != $this->g_Tressources["matieres"] )
             {
                 // Boucle de calcul pour approche/distance de l'obejctif demandé
@@ -197,7 +197,7 @@ class OAlpa
                     // incrementation du compteur à chaque passage dans le calcul
                     $l_compteur++ ;
                     // incrémentation de la sequence
-                    $l_sequence .= '[o]' . $this->g_Tressources["outils"] . '[m]' . $this->g_Tressources["matieres"] ;
+                    $l_sequence .= '--o++' . $this->g_Tressources["outils"] . '--m++' . $this->g_Tressources["matieres"] ;
 
                     // lancement du calcul itératif 
                     $l_resultat = $LFUNC->$Coutils($l_resultat, $this->g_Tressources["matieres"]) ;
@@ -221,7 +221,7 @@ class OAlpa
             {
 
                 // incrémentation de la sequence
-                $l_sequence .= '[o]' . $this->g_Tressources["outils"] . '[m]' . $this->g_Tressources["matieres"] ;
+                $l_sequence .= '--o++' . $this->g_Tressources["outils"] . '--m++' . $this->g_Tressources["matieres"] ;
 
                 // Controle de précision de calcul et de respect des contraintes
                     // Estimation de l'approche/distance à l'objectif 
@@ -424,7 +424,7 @@ class OAlpa
             $l_TobjType = $BFUNC->get_type( $l_objectif ) ;
             $l_CtabName = $BDD->p_Tprefixes["arch"] . $l_TobjType["subval"] ;
 
-            $g_i_id = "v1-o" . $BDD->p_NtraceId . "-" . $l_Tressources["outils"] . "-" . $BDD->tab_max_id( $l_CtabName, "id" )["val"] ;
+            $g_i_id = "v1o" . $BDD->p_NtraceId . "-" . $l_Tressources["outils"] . "-" . $BDD->tab_max_id( $l_CtabName, "id" )["val"] ;
 
             // -------------------- TRAVAIL  
             // TRAVAIL D'APPRENTISAGE ELEMENTAIRE 

@@ -162,6 +162,30 @@ class OBaseFunctions
 
 
 
+/* --------- SHOW OR JSON -------------------------------------------------------- 
+* Permet soit un echo pour une var scalable, soit l'appelle de la méthode printr si c'est une var non scalable 
+* @param url de la page
+* @return charge l'url dans une propriété de la classe
+*/
+  function showOrJson( $var, $Cjeton, $json = true)
+  {
+    //if ( $json ){ $var = preg_replace('/[\[\]]/', '', json_encode( $var ) ) ; } // sans les crochets
+    if ( $json ){ $var = json_encode( $var ) ; }
+    if ( isset( $_GET["show"] ) )
+    { 
+        if ( $_GET["show"] == $Cjeton )
+        {
+          if ( $json ) { echo $var  ; } else { var_dump( $var ) ; }
+        }
+    }
+    else 
+    {
+        $this->show( $var ) ; 
+    }
+
+  // fin show or json
+  }
+  // ------------------------------------
 
 /* --------- SHOW VAR -------------------------------------------------------- 
 * Permet soit un echo pour une var scalable, soit l'appelle de la méthode printr si c'est une var non scalable 

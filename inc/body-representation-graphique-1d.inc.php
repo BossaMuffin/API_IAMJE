@@ -13,7 +13,7 @@
 
 // Construction d'une grille horizontale pour la progression d'un piont graphique de 0 à Objectif 
 // oncalcul la largeur d'une colonne comme un ratio de l'objectif -> 100% / objectif = width de la case
-$l_caseWidth = 100 / ( $$l_ALPA->g_Tobjectifs["objectif"][0] +1 )  ;
+$l_caseWidth = 100 / ( $l_objectif +1 )  ;
 
 echo '
         <div id="chessDesk">
@@ -24,7 +24,7 @@ echo '
                             <tr>
                                 <td class="boardAngle"></td>
     ' ;
-                            for ( $l_hcoord = 0 ; $l_hcoord <= $$l_ALPA->g_Tobjectifs["objectif"][0] ; $l_hcoord++ )
+                            for ( $l_hcoord = 0 ; $l_hcoord <= $l_objectif ; $l_hcoord++ )
                             {
                                 echo '<th class="horizCoords">' . $l_hcoord . '</th>' ;
 
@@ -40,7 +40,7 @@ echo '
                                 <th class="vertCoords">' . $l_vcoord . '</th>
     ' ;
 
-                            for ( $l_hcoord = 0 ; $l_hcoord <= $$l_ALPA->g_Tobjectifs["objectif"][0] ; $l_hcoord++ )
+                            for ( $l_hcoord = 0 ; $l_hcoord <= $l_objectif ; $l_hcoord++ )
                             {
                                 // on alterne la couleur des case : gris + blanc + gris + blanc
                                 if ( $l_hcoord&1 )
@@ -73,7 +73,7 @@ echo '
                                 <td class="boardAngle"></td>
     ' ;
             
-                            for ( $l_hcoord = 0 ; $l_hcoord <= $$l_ALPA->g_Tobjectifs["objectif"][0] ; $l_hcoord++ )
+                            for ( $l_hcoord = 0 ; $l_hcoord <= $l_objectif ; $l_hcoord++ )
                             {
                                 echo '<th class="horizCoords">' . $l_hcoord . '</th>' ;
 
