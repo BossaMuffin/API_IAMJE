@@ -17,11 +17,22 @@ const HTPROT = "http://" ;
 // --------------------------------    MODE DEV  ----->
 // les variables de mode développement
 
+//FILTER_VALIDATE_BOOLEAN
+/* 	Retourne TRUE pour "1", "true", "on" et "yes"
+*	Renvoie FALSE pour "0", "false", "off" et "no"
+*	Retourne NULL sinon. */
+
 // permet d'activer le mode d'enregistrement des erreurs
 	// doit on trâcer les erreurs ? par defaut on garde la trâce
+
+/* Requete type
+* 	http://iamje/api/index.php
+*	?show=off&ia=alpa&mode=learn&outs=addition&obj=12&mat=1&dist=1&delais=1000&ratio=0.8&err=on&dev=on
+*/
+
 $B_DEVMODERUN = true ;
 	
-if ( isset( $_GET["err"] ) && ! empty( $_GET["err"] ) && strlen( $_GET["err"] ) <= 5 ) 
+if ( isset( $_GET["err"] ) && ( ! empty( $_GET["err"] ) || $_GET["err"] == 0 ) && strlen( $_GET["err"] ) <= 5   ) 
 {
     $B_DEVMODERUN = filter_var( $_GET["err"], FILTER_VALIDATE_BOOLEAN ) ;
 }
@@ -30,13 +41,12 @@ if ( isset( $_GET["err"] ) && ! empty( $_GET["err"] ) && strlen( $_GET["err"] ) 
 // permet d'afficher la trace des erreurs des fonctions appelées
 	// doit on afficher la trâce des erreurs ? par defaut on ne l'affiche pas
 $B_DEVMODESHOW = false ;
-	
-if ( isset( $_GET["dev"] ) && ! empty( $_GET["dev"] ) && strlen( $_GET["dev"] ) <= 5 ) 
+
+if ( isset( $_GET["dev"] ) && ( ! empty( $_GET["dev"] ) || $_GET["dev"] == 0 ) && strlen( $_GET["dev"] ) <= 5 ) 
 {
     $B_DEVMODESHOW = filter_var( $_GET["dev"], FILTER_VALIDATE_BOOLEAN ) ;
 }
 // --------   Fin MODE DEV  ----->
-
 
 /* MAIN FOLDERS */
 const	FOLD_API = "api/" ;

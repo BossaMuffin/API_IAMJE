@@ -61,17 +61,17 @@ if ( ! isset($_GET['show']) )
 $g_Bjeton_index_1 = true ;
 
 // on aiguille en fonction de l'ia demandée
-switch ($_GET["ia"]) :
+switch ($_GET["ia"]):
     case $tIA[0]:
-        require_once( FOLD_INC . "iamje-alpa.ajax.php" );
-        break;
+        require_once( FOLD_INC . "iamje-alpa.ajax.php" ) ;
+        break ;
     case $tIA[1]:
-       	require_once( FOLD_INC . "iamje-alpa-1.ajax.php" );
-        break;
+       	require_once( FOLD_INC . "iamje-alpa-1.ajax.php" ) ;
+        break ;
     default:
-       	echo $tErrMess["api"];
+       	echo $tErrMess["api"] ;
 		exit;
-endswitch;
+endswitch ;
 
 
 

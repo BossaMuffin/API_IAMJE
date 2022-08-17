@@ -48,7 +48,8 @@ require( $l_Cprefixe_1 . "filtre_params_alpa.req.php" ) ;
 
 $g_Tressources = array ( "matieres"  => $_GET["mat"], "outils" => $_GET["outs"] ) ;
 $g_TobjectifsListe = explode( ",", $_GET["obj"] ) ;
-$test = $BFUNC->get_type($_GET["obj"]) ;
+
+//$test = $BFUNC->get_type($_GET["obj"]) ;
 
 $g_Tobjectifs = array ( "objectif"  => $g_TobjectifsListe, "distance" => $_GET["dist"], "precision" => $_GET["ratio"], "delais" => $_GET["delais"] ) ;
 
@@ -88,13 +89,16 @@ switch ($_GET["mode"]) :
 
     case $tMode[1]:
         // Retour ALPA en mode WORK
-        $BFUNC->showOrJson( $$l_ALPA->p_Tresultats, "off" ) ;
+        $BFUNC->showOrJson( $$l_ALPA->p_Tresultats, "off") ;
         break;
 
     default:
         echo $tErrMess["api"];
         exit;
 endswitch;
+
+include( $g_page_arbo . FOLD_INC . "body-dev-erreurs.inc.php" ) ;
+
 
 /*
 echo "TRACES NOMS:" ;

@@ -33,6 +33,12 @@ class OListeFunctions
 		return $s1+$s2;
 	}
 
+	// SOUTRACTION
+	function soustraction( $s1, $s2 ) 
+	{
+		return $s1-$s2;
+	}
+
 
 
 

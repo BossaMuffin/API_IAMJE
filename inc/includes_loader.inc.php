@@ -21,7 +21,10 @@ if ( ! isset( $metaIncludeJeton ) )
 if ( ! isset( $OBfuncIncludeJeton )  )
 {
     require_once( $g_page_arbo . FOLD_CLASS . 'OBaseFunctions.req.php' ) ;
-    $BFUNC = new OBaseFunctions( $B_DEVMODESHOW, $B_DEVMODERUN ) ;
+
+    //$BFUNC = new OBaseFunctions( $B_DEVMODESHOW, $B_DEVMODERUN ) ;
+    $BFUNC = new OBaseFunctions( $B_DEVMODERUN ) ;
+
 }
 
 // permet d'aiguiller l'IA entre les différents serveurs
@@ -76,4 +79,3 @@ if ( ! isset( $filtresIncludeJeton ) )
 {
     require_once( $g_page_arbo . FOLD_INC . "global_var_filtres.req.php" );
 }    
-

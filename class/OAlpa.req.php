@@ -42,6 +42,7 @@ class OAlpa
 * @Class utilisée : new OTresultat
 * @return : idem
 */
+
     function __construct( $g_CinstanceName, $T_objectifs, $T_ressources, $mode )
     {    
         global $BDD ;   
@@ -52,13 +53,16 @@ class OAlpa
         $this->g_mode = $mode ;
 
         // BDD -> on trace les ordres envoyés et on recupere dans $BDD->p_NtraceId l'id de l'insert dans la BDD
+
         $l_Ttrace = $this->trace_ordres() ;
+
         // ---------------------------------------------------------------------------------------------- 
         // APPEL DE LA FONCTION ELEMENTAIRE EN MODE D'APPRENTISSAGE "ALPA":"A" 
         // $g_Tressources["outils"] se trouve dans $LFUNC
         if ( $l_Ttrace[0] and $this->serie_A() ) 
         {
-            // on UPDATE la trace avec kle dernier insert ID $l_Ttrace["val"] si ALPA aboutit 
+
+            // on UPDATE la trace avec le dernier insert ID $l_Ttrace["val"] si ALPA aboutit 
             $BDD->push_trace_A_running( $BDD->p_NtraceId, $BDD->p_CtabTracesName ) ;
         }
 
@@ -114,7 +118,7 @@ class OAlpa
     {
         $l_Treponse["err"]["id"] = "1" ;
     }
-    
+
     // on charge les erreurs dans la propriété qui permettra de les restituer en mode DEV
     $BFUNC->dev_mode( __METHOD__, $l_Treponse["err"] ) ;
 
@@ -156,6 +160,7 @@ class OAlpa
 // peux pôrter à confusion avec des "a" matiere ou "b" outil complexe pouvant présenter la suite de caracteres [m] et [o] XXXXXXXXXXXXXx  999999999999
     function A( $l_i_objectif, $g_i_id = "defo_id" )
     {
+
         global $BDD ;
         global $LFUNC ;
         global $BFUNC ;
@@ -166,7 +171,7 @@ class OAlpa
         $l_timestamp_ms_debut = microtime( true ) ;
             // Initialisation de l'approche au delais
         $l_timestamp_ms_difference = 0 ;
- 
+
 // --------------- ------------------------------------- LEARN : APPRENTISSAGE ALPA ----------------------------------
         if ( $this->g_mode == "learn" )
         {
@@ -371,6 +376,7 @@ class OAlpa
 */
     function formate_A( $l_RESULTAT, $T_result, $Cid, $Nmatieres, $Coutils )
     {
+
         // -------------------- MEMORISATION DU CHEMIN DEJA PARCOURU DANS OTRESULTAT  
         // on peut ajouter les matières utilisées et les données (contraintes, objectifs, outils etc) du calcul originel
         // on construit l'id
@@ -422,6 +428,7 @@ class OAlpa
             $l_i++ ;
             // 9999999999999 XXXXXXXXXXXXXXXXxx créer un objet de nommage des calculs
             $l_TobjType = $BFUNC->get_type( $l_objectif ) ;
+
             $l_CtabName = $BDD->p_Tprefixes["arch"] . $l_TobjType["subval"] ;
 
             $g_i_id = "v1o" . $BDD->p_NtraceId . "-" . $l_Tressources["outils"] . "-" . $BDD->tab_max_id( $l_CtabName, "id" )["val"] ;

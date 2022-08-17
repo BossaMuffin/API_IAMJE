@@ -84,7 +84,7 @@ class OBaseFunctions
   // variable qui indique si on doit enregistrer la trâce des erreurs des fonctions appelées (par défaut, on garde la trâce)
   public $p_BdevModeRun = true ;
   // affiche le mode développement
-  public $p_BdevModeShow ;
+  public $p_BdevModeShow = false ;
 
 
 /* ---------------- CONSTRUCTEUR ----------------------------- 
@@ -96,6 +96,7 @@ class OBaseFunctions
 
     $this->p_BdevModeRun = $B_DEVMODERUN ;
     $this->p_BdevModeShow = $B_DEVMODESHOW ;
+
 
   // fin construct
   }
@@ -169,6 +170,7 @@ class OBaseFunctions
 */
   function showOrJson( $var, $Cjeton, $json = true)
   {
+
     //if ( $json ){ $var = preg_replace('/[\[\]]/', '', json_encode( $var ) ) ; } // sans les crochets
     if ( $json ){ $var = json_encode( $var ) ; }
     if ( isset( $_GET["show"] ) )
@@ -194,6 +196,7 @@ class OBaseFunctions
 */
   function show( $var, $pIsOpen = true, $pIsSQL = false )
   {
+
       if ( is_scalar( $var ) )
       {
         echo $var ;
@@ -216,6 +219,7 @@ class OBaseFunctions
 */
   function printr( $var, $pIsOpen = true, $pIsSQL = false )
   {
+
       $lColor = ( is_string( $pIsSQL ) ? $pIsSQL : ( $pIsSQL === true ? '#FFF5DD' : '#F2FFEE' ) ) ;
       $pIsSQL = ( $pIsSQL === true || $lColor == '#FEE' ) ;
       $var = ( $pIsSQL === true ? wordwrap( $var . ";\n", 100 ) : $var ) ;
@@ -269,6 +273,7 @@ class OBaseFunctions
 */
   function validate_web( $c_var, $option = false )
   {
+
     $l_Treponse["err"] = array( "id" => "0", "com" => "" ) ;
     $l_Treponse["val"] = "" ; 
     $l_Treponse["subval"] = false ; // le domaine de l'url n'est pas validé
@@ -455,8 +460,8 @@ class OBaseFunctions
     }   
 
    // on charge les erreurs dans la propriété qui permettra de les restituer en mode DEV
-    $this->dev_mode( __METHOD__, $l_Treponse["err"] ) ;
-
+   $this->dev_mode( __METHOD__, $l_Treponse["err"] ) ;
+              
     // on charge la reponse à retourner
     return  $l_Treponse ;
 
@@ -474,6 +479,7 @@ class OBaseFunctions
 */
   function UrlSansParametres()
   {
+
     $l_urlCourante = $_SERVER['REQUEST_URI'] ;
     $l_TurlGet = explode( "?", $l_urlCourante ) ;
     return  $l_TurlGet[0] ;

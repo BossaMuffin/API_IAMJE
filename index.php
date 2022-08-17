@@ -58,14 +58,26 @@ echo '
         <!-- Page Canonique -->
         <link rel="canonical" href="' . $BFUNC->g_url . $g_page . '" />
 
+
         <!-- JS FILES  --> 
+
         <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
-        <script type="text/javascript" src="http://netdna.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+        <!-- <script type="text/javascript" src="' . $g_page_arbo . FOLD_JS . FOLD_COMMON . 'jquery-4.3.0.min.js"></script> -->
+        <!-- <script type="text/javascript" src="' . $g_page_arbo . FOLD_JS . FOLD_COMMON . 'jquery-2.0.2.min.js"></script> -->
+
+        <script type="text/javascript" src="http://netdna.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script> 
+        <!-- <script type="text/javascript" src="' . $g_page_arbo . FOLD_JS . FOLD_COMMON . 'bootstrap-4.3.1.bundle.min.js"></script>-->
+        <!-- <script type="text/javascript" src="' . $g_page_arbo . FOLD_JS . FOLD_COMMON . 'bootstrap-4.3.1.min.js"></script>-->
+
         <script type="text/javascript" src="' . $g_page_arbo . FOLD_JS . FOLD_COMMON . 'functions.js"></script>
 
         <!-- CSS FILES  --> 
-        <link href="http://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+        <!-- <link href="http://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+        <link type="text/css" rel="stylesheet" href="' . $g_page_arbo . FOLD_CSS . FOLD_COMMON . 'fontawesome-5.8.1.min.css" />
+
         <link href="http://pingendo.github.io/pingendo-bootstrap/themes/default/bootstrap.css" rel="stylesheet" type="text/css">
+        <!-- <link type="text/css" rel="stylesheet" href="' . $g_page_arbo . FOLD_CSS . FOLD_COMMON . 'bootstrap-4.3.1.min.css" /> -->
+
         <link type="text/css" rel="stylesheet" href="' . $g_page_arbo . FOLD_CSS . 'chess.css" />
         <link type="text/css" rel="stylesheet" href="' . $g_page_arbo . FOLD_CSS . FOLD_SKINS . 'gnome-chess.css" /> 
     
@@ -211,15 +223,20 @@ echo '
                             placeholder="chiffre autour de 1">
                   </div>
                 </div>
+                
+                <br/><br/>
 
+                <h4> Options </h4>
 
                 <div class="form-group">
-
+                  <div class="col-sm-offset-2 col-sm-10">
+                    <legend>Mode dev</legend>
+                  </div>
                 <!-- ERREURS -->
                   <div class="col-sm-offset-2 col-sm-4">
                     <div class="checkbox">
-                      <label>
-                        <input type="checkbox" name="err" id="index-input-erreurs" checked>Système d'erreurs</label>
+                      <label >
+                        <input type="checkbox" name="err" id="index-input-erreurs" autocomplete="off" checked>Système d'erreurs</label>
                     </div>
                   </div>
 
@@ -227,9 +244,22 @@ echo '
                   <div class="col-sm-4">
                     <div class="checkbox">
                       <label>
-                        <input type="checkbox" name="dev" id="index-input-developpement">Affichage des erreurs</label>
+                        <input type="checkbox" name="dev" id="index-input-developpement" autocomplete="off"  checked>Affichage des erreurs</label>
                     </div>
                   </div>
+
+                <!-- CHOIX AFFICHAGE HTML OU CANVAS -->
+                  <div class="col-sm-offset-2 col-sm-10">
+                    <br/>
+                    <legend>Type d'affichage</legend>
+                    <div> 
+                        <input type="radio" name="aff" id="index-input-canvas" value="canvas">
+                          <label for="canvas" style="margin: 0 45px 0 5px ; ">CANVAS</label>
+                        <input type="radio" name="aff" id="index-input-html" value="html">
+                          <label for="html" style="margin: 0 45px 0 5px ; ">HTML</label>
+                    </div>
+                  </div>
+
 
                 </div>
 
@@ -262,41 +292,64 @@ echo '
         <div class="row">
           <div class="col-md-12">
             <h2> REPRÉSENTATION GRAPHIQUE </h2>
-             <!-- AFFICHAGE ERREURS -->
-              <div id="zone-memo-sequence" style="display: none;">
-              </div>
-              <div id="zone-memo-etat" style="display: none;">
-              </div>
-            <form id="index-zone-exec" class="form-horizontal" role="form" method="post" action="#">
-              <!-- SUBMIT EXECUTION -->
+             <!-- AFFICHAGE ERREURS-->
+            <div id="zone-err-php" style="display: none; margin-top:30px">
+            </div>
+             <!-- DATAS RECUES SEQUENCE PROPRE-->
+            <div id="zone-sequence-propre" style="display: none; margin-top:30px">
+            </div>
+            <!-- AFFICHAGE DE LA DATA -->
+            <div id="zone-data-brute" style="display: none; margin-top:30px">
+            </div>
+            <!-- OU ESPACE DE MEMOIRE POUR AFFICHAGE ANIME 999999999999 A FAIRE -->
+            <div id="zone-memo-etat" style="display: none; margin-top:30px">
+            </div>
+            
+            <form id="index-zone-exec" class="form-horizontal" role="form" method="post" action="#" style="display: none; margin-top: 30px;">
+            <!-- SUBMIT EXECUTION -->
               <div class="form-group">
                 <div class="col-sm-offset-2 col-sm-5">
-                  <button type="submit" class="btn btn-default">Afficher</button>
+                  <button type="submit" class="btn btn-default">Animer</button>
                 </div>
                 <div id="zone-resultat" class="col-sm-5">
                 </div>
               </div>
             </form>
-
-           <div class="section" id="index-zone-chess">
-            <?php
-            $l_objectif = 10 ;
-            // Construction d'une grille horizontale pour la progression d'un piont graphique de 0 à Objectif 
-            // Construction d'une grille horizontale pour la progression d'un piont graphique de 0 à Objectif 
-            //include($g_page_arbo . FOLD_INC . 'body-representation-graphique-1d.inc.php') ;
-            ?>
-           </div>
-
-
-
           </div>
         </div>
+        <div class="row">
+          <div class="col-md-12">
+            <!-- ANIMATION DU CALCUL DANS UN DESSIN CANVAS width="1000" height="300" modifié après dans function.js pour coller à la taille de la fenetre -->
+            <div id="index-zone-chess-canvas">
+              <!-- PLATEAU -->
+              <canvas id="index-canvas-bg" style="width:1000px; height:300px; position:absolute; top:0px; left:0px; margin-top: 45px;">
+              </canvas>
+              <!-- ZONE D'ANIMATION -->
+              <canvas id="index-canvas-pion" style="width:1000px; height:300px; position:absolute; top:0px; left:0px; margin-top: 45px;">
+                
+
+              </canvas>
+            </div>
+            <!-- ANIMATION DU CALCUL SUR UNE ECHELLE HTML -->
+            <div class="section" id="index-zone-chess-html" >
+              <?php
+              $l_objectif = 10 ;
+              // Construction d'une grille horizontale pour la progression d'un piont graphique de 0 à Objectif 
+              // Construction d'une grille horizontale pour la progression d'un piont graphique de 0 à Objectif 
+              //include($g_page_arbo . FOLD_INC . 'body-representation-graphique-1d.inc.php') ;
+              ?>
+            </div>
+          </div>
+        </div>
+
+
+
       </div>
     </div>
 <!-- Fin REPRESENTATION GRAPHIQUE 1D DU CALCUL -->
 <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
-
+<div id="index-marge-bottom" style="display: none; height:1000px"></div>
 <!-- FIN -->
   <body>
 <html>
