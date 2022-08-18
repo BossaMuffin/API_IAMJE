@@ -27,26 +27,50 @@ const HTPROT = "http://" ;
 
 /* Requete type
 * 	http://iamje/api/index.php
-*	?show=off&ia=alpa&mode=learn&outs=addition&obj=12&mat=1&dist=1&delais=1000&ratio=0.8&err=on&dev=on
+*	?show=off&ia=alpa&mode=learn&outs=addition&obj=12&mat=1&dist=1&delais=1000&ratio=0.8&dev=on
 */
 
+// RUN MODE DEV 
 $B_DEVMODERUN = true ;
-	
-if ( isset( $_GET["err"] ) && ( ! empty( $_GET["err"] ) || $_GET["err"] == 0 ) && strlen( $_GET["err"] ) <= 5   ) 
+$tFiltre["err"] =  isset( $_GET["err"] ) && ( ! empty( $_GET["err"] ) || $_GET["err"] == 0 ) && strlen( $_GET["err"] ) <= 5 ;
+
+if ( $tFiltre["err"] ) 
 {
     $B_DEVMODERUN = filter_var( $_GET["err"], FILTER_VALIDATE_BOOLEAN ) ;
 }
 
-
-// permet d'afficher la trace des erreurs des fonctions appelées
-	// doit on afficher la trâce des erreurs ? par defaut on ne l'affiche pas
+// SHOW ERR (ssi RUN MODE DEV)
+// doit on afficher la trâce des erreurs ? par defaut on ne l'affiche pas
 $B_DEVMODESHOW = false ;
+$tFiltre["dev"] = isset( $_GET["dev"] ) && ( ! empty( $_GET["dev"] ) || $_GET["dev"] == 0 ) && strlen( $_GET["dev"] ) <= 5 ;
 
-if ( isset( $_GET["dev"] ) && ( ! empty( $_GET["dev"] ) || $_GET["dev"] == 0 ) && strlen( $_GET["dev"] ) <= 5 ) 
-{
-    $B_DEVMODESHOW = filter_var( $_GET["dev"], FILTER_VALIDATE_BOOLEAN ) ;
+if ( $B_DEVMODERUN == true ) {
+
+	// permet d'afficher la trace des erreurs des fonctions appelées
+	if ( $tFiltre["dev"] ) 
+	{
+	    $B_DEVMODESHOW = filter_var( $_GET["dev"], FILTER_VALIDATE_BOOLEAN ) ;
+	}
+	// --------   Fin MODE DEV  ----->
+
 }
-// --------   Fin MODE DEV  ----->
+
+// SHOW RESULT
+$B_RESULTMODESHOW = false ;
+
+// permet d'afficher le resultat sous forme de tableau ou sous forme de graphique 
+if ( isset( $_GET["show"] ) )
+{ 
+	$_GET["show"] = filter_var( $_GET["show"], FILTER_VALIDATE_BOOLEAN ) ;
+	
+	if ( $_GET["show"] ) 
+	{
+		$B_RESULTMODESHOW = true ; 
+	}
+}
+// --------   Fin MODE SHOW  ----->
+
+
 
 /* MAIN FOLDERS */
 const	FOLD_API = "api/" ;
@@ -80,7 +104,7 @@ $timeActu = time() ;
 
 $tIA = array() ;
 $tIA[0] = "alpa" ;
-$tIA[1] = "alpa" ;
+$tIA[1] = "dev" ;
 
 $tMode = array() ;
 $tMode[0] = "learn" ;

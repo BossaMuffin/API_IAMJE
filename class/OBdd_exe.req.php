@@ -635,6 +635,8 @@ class OBdd extends OBdd_connexion
 		$l_Treponse["val"] = "void" ;
 		$l_Treponse[0] = false ;
 // ATTENTION LORSQUE LES DONNEES A ENREGISTRER SONT EN VARCHAR OU EN INT IL FAUT METTRE OU ENLEVER LES GUILLEMET, LE MIEUX SERAIT D4ENREGITRER TOUT EN VARCHAR ET D'ASSOCIER LE TYPE AVEC LA DONNEE !!!  999999999999999999
+		if ( $BFUNC->p_BdevModeShow == "" ) { $BFUNC->p_BdevModeShow = "0" ; }
+
 		if ( $this->demande( 'INSERT INTO ' . $Ctab . ' (' . $this->p_Tcol["trace"]["mode"] . ', ' . $this->p_Tcol["trace"]["obj"] . ', ' . $this->p_Tcol["trace"]["mat"] . ', ' . $this->p_Tcol["trace"]["outs"] . ', ' . $this->p_Tcol["trace"]["dist"] . ', ' . $this->p_Tcol["trace"]["ratio"] . ', ' . $this->p_Tcol["trace"]["delais"] . ', ' . $this->p_Tcol["all"]["client_key"] . ', ' . $this->p_Tcol["trace"]["dev"] . ', ' . $this->p_Tcol["trace"]["err"] . ') 
 							VALUES ("' . $_GET["mode"] . '", "' . $_GET["obj"] . '", "' . $_GET["mat"] . '", "' . $_GET["outs"] . '", ' . $_GET["dist"] . ', ' . $_GET["ratio"] . ', ' . $_GET["delais"] . ', "' . $this->CLIENT_KEY_ID . '", "' . $BFUNC->p_BdevModeShow . '", "' . print_r( $BFUNC->p_Terreurs, true ) . '")' ) )
 		{

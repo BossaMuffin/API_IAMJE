@@ -17,7 +17,7 @@ if ( ! isset( $g_page_arbo ) )
 
 if ( ! isset( $g_page ) )
 {
-     $g_page = "api/inc/iamje-alpa.ajax.php" ;
+     $g_page = "api/inc/iamje-alpa.dev.php" ;
 }
 
 /* Charge tous les fichiers require_once si besoin */
@@ -70,16 +70,25 @@ $$l_ALPA = new OAlpa( $l_ALPA, $g_Tobjectifs, $g_Tressources, $_GET["mode"] ) ;
 /* --------------------------------------  ----- AFFICHAGE ----- -------------------------------------- */
 /* --------------------------------------  --------------------- -------------------------------------- */
 
+
+// AFFICHAGE DES ORDRES DE RESTITUTION 
+$BFUNC->show( $$l_ALPA->affichage_serie_A_ordres( ) ) ;
+//ou (si apres la methode serieA) : echo $$l_ALPA->p_Caffichage_serie_A ;
+
+
+
 // AFFICHAGE DES ORDRES DE RESTITUTION 
 //$BFUNC->show( $$l_ALPA->affichage_serie_A_ordres( ) ) ;
 //ou (si apres la methode serieA) : echo $$l_ALPA->p_Caffichage_serie_A ;
-
+$l_Bshow = true ;
+if ( ! isset($_GET["show"]) ){ $l_Bshow = false ; }
 
 // on aiguille en fonction du mode demandé
 /*
 $tMode[0] = "learn" ;
 $tMode[1] = "work" ;
 */
+echo "RESULTAT CALCUL :" ;
 switch ($_GET["mode"]) :
     case $tMode[0]:
         // Retour ALPA en mode LEARN (vardump si besoin par le formulaire  ou un affichage "show" si passage en direct )
@@ -97,6 +106,25 @@ switch ($_GET["mode"]) :
 endswitch;
 
 
+
+// Archives
+echo "<br/><br/>" ;
+echo "NEW ARCHIVES :" ;
+$BFUNC->show( $RESSOURCES->p_Tarchives ) ;
+echo "<br/><br/>" ;
+// Ressources
+echo "NEW RESSOURCES :" ;
+$BFUNC->show( $RESSOURCES->p_Tressources ) ;
+echo "<br/><br/>" ;
+
+
+$Ctab_nom = "T_ordres" ;
+$Ccol_nom = "id" ;
+echo "<u>MAX ID IN TAB ". $Ctab_nom . "</u> :<br/>" ;
+$BFUNC->show( $BDD->tab_max_id( $Ctab_nom, $Ccol_nom )["val"] ) ;
+echo "<br/>" ;
+
+
 include( $g_page_arbo . FOLD_INC . "body-dev-erreurs.inc.php" ) ;
 
 //$BFUNC->showOrJson( $BFUNC->p_Terreurs, "off") ; 
@@ -104,22 +132,73 @@ include( $g_page_arbo . FOLD_INC . "body-dev-erreurs.inc.php" ) ;
 
 
 
-/* on va enregister les errurs dans un fichier qu'on rouvrira en js coté client
-// 1 : on ouvre le fichier
-$monfichier = fopen( 'http://iamje/api/inc/erreurs.txt', 'a' );
-
-// 2 : on execute et on recupere le fichier à inclure dans le fichier text
-//$devErreurs = include( $g_page_arbo . FOLD_INC . "body-dev-erreurs.inc.php" ) ;
-// 3 : on ecrit dans le fichier
-fputs( $monfichier, 'bite' );
-
-// 4 : quand on a fini de l'utiliser, on ferme le fichier
-fclose( $monfichier ) ;
-*/
-
-
-
+/* TEST BDD -> NEW TABLE, DROP TABLE, NEW COLUMN*/ 
 /*
+$Ctab_nom = "bite" ;
+
+$newT = $BDD->tab_create( $Ctab_nom ) ;
+if ( $newT[0] ){ echo "TABLE CREE" ; }else{ echo "OUPS" ; } ;
+
+$newT = $BDD->tab_drop( "hello" ) ;
+if ( $newT[0] ){ echo "TABLE SUPPRIMEE" ; }else{ echo "OUPS" ; } ;
+
+$newT = $BDD->tab_show( ) ;
+if ( $newT[0] ){ $BFUNC->show( $newT ) ; }else{ echo "OUPS" ; } ;
+
+
+$newT = $BDD->col_show( $Ctab_nom ) ;
+if ( $newT[0] ){ $BFUNC->show( $newT ) ; }else{ echo "OUPS" ; } ;
+
+
+
+
+
+$newT = $BDD->col_show( $Ctab_nom ) ;
+if ( $newT[0] ){ $BFUNC->show( $newT ) ; }else{ echo "OUPS" ; } ;
+
+$l_var = "ee\"e" ;
+$l_type = $BFUNC->get_type( $l_var ) ;
+$BFUNC->show( $l_type["val"] ) ;
+echo "<br/>"; 
+
+$l_web = $BFUNC->validate_web("https://hello@)comozone.com") ;
+echo $l_web[0] ;
+echo "</br>" ;
+echo $l_web["val"] ;
+
+
+$newT = $BDD->col_show( "string" ) ;
+if ( $newT[0] ){ $BFUNC->show( $newT ) ; }else{ echo "OUPS" ; } ;
+
+$l_newRessource = $BDD->check_ressource(2.3) ;
+$BFUNC->show( $l_newRessource[0] ) ;
+
+$newT = $BDD->col_show( "string" ) ;
+if ( $newT[0] ){ $BFUNC->show( $newT ) ; }else{ echo "OUPS" ; } ;
+
+
+
+$newT = $BDD->check_ressource("string") ;
+echo $newT["err"] ;
+
+$CtabName  = "test2" ;
+$Ccol = "valeur" ;
+$CcolId = "Cid" ;
+$CcolObj = "objectif" ;
+$CcolMat = "matieres" ;
+$CcolOuts = "outils" ;
+$CcolSeq = "sequence" ;
+$CcolResult = "resultat" ;
+$CcolDist = "distance" ;
+$CcolRatio = "precision" ;
+$CcolDelais = "delais" ;
+$CcolCompt = "compteur" ;
+$l_newArchiveT = $BDD->tab_archive_A_create( $CtabName, $CcolId, $CcolObj, $CcolMat, $CcolOuts, $CcolSeq, $CcolResult, $CcolDist, $CcolRatio, $CcolDelais, $CcolCompt ) ;
+echo $l_newArchiveT["err"] ;
+
+
+
+
 echo "TRACES NOMS:" ;
 (string) $BFUNC->show( $BDD->p_TnewTtraces ) ;
 echo "<br/>" ;
@@ -127,6 +206,7 @@ echo "RESSOURCES NOMS:" ;
 $BFUNC->show( $BDD->p_TnewTressources ) ;
 echo "ARCHIVES NOMS:" ;
 $BFUNC->show( $BDD->p_TnewTarchives ) ;
-*/
 
+
+*/
 // ---------------------------------------------------------------------------------------------- 

@@ -66,7 +66,7 @@ switch ($_GET["ia"]):
         require_once( FOLD_INC . "iamje-alpa.ajax.php" ) ;
         break ;
     case $tIA[1]:
-       	require_once( FOLD_INC . "iamje-alpa-1.ajax.php" ) ;
+       	require_once( FOLD_INC . "iamje-alpa.dev.php" ) ;
         break ;
     default:
        	echo $tErrMess["api"] ;

@@ -438,17 +438,21 @@ class OAlpa
             // $l_i_objectif = intval( $l_i_objectif ) ;
             $l_Tresult = $this->A( $l_i_objectif, $g_i_id ) ;
             // Résultat formaté, ressourcé et archivé dans Alpa
-            $l_Treponse[$g_i_id] = $l_Tresult->p_T ;
-
+            //v0 : $l_Treponse[$g_i_id] = $l_Tresult->p_T ;
+            //v1 : $l_Treponse[$l_i] = $l_Tresult->p_T ;
+            $l_Treponse = $l_Tresult->p_T ;
             // --------------------------- AFFICHAGE PHASE A 
             // Implémente l'attribut d'affichage de la phase d'apprentissage */
             $this->p_Caffichage_serie_A .= $this->affichage_A( $l_Tresult->p_T ) ;
 
             // Fin boucle foreach pour créer la serie d'apprentissage
+            array_push( $this->p_Tresultats, $l_Treponse ) ;
         }
 
-        $this->p_Tresultats = $l_Treponse ;
-        
+        // $this->p_Tresultats = $l_Treponse ;
+        //array_push( $this->p_Tresultats, $l_Treponse ) ;
+        //print_r($this->p_Tresultats) ;
+
         return true ;
 
     // Fin de la fonction d'apprentissage en série ALPA

@@ -85,19 +85,20 @@ class OBaseFunctions
   public $p_BdevModeRun = true ;
   // affiche le mode développement
   public $p_BdevModeShow = false ;
-
+  // affiche le RESULTAT BRUT OU GRAPHIQUE ( false = json )
+  public $p_BresultModeShow = false ;
 
 /* ---------------- CONSTRUCTEUR ----------------------------- 
 * @value : none
 * @return : none
 */
-  function  __construct( $B_DEVMODESHOW, $B_DEVMODERUN = true )
+  function  __construct( $B_DEVMODERUN, $B_DEVMODESHOW, $B_RESULTMODESHOW )
   {
 
     $this->p_BdevModeRun = $B_DEVMODERUN ;
     $this->p_BdevModeShow = $B_DEVMODESHOW ;
-
-
+    $this->p_BresultModeShow = $B_RESULTMODESHOW ;
+    
   // fin construct
   }
   // ------------------------------------
@@ -168,17 +169,23 @@ class OBaseFunctions
 * @param url de la page
 * @return charge l'url dans une propriété de la classe
 */
-  function showOrJson( $var, $Cjeton, $json = true)
+  function showOrJson( $var, $json )
   {
 
     //if ( $json ){ $var = preg_replace('/[\[\]]/', '', json_encode( $var ) ) ; } // sans les crochets
-    if ( $json ){ $var = json_encode( $var ) ; }
-    if ( isset( $_GET["show"] ) )
+
+    if ( ! $this->p_BresultModeShow )
     { 
-        if ( $_GET["show"] == $Cjeton )
-        {
-          if ( $json ) { echo $var  ; } else { var_dump( $var ) ; }
-        }
+          if ( $json ) 
+          { 
+            $var = json_encode( $var ) ;
+            echo $var  ; 
+          } 
+          else 
+          { 
+            var_dump( $var ) ; 
+          }
+
     }
     else 
     {
@@ -223,7 +230,7 @@ class OBaseFunctions
       $lColor = ( is_string( $pIsSQL ) ? $pIsSQL : ( $pIsSQL === true ? '#FFF5DD' : '#F2FFEE' ) ) ;
       $pIsSQL = ( $pIsSQL === true || $lColor == '#FEE' ) ;
       $var = ( $pIsSQL === true ? wordwrap( $var . ";\n", 100 ) : $var ) ;
-      $lHeight = ( $pIsSQL === true ? '100px' : '200px' ) ;
+      $lHeight = ( $pIsSQL === true ? '300px' : '300px' ) ;
       $lUniqId = uniqid( md5( rand() ) ) ;
 
       echo '<table  cellspacing="0" cellpadding="0" 

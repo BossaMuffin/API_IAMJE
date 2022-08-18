@@ -24,7 +24,7 @@ if ( ! isset( $g_page ) )
 require_once( $g_page_arbo . 'inc/global_var_meta.req.php') ;
 //regroupe les fonctions liées au fonctionnement global de l'IA
 require_once( $g_page_arbo . FOLD_CLASS . 'OBaseFunctions.req.php' ) ;
-$BFUNC = new OBaseFunctions( $B_DEVMODESHOW, $B_DEVMODERUN ) ;
+$BFUNC = new OBaseFunctions( $B_DEVMODESHOW, $B_DEVMODERUN, $B_RESULTMODERUN ) ;
 //permet d'aiguiller l'IA entre les différents serveurs
 require_once( $g_page_arbo . FOLD_INC . 'route_serv.req.php' ) ;
 
@@ -100,10 +100,43 @@ echo '
             /* INTRODUCTION */
             // Affichage d'un mot d'accueil
             echo "Je veux apprendre.<br/>" ;
+            /* Fin Introdution */
+?>
+            </div>
+            <div class="col-md-5">
+<?php
             echo "Vous pouvez m'aider en me donnant des exercices. <br/>" ;
             echo "<br/>" ;
             echo "Pour cela,<br/>" ;
             echo "Il vous suffit de me donner les instructions via le formulaire ci-dessous : " ;
+?>
+            </div>
+            <div class="col-md-7">
+<?php
+            /* VERS LA PAGE API */
+            // Paramètres par défaut
+            $l_Tparam = [
+              "ia"    => "alpa",
+              "mode"  => "learn",
+              "outs"  => "addition",
+              "obj"   => "12,5",
+              "mat"   => "1",
+              "dist"  => "1",
+              "delais"=> "1000",
+              "ratio" => "0.8",
+              "dev"   => "on"] ;
+
+            
+            echo "<br/>" ;
+            echo "Ou en mode API en suivant le lien suivant : " ;
+            echo '<a target="blank" href="' . $g_page_arbo . FOLD_API . 'index.php?ia=' . $l_Tparam["ia"] . '&mode=' . $l_Tparam["mode"] . '&outs=' . $l_Tparam["outs"] . '&obj=' . $l_Tparam["obj"] . '&mat=' . $l_Tparam["mat"] . '&dist=' . $l_Tparam["dist"] . '&delais=' . $l_Tparam["delais"] . '&ratio=' . $l_Tparam["ratio"] . '&dev=' . $l_Tparam["dev"] . '">ia=alpa&mode=learn&outs=addition&obj=12&mat=1&dist=1&delais=1000&ratio=0.8</a>' ;
+            echo "<br/>" ;
+            echo "Ou en mode API DEV en suivant le lien suivant : " ;
+            echo '<a target="blank" href="' . $g_page_arbo . FOLD_API . 'index.php?ia=dev&mode=' . $l_Tparam["mode"] . '&outs=' . $l_Tparam["outs"] . '&obj=' . $l_Tparam["obj"] . '&mat=' . $l_Tparam["mat"] . '&dist=' . $l_Tparam["dist"] . '&delais=' . $l_Tparam["delais"] . '&ratio=' . $l_Tparam["ratio"] . '&dev=' . $l_Tparam["dev"] . '">ia=dev&mode=learn...</a>' ;
+
+
+
+           
             /* Fin Introdution */
 ?>
             </div>
@@ -128,7 +161,7 @@ echo '
                 <input  type="hidden" id="index-input-show" name="show"  value="off">
 
                 <!-- MODE -->
-                <input  type="hidden" id="index-input-ia" name="ia"  value="alpa">
+                <input  type="hidden" id="index-input-ia" name="ia"  value="<?php echo $l_Tparam['ia'] ; ?>">
 
                 <!-- MODE -->
                 <div class="form-group has-success has-feedback">
@@ -168,7 +201,7 @@ echo '
                   </div>
                   <div class="col-sm-5">
                     <input  type="texte" name="obj" id="index-input-objectif" class="form-control" 
-                            value="12"
+                            value="<?php echo $l_Tparam['obj'] ; ?>"
                             placeholder="Pour l'instant, que des chiffres, plusieurs séparés de virgules si mode &quot;learn&quot;">
                     <span class="fa fa-check form-control-feedback"></span>
                   </div>
@@ -181,7 +214,7 @@ echo '
                   </div>
                   <div class="col-sm-5">
                     <input  type="number" name="mat" id="index-input-matiere" class="form-control" 
-                            value="1"
+                            value="<?php echo $l_Tparam['mat'] ; ?>"
                             placeholder="Pour l'instant, que des chiffres...">
                   </div>
                 </div>
@@ -195,7 +228,7 @@ echo '
                   </div>
                   <div class="col-sm-5">
                     <input  type="number" name="dist" id="index-input-distance" class="form-control" 
-                            value="1" min="0" max="10" step="0.5"
+                            value="<?php echo $l_Tparam['dist'] ; ?>" min="0" max="10" step="0.5"
                             placeholder="Distance en chiffre">
                   </div>
                 </div>
@@ -207,7 +240,7 @@ echo '
                   </div>
                   <div class="col-sm-5">
                     <input  type="number" name="delais" id="index-input-delais" class="form-control" 
-                            value="1000" min="500" max="10000" step="100"
+                            value="<?php echo $l_Tparam['delais'] ; ?>" min="500" max="10000" step="100"
                             placeholder="Temps de calcul en miliseconde">
                   </div>
                 </div>
@@ -219,7 +252,7 @@ echo '
                   </div>
                   <div class="col-sm-5">
                     <input  type="number" name="ratio" id="index-input-ratio" class="form-control" 
-                            value="0.8" min="0" max="2" step="0.01"
+                            value="<?php echo $l_Tparam['ratio'] ; ?>" min="0" max="2" step="0.01"
                             placeholder="chiffre autour de 1">
                   </div>
                 </div>
@@ -229,31 +262,30 @@ echo '
                 <h4> Options </h4>
 
                 <div class="form-group">
-                  <div class="col-sm-offset-2 col-sm-10">
-                    <legend>Mode dev</legend>
-                  </div>
+
                 <!-- ERREURS -->
                   <div class="col-sm-offset-2 col-sm-4">
-                    <div class="checkbox">
-                      <label >
-                        <input type="checkbox" name="err" id="index-input-erreurs" autocomplete="off" checked>Système d'erreurs</label>
-                    </div>
+                        <input type="hidden" name="err" id="index-input-erreurs" value="true" />
                   </div>
 
                 <!-- DEVELOPPEMENT -->
-                  <div class="col-sm-4">
-                    <div class="checkbox">
-                      <label>
-                        <input type="checkbox" name="dev" id="index-input-developpement" autocomplete="off"  checked>Affichage des erreurs</label>
+                  <div id="index-input-devmode" class="col-sm-offset-2 col-sm-10">
+                    <br/>
+                    <legend>Mode développement</legend>
+                    <div> 
+                        <input type="radio" name="dev" id="index-input-dev" value="yes" >
+                          <label for="yes" style="margin: 0 45px 0 5px ; ">OUI</label>
+                        <input type="radio" name="dev" id="index-input-normal" value="no" checked>
+                          <label for="no" style="margin: 0 45px 0 5px ; ">NON</label>
                     </div>
                   </div>
 
                 <!-- CHOIX AFFICHAGE HTML OU CANVAS -->
-                  <div class="col-sm-offset-2 col-sm-10">
+                  <div id="index-form-aff" class="col-sm-offset-2 col-sm-10" style="display: none;">
                     <br/>
                     <legend>Type d'affichage</legend>
                     <div> 
-                        <input type="radio" name="aff" id="index-input-canvas" value="canvas">
+                        <input type="radio" name="aff" id="index-input-canvas" value="canvas" checked>
                           <label for="canvas" style="margin: 0 45px 0 5px ; ">CANVAS</label>
                         <input type="radio" name="aff" id="index-input-html" value="html">
                           <label for="html" style="margin: 0 45px 0 5px ; ">HTML</label>
@@ -295,9 +327,7 @@ echo '
              <!-- AFFICHAGE ERREURS-->
             <div id="zone-err-php" style="display: none; margin-top:30px">
             </div>
-             <!-- DATAS RECUES SEQUENCE PROPRE-->
-            <div id="zone-sequence-propre" style="display: none; margin-top:30px">
-            </div>
+
             <!-- AFFICHAGE DE LA DATA -->
             <div id="zone-data-brute" style="display: none; margin-top:30px">
             </div>
@@ -320,16 +350,25 @@ echo '
         <div class="row">
           <div class="col-md-12">
             <!-- ANIMATION DU CALCUL DANS UN DESSIN CANVAS width="1000" height="300" modifié après dans function.js pour coller à la taille de la fenetre -->
-            <div id="index-zone-chess-canvas">
-              <!-- PLATEAU -->
-              <canvas id="index-canvas-bg" style="width:1000px; height:300px; position:absolute; top:0px; left:0px; margin-top: 45px;">
-              </canvas>
-              <!-- ZONE D'ANIMATION -->
-              <canvas id="index-canvas-pion" style="width:1000px; height:300px; position:absolute; top:0px; left:0px; margin-top: 45px;">
-                
+              <div class="row" id="index-zone-chess-canvas">
+                <div class="col-md-12">
+                  
+                  <!-- DATAS RECUES SEQUENCE PROPRE-->
+                  <div id="zone-sequence-propre-1" style="display: none; margin-top:30px">
+                  </div>
+                  
+                </div>
+                <div class="col-md-12">
+                  
+                  <!-- PLATEAU -->
+                  <canvas id="index-canvas-bg-1" style="width:1000px; height:300px; position:absolute; top:0px; left:0px; margin-top: 45px;">
+                  </canvas>
+                  <!-- ZONE D'ANIMATION -->
+                  <canvas id="index-canvas-pion-1" style="width:1000px; height:300px; position:absolute; top:0px; left:0px; margin-top: 45px;">
+                  </canvas>
 
-              </canvas>
-            </div>
+                </div>
+              </div>
             <!-- ANIMATION DU CALCUL SUR UNE ECHELLE HTML -->
             <div class="section" id="index-zone-chess-html" >
               <?php

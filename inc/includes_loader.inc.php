@@ -22,8 +22,7 @@ if ( ! isset( $OBfuncIncludeJeton )  )
 {
     require_once( $g_page_arbo . FOLD_CLASS . 'OBaseFunctions.req.php' ) ;
 
-    //$BFUNC = new OBaseFunctions( $B_DEVMODESHOW, $B_DEVMODERUN ) ;
-    $BFUNC = new OBaseFunctions( $B_DEVMODERUN ) ;
+    $BFUNC = new OBaseFunctions( $B_DEVMODERUN, $B_DEVMODESHOW, $B_RESULTMODESHOW  ) ;
 
 }
 
