@@ -24,7 +24,7 @@ if ( ! isset( $g_page ) )
 require_once( $g_page_arbo . 'inc/global_var_meta.req.php') ;
 //regroupe les fonctions liées au fonctionnement global de l'IA
 require_once( $g_page_arbo . FOLD_CLASS . 'OBaseFunctions.req.php' ) ;
-$BFUNC = new OBaseFunctions( $B_DEVMODESHOW, $B_DEVMODERUN, $B_RESULTMODERUN ) ;
+$BFUNC = new OBaseFunctions( $B_DEVMODESHOW, $B_DEVMODERUN, $B_RESULTMODESHOW ) ;
 //permet d'aiguiller l'IA entre les différents serveurs
 require_once( $g_page_arbo . FOLD_INC . 'route_serv.req.php' ) ;
 
@@ -157,8 +157,8 @@ echo '
               <h2> Ordres </h2>
               <form id="index-zone-form" class="form-horizontal" role="form" method="get" action="<?php echo $BFUNC->g_url . FOLD_API . 'index.php' ; ?>">
                 
-                <!-- JETON -->
-                <input  type="hidden" id="index-input-show" name="show"  value="off">
+                <!-- JETON 99999 -->
+                <!-- <input  type="hidden" id="index-input-show" name="show"  value="off"> -->
 
                 <!-- MODE -->
                 <input  type="hidden" id="index-input-ia" name="ia"  value="<?php echo $l_Tparam['ia'] ; ?>">
@@ -287,10 +287,22 @@ echo '
                     <div> 
                         <input type="radio" name="aff" id="index-input-canvas" value="canvas" checked>
                           <label for="canvas" style="margin: 0 45px 0 5px ; ">CANVAS</label>
-                        <input type="radio" name="aff" id="index-input-html" value="html">
-                          <label for="html" style="margin: 0 45px 0 5px ; ">HTML</label>
+                        <!-- <input type="radio" name="aff" id="index-input-html" value="html">
+                          <label for="html" style="margin: 0 45px 0 5px ; ">HTML</label> -->
                     </div>
                   </div>
+                  <!-- CHOIX AFFICHAGE HTML OU CANVAS -->
+                  <div id="index-form-show" class="col-sm-offset-2 col-sm-10" style="display: none;">
+                    <br/>
+                    <legend>Type d'affichage</legend>
+                    <div> 
+                        <input type="radio" name="show" id="index-input-show-table" value="on">
+                          <label for="on" style="margin: 0 45px 0 5px ; ">TABLE</label>
+                        <input type="radio" name="show" id="index-input-show-json" value="off" checked>
+                          <label for="off" style="margin: 0 45px 0 5px ; ">JSON</label>
+                    </div>
+                  </div>
+
 
 
                 </div>
@@ -331,20 +343,8 @@ echo '
             <!-- AFFICHAGE DE LA DATA -->
             <div id="zone-data-brute" style="display: none; margin-top:30px">
             </div>
-            <!-- OU ESPACE DE MEMOIRE POUR AFFICHAGE ANIME 999999999999 A FAIRE -->
-            <div id="zone-memo-etat" style="display: none; margin-top:30px">
-            </div>
             
-            <form id="index-zone-exec" class="form-horizontal" role="form" method="post" action="#" style="display: none; margin-top: 30px;">
-            <!-- SUBMIT EXECUTION -->
-              <div class="form-group">
-                <div class="col-sm-offset-2 col-sm-5">
-                  <button type="submit" class="btn btn-default">Animer</button>
-                </div>
-                <div id="zone-resultat" class="col-sm-5">
-                </div>
-              </div>
-            </form>
+            
           </div>
         </div>
         <div class="row">
@@ -370,13 +370,7 @@ echo '
                 </div>
               </div>
             <!-- ANIMATION DU CALCUL SUR UNE ECHELLE HTML -->
-            <div class="section" id="index-zone-chess-html" >
-              <?php
-              $l_objectif = 10 ;
-              // Construction d'une grille horizontale pour la progression d'un piont graphique de 0 à Objectif 
-              // Construction d'une grille horizontale pour la progression d'un piont graphique de 0 à Objectif 
-              //include($g_page_arbo . FOLD_INC . 'body-representation-graphique-1d.inc.php') ;
-              ?>
+            <div class="section" id="index-zone-html" >
             </div>
           </div>
         </div>

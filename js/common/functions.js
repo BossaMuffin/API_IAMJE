@@ -15,6 +15,7 @@ $(document).ready(function(ele)
     }
     // donnée de formualaire : CANVAS ou HTML
     var f_Caff = "canvas" ;
+    var f_Cshow = "off" ;
     // jeton temoin du n° de CANVAS en cours de traitement 
     //lorsque plusieur tableau de resultats sont reçus
     var g_Ncanvas = 0 ;
@@ -67,6 +68,8 @@ $(document).ready(function(ele)
     {
         // Affiche le controleur de type d'affichage HTML ou CANVAS si pas en mode DEV
         switchAff() ;
+
+        
     });
 
 
@@ -81,10 +84,18 @@ $(document).ready(function(ele)
 
         //   ------------------------ REMISE à 0 -------------------------------
 
+        // si mode Normal on passe le mode show en false : renvoi json
+        if ( $('#index-input-normal').is(':checked'))
+        {
+            $('#index-input-show-json').prop('checked', true) ;
+            $('#index-input-show-table').prop('checked', false) ;
+        }
+
+
+
         // variable de notification d'erreur à incrémenter avec chaque message d'erreur => sera affiché en front 
         var l_CerrorNotif = ''; 
         // remise à zéro de la représenttion graphique et de la propriété g_ALPA
-        tare_chess_1D()
         g_ALPA = {
             sequence: [],
             sequencePropre: [],
@@ -105,7 +116,6 @@ $(document).ready(function(ele)
         g_BcanvasTemoin = 1 ;
 
         // récupère les valeurs
-        var f_Cshow = $('#index-input-show').val() ;
 
         var f_Cia = $('#index-input-ia').val() ; 
         var f_Cmode = $('#index-input-mode').val() ;
@@ -135,9 +145,7 @@ $(document).ready(function(ele)
             if ( !l_Bouts ){ l_Iouts++ } ;
         });
 
-        // alert( 'ia : ' + f_Cia + '/ mode : ' + f_Cmode + '/ outs : ' + f_Couts + '/ obj : ' + f_Cobj + '/ mat : ' + f_Cmat + '/ delais : ' + f_Ndelais + '/ ratio : ' + f_Nratio + '/ dist : ' + f_Ndist + '/ dev : ' + f_Bdev ) ;
-      
-        
+            // alert( 'ia : ' + f_Cia + '/ mode : ' + f_Cmode + '/ outs : ' + f_Couts + '/ obj : ' + f_Cobj + '/ mat : ' + f_Cmat + '/ delais : ' + f_Ndelais + '/ ratio : ' + f_Nratio + '/ dist : ' + f_Ndist + '/ dev : ' + f_Bdev ) ;
         if ( l_Tia_possible.indexOf( f_Cia ) != -1 && l_Tmode_possible.indexOf( f_Cmode ) != -1 && l_Bouts 
                 && f_Cobj != '' && f_Cmat != '' && ( f_Cshow == 'off' || f_Cshow == 'on' )
                 && ! isNaN(f_Ndelais) && ! isNaN(f_Nratio) && ! isNaN(f_Ndist)
@@ -171,7 +179,7 @@ $(document).ready(function(ele)
                             { 
                                 // D'abord on efface les zones HTML
                                 $('#index-zone-exec').hide( ) ;
-                                $('#index-zone-chess-html').html( "" ) ;
+                                $('#index-zone-html').html( "" ) ;
                                 // on efface la zone CANVAS
                                 $('#index-zone-chess-canvas').html( "" ) ;
                     
@@ -206,11 +214,11 @@ $(document).ready(function(ele)
                                 buildCanvas( g_Tprop ) ;
                                 
                                 // Definition des CANVAS d'affichages
-        /* ************************************************************************ */
+            /* ************************************************************************ */
 
                                 parcourtResultToAffichage() ;
 
-        /* ************************************************************************ */                             
+            /* ************************************************************************ */                             
                                                                        
 
                                 // Affichage du bresultat graphique
@@ -223,7 +231,7 @@ $(document).ready(function(ele)
 
                             // Affichage de la zone d'affichage
                             $('#index-zone-affichage').show() ;
-                            $('#index-zone-chess-html').html( l_html ) ;
+                            $('#index-zone-html').html( l_html ) ;
                         
                         },
 
@@ -322,7 +330,7 @@ $(document).ready(function(ele)
             {
                 // D'abord on efface les zones HTML
                 $('#index-zone-exec').hide() ;
-                $('#index-zone-chess-html').html( "" ) ;
+                $('#index-zone-html').html( "" ) ;
                 // console.log("OBJ : " + g_ALPA.objectif ) ;
                 g_objectif = Number( g_ALPA.objectif ) ;
 
@@ -374,15 +382,13 @@ $(document).ready(function(ele)
             {
 
     // AFFICHAGE HTML --------------------------------------------------------------
-    // ----------------------------------------------------------------------------
+    // ------------------------ SUPPRIME POUR FACILITE LA MAINTENANCE ----------------------------------------------------
 
                 // on efface la zone CANVAS
                 $('#index-zone-chess-canvas').html( "" ) ;
                 buildCanvas([1]) ;
-
                 // code pour le cas où canvas ne serait pas supporté
                 // on va pouvoir animer l'affichage en suivant le schéma
-                l_html = representation_graphique_html_1d( g_ALPA.objectif ) ;
                 //Affichage du bouton "animation"
                 $('#index-zone-exec').show( ) ;
             }
@@ -390,7 +396,7 @@ $(document).ready(function(ele)
             {
     // AFFICHAGE ERREUR -----------------------------------------------------------
                 // on efface la zone HTML
-                $('#index-zone-chess-html').html( "" ) ;
+                $('#index-zone-html').html( "" ) ;
                 // on efface la zone CANVAS
                 $('#index-canvas-bg').html( "" ) ;
                 $('#index-canvas-pion').html( "" ) ;
@@ -416,28 +422,43 @@ $(document).ready(function(ele)
         var l_Bdevelo = $('#index-input-dev').val() ;
         var l_Bnormal = $('#index-input-normal').val() ;
 
+        var l_BshowTabl = $('#index-input-show-table').val() ;
+        var l_BshowJson = $('#index-input-show-json').val() ;
+ 
+
         if ( $('#index-input-dev').prop("checked") )
         { 
-            f_Bdev = $('#index-input-dev').val() ; 
-            $('#index-input-show').val("on") ;
+            f_Bdev = $('#index-input-dev').val() ;
         }
         else if ($('#index-input-normal').prop("checked"))
         { 
             f_Bdev = $('#index-input-normal').val() ; 
-            $('#index-input-show').val("off") ;
+        }
+
+
+        if ( $('#index-input-show-html').prop("checked") )
+        { 
+            f_Cshow = $('#index-input-show-html').val() ;
+        }
+        else if ($('#index-input-show-table').prop("checked"))
+        { 
+            f_Cshow = $('#index-input-show-table').val() ;
         }
 
         //console.log( $('#index-input-show').val() ) ;
         //console.log( $('#index-input-dev').val() ) ;
 
         if ( f_Bdev == l_Bdevelo )
-            { 
-                $('#index-form-aff').hide() ; 
-            }
-            else if ( f_Bdev == l_Bnormal ) 
-            {
-                $('#index-form-aff').show() ; 
-            }
+        { 
+            $('#index-form-aff').hide() ; 
+            $('#index-form-show').show() ;
+        }
+        else if ( f_Bdev == l_Bnormal ) 
+        {
+            $('#index-form-aff').show() ; 
+            $('#index-form-show').hide() ;
+        }
+
     }
 
 /* -------------------------------------- BUILDCANVAS -------------------------------------- */
@@ -648,181 +669,6 @@ function waitFunction() {
     }
 
 
-
-
-/* ---------------------------------------------------------------------------------- */
-/* -------------------------------------- HTML -------------------------------------- */
-/* ---------------------------------------------------------------------------------- */
-
-
-
-
-/* -------------------------------------- REPRESENTATION GRAPHIQUE HTML 1D DU CALCUL -------------------------------------- */
-    function representation_graphique_html_1d( g_objectif ) 
-    {
-        // Construction d'une grille horizontale pour la progression d'un piont graphique de 0 à Objectif 
-        // oncalcul la largeur d'une colonne comme un ratio de l'objectif -> 100% / objectif = width de la case
-        
-        // variable retourné, la grille html à afficher
-        var html = '' ;
-        var l_caseWidth ;
-        var l_vcoord = 1 ;
-        g_objectif = Number( g_objectif ) ;
-        l_caseWidth = 100 / ( g_objectif + 1 )  ;
-
-        html += '<div id="chessDesk">' ;
-        html += '        <div id="chessboardsBox" style="width: 100%; height: 200px;">' ;
-        html += '           <div id="chess2DBox" style="width: 100%; height: 200px;">' ;
-        html += '                <table id="flatChessboard" style="width: 98%; height: 188px; margin-bottom: 6px; margin-top: 6px;">' ;
-        html += '                    <tbody>' ;
-        html += '                        <tr>' ;
-        html += '                            <td class="boardAngle"></td>' ;
-
-        for ( var l_hcoord = 0 ; l_hcoord <= g_objectif ; l_hcoord++ ) 
-        {
-           html += '<th class="horizCoords">' + l_hcoord + '</th>' ;
-        }
-
-        html += ' <td class="boardAngle"></td>' ;
-        html += '        </tr>' ;
-        html += '        <tr>' ;
-        html += '            <th class="vertCoords">' + l_vcoord + '</th>' ;
-
-        for ( var l_hcoord = 0 ; l_hcoord <= g_objectif ; l_hcoord++ )
-        {
-            // on alterne la couleur des case : gris + blanc + gris + blanc
-            if ( l_hcoord&1 )
-            {
-                html += '<td class="blackSquares"' ;
-            }
-            else
-            {
-                html += '<td class="whiteSquares"' ;
-            }
-            
-            // on note l'id de la case Coord Verticale + Coord Horizontale
-            html += 'style="width: ' + l_caseWidth + '% !important" id="flatSq' + l_vcoord + '-' + l_hcoord + '">' ;
-            
-            // on place le pion dans la première case notée 0 
-            if ( l_hcoord == 0 )
-            {
-                html += '<span>♚</span>' ;
-            }
-            
-            // on ferme la case
-            html += '</td>' ;
-
-        }
-                                 
-        html += ' <th class="vertCoords">' + l_vcoord + '</th>';
-        html += '        </tr>';
-        html += '        <tr>';
-        html += '            <td class="boardAngle"></td>' ;
-                
-        for ( var l_hcoord = 0 ; l_hcoord <= g_objectif ; l_hcoord++ )
-        {
-            html += '<th class="horizCoords">' + l_hcoord + '</th>' ;
-
-        }
-
-        html += '               <td class="boardAngle"></td>';
-        html += '                    </tr>';
-        html += '                </tbody>';
-        html += '            </table>';
-        html += '        </div>';
-        html += '    </div>';
-        html += '</div>';
-
-
-        return html ;
-    }
-
-
-
-/* -------------------------------------- TARE CHESS -------------------------------------- */
-    function tare_chess_1D() 
-    {
-        $('#flatSq1'+g_ALPA.objectif).html( "" ) ;
-        $('#flatSq10').html( "<span>♚</span>" ) ;
-    }
-
-
-
-/* -------------------------------------- EXECUTION AFFICHAGE -------------------------------------- */
-    $(document).on('submit', '#index-zone-exec', function(e){
-
-        e.preventDefault(); // J'empêche le comportement par défaut du navigateur, c-à-d de soumettre le formulaire
-
-        var $this = $(this); // L'objet jQuery du formulaire
-
-        var l_CerrorNotif = ''; // variable de notification d'erreur à incrémenter avec chaque message d'erreur => sera affiché en front 
-
-        // remise à zéro 
-        tare_chess_1D()
-
-     // on va faire avancer le pion en suivant le schéma 
-        var l_hcoord_next ;
-        // on parcours la sequence dan g_ALPA
-        for ( var l_i = g_ALPA.etape ; l_i < g_ALPA.sequence.length ; l_i++ )
-        {
-            // on garde en memoire l'étape de calcul
-            g_ALPA.etape = l_i ;
-
-            // on analyse la sequence pour departager outs et matières
-            l_Tseq_outs = g_ALPA.sequence[l_i].split('o\+\+') ;
-            l_Tseq_mat = g_ALPA.sequence[l_i].split('m\+\+') ;
-            
-            if ( l_Tseq_mat.length > 1 )
-            {
-                // on a la matiere
-                //l'etape 1 on recupere l'initiale comme coordonnée initale
-                if ( l_i == 1 )
-                { 
-                    g_ALPA.hcoord = l_Tseq_mat[1]; 
-                    // on retire le pion 
-                    $('#flatSq1-0').html( "" ) ;
-                }
-                else
-                {
-                    //on garde le precedent afin de retirer le pion de son emplacement
-                    l_hcoord_prev = g_ALPA.hcoord ;
-                    //on incremente la nouvelle position
-                    g_ALPA.hcoord = Number( g_ALPA.hcoord ) + Number( l_Tseq_mat[1] ) ;
-                    //on bouge le pion
-                    move_1d( l_hcoord_prev, g_ALPA.hcoord  ) ;
-                }
-            }
-            else if (l_Tseq_outs.length > 1)
-            {
-                // on a l'outil
-                // on garde en memoire l'outil pour l'utiliser avec lamatiere suivante
-                g_ALPA.outil_utile = l_Tseq_outs[1] ;
-            }
-            else
-            {
-                console.log( l_Tseq_mat + l_Tseq_outs ) ;
-            }
-            
-            //move_1d( l_hcoord ) ;
-            //sleep( 300 ) ;
-        
-        }
-
-        return false;
-    });
-
-
-    /* -------------------------------------- AVANCE PION - MOVE 1D -------------------------------------- */
-    function move_1d( g_hcoord, g_hcoord_next  ) 
-    {
-        // on efface le pion de sa position actuelle 
-        console.log('#flatSq1-' + g_hcoord);
-
-        $('#flatSq1-' + g_hcoord).html( "" ) ;
-        // on le place sur sa nouvelle place
-        $('#flatSq1-' + g_hcoord_next).html( "<span>♚</span>" ) ;
-
-    }
 
 
 // Fin JQUERY DOCUMENT FONCTIONS

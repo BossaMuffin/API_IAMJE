@@ -7,12 +7,6 @@ $filtresJeton = true ;
 $filtresListe = "" ;
 
 // Filtre Faux : pas d'impact // l'absence de cette variable n'est pas blocante
-if ( ! $tFiltre["show"] )
-{
-    $filtresListe .= "show / " ;
-}
-
-
 if ( ! $tFiltre["mode"] ) 
 {
     $filtresJeton = false ;
@@ -55,17 +49,6 @@ if ( ! $tFiltre["precision"] )
     $filtresListe .= "precision / " ;
 }
 
-// Filtre Faux : pas d'impact // l'absence de cette variable n'est pas blocante
-if ( ! $tFiltre["dev"] )
-{
-    $filtresListe .= "dev / " ;
-}
-
-// Filtre Faux : pas d'impact // l'absence de cette variable n'est pas blocante
-if ( ! $tFiltre["err"] )
-{
-    $filtresListe .= "err / " ;
-}
 
 if ( ! $filtresJeton ) 
 {
