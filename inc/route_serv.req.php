@@ -36,11 +36,13 @@ $servIncludeJeton = true ;
   if( $s === 'local' ) 
   {
     /*url racine */
-    if( $BFUNC->UrlSousDomaine( "iamje" ) )
+    if( $BFUNC->UrlSousDomaine( "localhost" ) )
     {
       // on initie la propriété g_url de BFUNC
       #$BFUNC->define_url( HTPROT . "localhost/www/2018-IAMJE/" ) ;
-      $BFUNC->define_url( HTPROT . "iamje/" ) ;
+      #$BFUNC->define_url( HTPROT . "iamje/" ) ;
+      $BFUNC->define_url( HTPROT . "localhost/www/2019-IAMJE/" ) ;
+      
     }
     else
     {

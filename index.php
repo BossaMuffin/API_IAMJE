@@ -45,42 +45,33 @@ echo '
         <meta name="language" content="fr-FR" />
         <meta name="viewport" content="width=device-width, initial-scale=1">
         
-        <!-- Core Meta Data -->
+      <!-- Core Meta Data -->
         <meta name="author" content="Jean-Eudes Méhus" >
         <meta name="publisher" content="Agence Comozone" >
         <meta name="email" content="coz.web@comozone.com">
         <meta name="description" content="Première Intelligence Artificielle Par Enseigenment Renforcé." />
         <meta name="keywords" content="Intelligence Artificielle, IA, AI, artificial intelligence" />
         
-        <!-- Humans -->
+      <!-- Humans -->
         <link rel="author" href="https://www.comozone.com/page-ourteam.txt"/>
         
-        <!-- Page Canonique -->
+      <!-- Page Canonique -->
         <link rel="canonical" href="' . $BFUNC->g_url . $g_page . '" />
 
+      
+      <!-- CSS FILES  --> 
+        <link href="http://www.jqueryscript.net/css/jquerysctipttop.css" rel="stylesheet" type="text/css">
 
-        <!-- JS FILES  --> 
+        <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+          <!-- <link rel="stylesheet" href="' . $g_page_arbo . FOLD_CSS . FOLD_COMMON . 'fontawesome-5.8.1.min.css" > -->
+          <!-- <link href="http://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+       
+        <link rel="stylesheet" type="text/css" href="' . $g_page_arbo . FOLD_CSS . FOLD_COMMON . 'buttonLoader.css" >
 
-        <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
-        <!-- <script type="text/javascript" src="' . $g_page_arbo . FOLD_JS . FOLD_COMMON . 'jquery-4.3.0.min.js"></script> -->
-        <!-- <script type="text/javascript" src="' . $g_page_arbo . FOLD_JS . FOLD_COMMON . 'jquery-2.0.2.min.js"></script> -->
-
-        <script type="text/javascript" src="http://netdna.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script> 
-        <!-- <script type="text/javascript" src="' . $g_page_arbo . FOLD_JS . FOLD_COMMON . 'bootstrap-4.3.1.bundle.min.js"></script>-->
-        <!-- <script type="text/javascript" src="' . $g_page_arbo . FOLD_JS . FOLD_COMMON . 'bootstrap-4.3.1.min.js"></script>-->
-
-        <script type="text/javascript" src="' . $g_page_arbo . FOLD_JS . FOLD_COMMON . 'functions.js"></script>
-
-        <!-- CSS FILES  --> 
-        <!-- <link href="http://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
-        <link type="text/css" rel="stylesheet" href="' . $g_page_arbo . FOLD_CSS . FOLD_COMMON . 'fontawesome-5.8.1.min.css" />
-
-        <link href="http://pingendo.github.io/pingendo-bootstrap/themes/default/bootstrap.css" rel="stylesheet" type="text/css">
-        <!-- <link type="text/css" rel="stylesheet" href="' . $g_page_arbo . FOLD_CSS . FOLD_COMMON . 'bootstrap-4.3.1.min.css" /> -->
-
-        <link type="text/css" rel="stylesheet" href="' . $g_page_arbo . FOLD_CSS . 'chess.css" />
-        <link type="text/css" rel="stylesheet" href="' . $g_page_arbo . FOLD_CSS . FOLD_SKINS . 'gnome-chess.css" /> 
-    
+        <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+          <!-- <link href="http://pingendo.github.io/pingendo-bootstrap/themes/default/bootstrap.css" rel="stylesheet" type="text/css" > -->
+          <!-- <link type="text/css" rel="stylesheet" href="' . $g_page_arbo . FOLD_CSS . FOLD_COMMON . 'bootstrap-4.3.1.min.css" > -->
+ 
     </head>
     
     <body>' ;
@@ -310,14 +301,14 @@ echo '
                 <!-- SUBMIT -->
                 <div class="form-group">
                   <div class="col-sm-offset-2 col-sm-10">
-                    <button type="submit" class="btn btn-default">Envoyer</button>
+                    <button type="submit" class="btn btn-success has-spinner">Envoyer</button>
                   </div>
                 </div>
 
               </form>
               
               <!-- AFFICHAGE ERREURS -->
-              <div id="zone-notif-erreur">
+              <div id="zone-notif-erreur" class="text-danger">
               </div>
 
             </div>
@@ -349,6 +340,8 @@ echo '
         </div>
         <div class="row">
           <div class="col-md-12">
+            <!-- LOADER -->
+              <div id="index-ajaxBox"></div>
             <!-- ANIMATION DU CALCUL DANS UN DESSIN CANVAS width="1000" height="300" modifié après dans function.js pour coller à la taille de la fenetre -->
               <div class="row" id="index-zone-chess-canvas">
                 <div class="col-md-12">
@@ -369,9 +362,6 @@ echo '
 
                 </div>
               </div>
-            <!-- ANIMATION DU CALCUL SUR UNE ECHELLE HTML -->
-            <div class="section" id="index-zone-html" >
-            </div>
           </div>
         </div>
 
@@ -384,6 +374,29 @@ echo '
 
 <div id="index-marge-bottom" style="display: none; height:1000px"></div>
 <!-- FIN -->
+
+<?php
+/* -------------------------------   SCRIPT  ----------------------------------------------------  */
+echo '
+      <!-- JS FILES  --> 
+        <script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
+          <!-- <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script> -->
+          <!-- <script type="text/javascript" src="' . $g_page_arbo . FOLD_JS . FOLD_COMMON . 'jquery-4.3.0.min.js"></script> -->
+          <!-- <script type="text/javascript" src="' . $g_page_arbo . FOLD_JS . FOLD_COMMON . 'jquery-2.0.2.min.js"></script> -->
+
+        <script type="text/javascript" src="http://netdna.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script> 
+          <!-- <script type="text/javascript" src="' . $g_page_arbo . FOLD_JS . FOLD_COMMON . 'bootstrap-4.3.1.bundle.min.js"></script> -->
+          <!-- <script type="text/javascript" src="' . $g_page_arbo . FOLD_JS . FOLD_COMMON . 'bootstrap-4.3.1.min.js"></script> -->
+
+        <script src="' . $g_page_arbo . FOLD_JS . FOLD_COMMON . 'jquery.buttonLoader.min.js"></script>
+
+        <script type="text/javascript" src="' . $g_page_arbo . FOLD_JS . 'functions.js"></script>
+' ;
+/* Fin script */
+?>
+
+
+
   <body>
 <html>
 <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - -->

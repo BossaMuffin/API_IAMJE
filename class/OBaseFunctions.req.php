@@ -444,7 +444,7 @@ class OBaseFunctions
       }
       else
       {
-        // ATTENTION : pas toujours DOUBLE OU FLOTTANT, 
+        // ATTENTION : pas toujours DOUBLE OU FLOTTANT, XXXXXXXXXXXXXXXXXXXx
         // identifie une donnée du type "78" au lieu de 78
         // distingue les entiers ou flottant ou double ... 
         // même sous forme de chaine de caractère (entre guillement) car récupérer d'un "explode" depuis les GET 

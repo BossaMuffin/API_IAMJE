@@ -287,11 +287,25 @@ class OAlpa
             $l_while_continue = true ;
             $l_while_compteur = 0 ;
 // XXXXXXXXXXXXXXXXXXXXXXXXX 9999999999999999 ATTENTION A LA DIVERGENCE !!!!!!!!!!!!!!!!!!!!!!!!
+            // Ancienne méthode "rigide" et peu fiable
+            /*
             while ( $l_while_continue 
                     and  ( ( abs( 1 - abs( $l_RESULTAT->p_T["datas"]["precision"] ) ) > ( 1 - $this->g_Tobjectifs["precision"] ) ) 
-                        or $l_RESULTAT->p_T["datas"]["distance"] <= $g_Tobjectifs["distance"] )
+                        or $l_RESULTAT->p_T["datas"]["distance"] <= $this->g_Tobjectifs["distance"] )
                     and $l_timestamp_ms_difference <= $this->g_Tobjectifs["delais"] )
             {
+            */
+
+            // Nouvelle méthode de comparaison de de relance de la boucle WHILE
+            // Plus souple (permet d'alterner facilement de méthode) et Plus fiable (possède des crans d'arrêt évitant la divergence)
+// XXXXXXXXXXXXXXXXXXXXXXXXX 9999999999999999 Nouvelle méthode A FAIRE
+             while ( $l_while_continue 
+                    and  ( ( abs( 1 - abs( $l_RESULTAT->p_T["datas"]["precision"] ) ) > ( 1 - $this->g_Tobjectifs["precision"] ) ) 
+                        or $l_RESULTAT->p_T["datas"]["distance"] <= $this->g_Tobjectifs["distance"] )
+                    and $l_timestamp_ms_difference <= $this->g_Tobjectifs["delais"] )
+            {
+
+
                 $l_while_compteur++ ; 
                 // On verifie si l'objectif n'a pas déjà été atteint
                 // En comparant l'objectif demandée aux ressources existantes

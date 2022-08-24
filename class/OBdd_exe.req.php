@@ -1065,9 +1065,13 @@ class OBdd extends OBdd_connexion
 			$l_Treponse["err"]["com"] = "cols not new" ;
 		}
 // Col SEQUENCE DE CALCUL
-// 999999999999999999999  ATTENTION : la taille de la donnée grandit vite, mieux vaux un texte ou tinytext 
-		// ... mais "text" n'est pas compris par la méthode build type  ------------  99999999999 XXXXXXXXXx
-		$l_TnewCol = $this->tab_add_col( $CtabName, $this->p_Tcol["arch"]["seq"], $BFUNC->p_Ttypes[4]["bdd"], $BFUNC->p_Ttypes[4]["size"] ) ;
+// ATTENTION : la taille de la donnée grandit vite, on utilise un type texte pour enregistrer les séquences complètes
+		// ... mais il est possible que "text" ne soit pas correctement compris par la méthode build type  ------------  99999999999 XXXXXXXXXx
+		// VARCHAR -> limité à 255
+		#$l_TnewCol = $this->tab_add_col( $CtabName, $this->p_Tcol["arch"]["seq"], $BFUNC->p_Ttypes[4]["bdd"], $BFUNC->p_Ttypes[4]["size"] ) ;
+		// TEXT
+		$l_TnewCol = $this->tab_add_col( $CtabName, $this->p_Tcol["arch"]["seq"], $BFUNC->p_Ttypes[12]["bdd"], $BFUNC->p_Ttypes[12]["size"] ) ;
+		
 		if ( ! $l_TnewCol[0] )
 		{
 			$l_jeton = false ;
