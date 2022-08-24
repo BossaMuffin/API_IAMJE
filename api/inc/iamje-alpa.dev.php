@@ -83,12 +83,19 @@ $BFUNC->show( $$l_ALPA->affichage_serie_A_ordres( ) ) ;
 $l_Bshow = true ;
 if ( ! isset($_GET["show"]) ){ $l_Bshow = false ; }
 
+// TEST COMPARE
+echo "<br/>" ;
+echo "DEV :" ;
+echo "<br/>" ;
+echo $$l_ALPA->g_dev_i ;
 // on aiguille en fonction du mode demandé
 /*
 $tMode[0] = "learn" ;
 $tMode[1] = "work" ;
 */
+echo "<br/>" ;
 echo "RESULTAT CALCUL :" ;
+echo "<br/>" ;
 switch ($_GET["mode"]) :
     case $tMode[0]:
         // Retour ALPA en mode LEARN (vardump si besoin par le formulaire  ou un affichage "show" si passage en direct )

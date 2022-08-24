@@ -13,7 +13,6 @@ $OAlpaIncludeJeton = true ;
 
 /* ----------------------------CLASS ALPA---------------------------------------------- */
 // La classe ALPA est l'unité élémentaire du coeur de l'intelligence artificielle IAMJE - ALPA est le MOTEUR !!! 
-//                           /!\ Reste à mieux rendre les erreurs (sur test d'une fonction avec la valeur de lerreur de cette fonction)
 //                           /!\ Reste à gérer les droits d'acès aux fonction public, private, protected
 //                           /!\ Reste ...
 
@@ -28,7 +27,9 @@ class OAlpa
     public $p_Tresultats = array() ;
     // public $p_Caffichage_serie_A_ordres = "" ;
     public $p_Caffichage_serie_A = "" ;
-
+    
+    // TEST DEV
+    public $g_dev_i = 1 ;
 
 // Var de construction
     private $g_CinstanceName = "nom de l'instance ALPA" ;
@@ -46,6 +47,7 @@ class OAlpa
     function __construct( $g_CinstanceName, $T_objectifs, $T_ressources, $mode )
     {    
         global $BDD ;   
+
 
         $this->g_CinstanceName = $g_CinstanceName ;
         $this->g_Tobjectifs = $T_objectifs ;
@@ -149,6 +151,7 @@ class OAlpa
 
 
 
+
 /* ------------------------------------ ALPA ----------------------------------------------- 
 * FONCTION ELEMENTAIRE EN MODE D'APPRENTISSAGE "ALPA":"A" 
 * @param :
@@ -195,7 +198,8 @@ class OAlpa
             if ( $this->g_Tobjectifs["objectif"][$l_i_objectif] != $this->g_Tressources["matieres"] )
             {
                 // Boucle de calcul pour approche/distance de l'obejctif demandé
-                while ( $l_distance  > $this->g_Tobjectifs["distance"] and $l_timestamp_ms_difference < $this->g_Tobjectifs["delais"] )
+                // XXXXXXXXXXXXXXXXXXXXXXXXX 9999999999999999 
+                while ( $this->compare_result( "learn", $l_distance, $l_timestamp_ms_difference, 1 )["val"] )
                 //while( $l_precision  > $T_objectifs["precision"] and $l_timestamp_ms_difference < $T_objectifs["delais"] )
                 {
 
@@ -286,25 +290,10 @@ class OAlpa
             // jeton de boucle while 
             $l_while_continue = true ;
             $l_while_compteur = 0 ;
+
 // XXXXXXXXXXXXXXXXXXXXXXXXX 9999999999999999 ATTENTION A LA DIVERGENCE !!!!!!!!!!!!!!!!!!!!!!!!
-            // Ancienne méthode "rigide" et peu fiable
-            /*
-            while ( $l_while_continue 
-                    and  ( ( abs( 1 - abs( $l_RESULTAT->p_T["datas"]["precision"] ) ) > ( 1 - $this->g_Tobjectifs["precision"] ) ) 
-                        or $l_RESULTAT->p_T["datas"]["distance"] <= $this->g_Tobjectifs["distance"] )
-                    and $l_timestamp_ms_difference <= $this->g_Tobjectifs["delais"] )
+            while ( $l_while_continue and $this->compare_result( "work", $l_RESULTAT, $l_timestamp_ms_difference, 1 )["val"] )
             {
-            */
-
-            // Nouvelle méthode de comparaison de de relance de la boucle WHILE
-            // Plus souple (permet d'alterner facilement de méthode) et Plus fiable (possède des crans d'arrêt évitant la divergence)
-// XXXXXXXXXXXXXXXXXXXXXXXXX 9999999999999999 Nouvelle méthode A FAIRE
-             while ( $l_while_continue 
-                    and  ( ( abs( 1 - abs( $l_RESULTAT->p_T["datas"]["precision"] ) ) > ( 1 - $this->g_Tobjectifs["precision"] ) ) 
-                        or $l_RESULTAT->p_T["datas"]["distance"] <= $this->g_Tobjectifs["distance"] )
-                    and $l_timestamp_ms_difference <= $this->g_Tobjectifs["delais"] )
-            {
-
 
                 $l_while_compteur++ ; 
                 // On verifie si l'objectif n'a pas déjà été atteint
@@ -473,6 +462,136 @@ class OAlpa
     }
     // ------------------------------------
 
+
+// A AFFINER -> ATTENTION A LA DIVERGENCE
+
+/* COMPARE RESULT ALPA LEARN ou WORK --------XXXXXXXXXXXXXX 99999999  -------------- COMPARE RESULT ALPA LEARN
+ * Nouvelle méthode de comparaison de de relance de la boucle WHILE pour le mode ALPA LEARN
+ * Plus souple (permet d'alterner facilement de méthode) et Plus fiable (possède des crans d'arrêt évitant la divergence)
+ * @Param: 
+ *          $l_CalpaMode (learn ou work), 
+ *          $entryToCompare ( $l_distance pour learn ou $l_RESULTAT pour work), 
+ *          $l_timestamp_ms_difference le temps de calcul effectué, 
+ *          $l_Nmode les mode de comparaison,
+ * @Return: boolean, jeton de réussite et table d'erreur
+*/
+
+    function compare_result( $l_CalpaMode, $entryToCompare, $l_timestamp_ms_difference, $l_Nmode ) 
+    {
+
+        global $BFUNC ;
+
+        $l_Treponse["err"] = array( "id" => "0", "com" => "" ) ;
+        $l_Treponse["val"] = false ;
+        $l_Treponse[0] = false ;
+
+
+        $this->g_dev_i++ ;
+
+        switch ( $l_CalpaMode )
+            {
+                case "learn" :
+                    switch ( $l_Nmode )
+                    {
+                        case 1 :
+                        // $entryTocompare est $l_distance
+                            if ( abs( $entryToCompare )  > abs( $this->g_Tobjectifs["distance"] ) and $l_timestamp_ms_difference < $this->g_Tobjectifs["delais"])
+                            {
+                                $l_Treponse["val"] = true ;
+                                $l_Treponse[0] = true ;
+                            }
+                            else
+                            {
+                                $l_Treponse["err"]["id"] = "1" ;
+                                $l_Treponse["err"]["com"] = $l_CalpaMode . "compare criteres FALSE " ;
+                            }
+                        break ;
+
+                    }
+                break ;
+
+                case "work" :
+                    switch ( $l_Nmode )
+                    {
+                        case 1 :
+                        // $entryTocompare est $l_RESULTAT
+                            if ( ( ( abs( 1 - abs( $entryToCompare->p_T["datas"]["precision"] ) ) > ( 1 - $this->g_Tobjectifs["precision"] ) ) 
+                                            or $entryToCompare->p_T["datas"]["distance"] <= $this->g_Tobjectifs["distance"] )
+                                        and $l_timestamp_ms_difference <= $this->g_Tobjectifs["delais"] )
+                            {
+                                $l_Treponse["val"] = true ;
+                                $l_Treponse[0] = true ;
+                            }
+                            else
+                            {
+                                $l_Treponse["err"]["id"] = "1" ;
+                                $l_Treponse["err"]["com"] = $l_CalpaMode . "compare criteres FALSE " ;
+                            }
+                        break ;
+
+                        
+                    }
+                break ;
+            }
+        // on charge les erreurs dans la propriété qui permettra de les restituer en mode DEV
+        $BFUNC->dev_mode( __METHOD__, $l_Treponse["err"] ) ;
+
+        // on charge la reponse à retourner
+        return $l_Treponse ;
+
+    // Fin RESULT ALPA LEARN
+    }
+    // ------------------------------------
+
+
+/* COMPARE RESULT ALPA WORK --------XXXXXXXXXXXXXX 99999999  -------------- COMPARE RESULT ALPA WORK
+ * Nouvelle méthode de comparaison de de relance de la boucle WHILE pour le mode ALPA WORK
+ * Plus souple (permet d'alterner facilement de méthode) et Plus fiable (possède des crans d'arrêt évitant la divergence)
+ * @Param: 
+ * @Return: 
+*/
+
+    function compare_result_work( $l_RESULTAT, $l_timestamp_ms_difference, $l_Nmode ) 
+    {
+
+        global $BFUNC ;
+
+        $l_Treponse["err"] = array( "id" => "0", "com" => "" ) ;
+        $l_Treponse["val"] = false ;
+        $l_Treponse[0] = false ;
+
+
+        $this->g_dev_i++ ;
+
+        switch ( $l_Nmode )
+        {
+            case 1 :
+                if ( ( ( abs( 1 - abs( $l_RESULTAT->p_T["datas"]["precision"] ) ) > ( 1 - $this->g_Tobjectifs["precision"] ) ) 
+                                or $l_RESULTAT->p_T["datas"]["distance"] <= $this->g_Tobjectifs["distance"] )
+                            and $l_timestamp_ms_difference <= $this->g_Tobjectifs["delais"] )
+                {
+                    $l_Treponse["val"] = true ;
+                    $l_Treponse[0] = true ;
+                }
+                else
+                {
+                    $l_Treponse["err"]["id"] = "1" ;
+                    $l_Treponse["err"]["com"] = "compare criteres WORK FALSE " ;
+                }
+            break ;
+
+            
+        }
+
+        // on charge les erreurs dans la propriété qui permettra de les restituer en mode DEV
+        $BFUNC->dev_mode( __METHOD__, $l_Treponse["err"] ) ;
+
+        // on charge la reponse à retourner
+        return $l_Treponse ;
+
+    // Fin RESULT ALPA WORK
+    }
+    // ------------------------------------
 
 
 /* --------------------------------AFFICHAGE POUR CONTROLE D'APPRENTISSAGE ------------------------------------------------- 

@@ -9,7 +9,6 @@
 *  @license    Jean-Eudes Méhus property
 */
 
-//                           /!\ Reste à mieux rendre les erreurs (sur test d'une fonction avec la valeur de l'erreur de cette fonction)
 //                           /!\ Reste à gérer les droits d'acès aux fonction public, private, protected
 //                           /!\ Reste à répartir les fonctions dans plusieurs classes et renomer correctement les instances
 /* SCHEMA */

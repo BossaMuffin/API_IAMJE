@@ -11,7 +11,6 @@
 // on utilise cette variable pour valider l'include du fichier
 $OBfuncIncludeJeton = true ;
 
-//                           /!\ Reste à mieux rendre les erreurs (sur test d'une fonction avec la valeur de lerreur de cette fonction)
 //                           /!\ Reste à gérer les droits d'acès aux fonction public, private, protected
 //                           /!\ Reste à répartir les fonctions dans plusieurs classes et renomer correctement les instances
 

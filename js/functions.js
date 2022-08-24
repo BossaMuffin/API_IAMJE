@@ -1,6 +1,7 @@
 $(document).ready(function (ele) 
 {
     var g_scrollY = window.scrollY ;
+    var g_scrollFirst = 800 ;
     var g_scrollYpas = 400 ;
 
     // Durée total d'une animation CANVAS en ms
@@ -173,7 +174,7 @@ $(document).ready(function (ele)
             
             // deplacement de la fenetre vers la zone d'affichage
             $('#index-marge-bottom').show( ) ;
-            $('html, body').animate( {scrollTop: 1100}, "swing" ) ;
+            $('html, body').animate( {scrollTop: g_scrollFirst}, "swing" ) ;
             //window.scrollTo(0,800);
 
 
